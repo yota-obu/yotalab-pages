@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Apps - yotalab</title>
-  <meta name="description" content="yotalab のアプリ一覧">
+  <meta name="description" content="yotalab のアプリ一覧。日常の学びをもっと楽しく。">
   <style>
     :root {
       --bg: #fbfbfd;
       --text: #1d1d1f;
-      --sub: #6e6e73;
+      --sub: #86868b;
       --accent: #738BE7;
       --accent2: #5B67A2;
       --border: rgba(0,0,0,0.06);
@@ -21,186 +21,141 @@
       color: var(--text);
       -webkit-font-smoothing: antialiased;
     }
+    a { text-decoration: none; }
 
-    /* Navigation */
+    /* ── Nav ── */
     nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 100;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       background: rgba(251,251,253,0.72);
       backdrop-filter: saturate(180%) blur(20px);
       -webkit-backdrop-filter: saturate(180%) blur(20px);
       border-bottom: 0.5px solid var(--border);
     }
-    nav .nav-inner {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 0 22px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .nav-inner {
+      max-width: 980px; margin: 0 auto; padding: 0 22px;
+      height: 48px; display: flex; align-items: center; justify-content: space-between;
     }
-    nav .logo {
-      font-size: 21px;
-      font-weight: 700;
-      color: var(--text);
-      text-decoration: none;
-      letter-spacing: -0.3px;
-    }
-    nav .nav-links {
-      display: flex;
-      gap: 28px;
-      list-style: none;
-    }
-    nav .nav-links a {
-      font-size: 14px;
-      color: var(--sub);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    nav .nav-links a:hover { color: var(--text); }
-    nav .nav-links a.active { color: var(--text); font-weight: 500; }
+    .logo { font-size: 21px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { font-size: 14px; color: var(--sub); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--text); font-weight: 600; }
 
-    /* Page Header */
-    .page-header {
-      padding: 120px 24px 60px;
+    /* ── Hero ── */
+    .hero {
+      padding: 140px 24px 80px;
       text-align: center;
+      background: linear-gradient(180deg, #f5f5f7, var(--bg));
     }
-    .page-header h1 {
-      font-size: clamp(36px, 6vw, 56px);
-      font-weight: 800;
-      letter-spacing: -1.5px;
+    .hero-eyebrow {
+      font-size: 15px; font-weight: 600; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;
     }
-    .page-header p {
-      font-size: 19px;
-      color: var(--sub);
-      margin-top: 12px;
+    .hero h1 {
+      font-size: clamp(44px, 8vw, 72px);
+      font-weight: 800; letter-spacing: -2.5px; line-height: 1.05;
     }
-
-    /* App Grid */
-    .app-section {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 40px 22px 120px;
-    }
-    .app-card {
-      display: flex;
-      align-items: center;
-      gap: 32px;
-      background: #fff;
-      border-radius: 24px;
-      padding: 36px;
-      text-decoration: none;
-      color: inherit;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
-      border: 1px solid var(--border);
-      transition: transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.3s;
-      margin-bottom: 20px;
-    }
-    .app-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 16px 48px rgba(0,0,0,0.08);
-    }
-    .app-icon {
-      width: 120px;
-      height: 120px;
-      border-radius: 27px;
-      flex-shrink: 0;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    }
-    .app-info {
-      flex: 1;
-    }
-    .app-info h2 {
-      font-size: 26px;
-      font-weight: 700;
-      margin-bottom: 4px;
-      letter-spacing: -0.5px;
-    }
-    .app-info .en-name {
-      font-size: 14px;
-      color: var(--sub);
-      margin-bottom: 10px;
-    }
-    .app-info .tagline {
-      font-size: 16px;
-      color: #424245;
-      line-height: 1.6;
-      margin-bottom: 16px;
-    }
-    .app-meta {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .app-meta .badge {
-      font-size: 12px;
-      font-weight: 600;
-      padding: 4px 14px;
-      border-radius: 100px;
-      background: rgba(115,139,231,0.1);
-      color: var(--accent);
-    }
-    .app-meta .badge.platform {
-      background: rgba(0,0,0,0.05);
-      color: var(--sub);
-    }
-    .arrow {
-      font-size: 20px;
-      color: #c7c7cc;
-      flex-shrink: 0;
-      transition: transform 0.2s;
-    }
-    .app-card:hover .arrow {
-      transform: translateX(4px);
-      color: var(--accent);
+    .hero p {
+      font-size: clamp(18px, 3vw, 24px);
+      color: var(--sub); margin-top: 16px; font-weight: 400; letter-spacing: -0.2px;
     }
 
-    /* Footer */
+    /* ── App Showcase ── */
+    .showcase {
+      max-width: 980px; margin: 0 auto; padding: 40px 22px 100px;
+    }
+    .app-tile {
+      display: flex; align-items: center; gap: 40px;
+      background: #fff; border-radius: 28px; padding: 48px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.04);
+      transition: transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.4s;
+      color: inherit; margin-bottom: 24px;
+      overflow: hidden; position: relative;
+    }
+    .app-tile::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(115,139,231,0.03), transparent 60%);
+      pointer-events: none;
+    }
+    .app-tile:hover {
+      transform: translateY(-6px) scale(1.005);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    }
+    .tile-icon {
+      width: 140px; height: 140px; border-radius: 32px; flex-shrink: 0;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+      transition: transform 0.4s;
+    }
+    .app-tile:hover .tile-icon { transform: scale(1.05); }
+    .tile-body { flex: 1; position: relative; z-index: 1; }
+    .tile-body h2 {
+      font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 2px;
+    }
+    .tile-body .en-name {
+      font-size: 15px; color: var(--sub); margin-bottom: 14px;
+    }
+    .tile-body .catchcopy {
+      font-size: 20px; font-weight: 600; color: var(--accent);
+      margin-bottom: 12px; letter-spacing: -0.3px;
+    }
+    .tile-body .desc {
+      font-size: 15px; color: #424245; line-height: 1.65; margin-bottom: 20px;
+    }
+    .tile-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .tile-badges .badge {
+      font-size: 12px; font-weight: 600; padding: 5px 14px;
+      border-radius: 100px; background: rgba(115,139,231,0.08); color: var(--accent);
+    }
+    .tile-badges .badge.muted {
+      background: rgba(0,0,0,0.04); color: var(--sub);
+    }
+    .tile-cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 17px; font-weight: 600; color: var(--accent);
+      transition: gap 0.2s;
+    }
+    .app-tile:hover .tile-cta { gap: 10px; }
+    .tile-cta .arrow-icon {
+      display: inline-block; transition: transform 0.2s;
+    }
+    .app-tile:hover .tile-cta .arrow-icon { transform: translateX(3px); }
+
+    /* ── Coming Soon ── */
+    .coming {
+      padding: 100px 24px;
+      text-align: center;
+      background: var(--text);
+      color: #f5f5f7;
+    }
+    .coming h2 {
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 700; letter-spacing: -1px; margin-bottom: 12px;
+    }
+    .coming p {
+      font-size: 19px; color: #86868b; max-width: 480px;
+      margin: 0 auto; line-height: 1.6;
+    }
+
+    /* ── Footer ── */
     footer {
-      border-top: 1px solid var(--border);
-      padding: 24px 22px;
-      text-align: center;
+      background: var(--text); border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 20px 22px;
     }
-    footer .footer-inner {
-      max-width: 980px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
+    .footer-inner {
+      max-width: 980px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
     }
-    footer p {
-      font-size: 13px;
-      color: var(--sub);
-    }
-    footer a {
-      font-size: 13px;
-      color: var(--sub);
-      text-decoration: none;
-    }
-    footer a:hover { color: var(--text); }
-    footer .footer-links {
-      display: flex;
-      gap: 20px;
-    }
+    footer p, footer a { font-size: 13px; color: #86868b; }
+    footer a:hover { color: #f5f5f7; }
+    .footer-links { display: flex; gap: 20px; }
 
-    @media (max-width: 600px) {
-      .app-card {
-        flex-direction: column;
-        text-align: center;
-        padding: 28px 24px;
-        gap: 20px;
-      }
-      .app-meta { justify-content: center; }
-      .arrow { display: none; }
-      footer .footer-inner {
-        flex-direction: column;
-      }
+    @media (max-width: 680px) {
+      .app-tile { flex-direction: column; text-align: center; padding: 36px 28px; gap: 24px; }
+      .tile-badges { justify-content: center; }
+      .tile-cta { justify-content: center; }
+      .footer-inner { flex-direction: column; text-align: center; }
     }
   </style>
 </head>
@@ -215,26 +170,34 @@
     </div>
   </nav>
 
-  <div class="page-header">
-    <h1>Apps</h1>
-    <p>日常の学びをもっと楽しく。</p>
+  <div class="hero">
+    <p class="hero-eyebrow">yotalab apps</p>
+    <h1>日常の学びを、<br>もっと楽しく。</h1>
+    <p>スキマ時間が、成長の時間に変わる。</p>
   </div>
 
-  <div class="app-section">
-    <a class="app-card" href="english-karuta/">
-      <img class="app-icon" src="../assets/english-karuta-icon.png" alt="英単語かるた">
-      <div class="app-info">
+  <div class="showcase">
+    <a class="app-tile" href="english-karuta/">
+      <img class="tile-icon" src="../assets/english-karuta-icon.png" alt="英単語かるた">
+      <div class="tile-body">
         <h2>英単語かるた</h2>
         <p class="en-name">English Vocabulary Karuta</p>
-        <p class="tagline">タップ、ひらめく、覚える。CEFR-J 準拠 約7,600語を収録した英単語マッチングゲーム。60秒チャレンジとタイムアタックの2モードで、スキマ時間に語彙力を鍛えます。</p>
-        <div class="app-meta">
+        <p class="catchcopy">タップ、ひらめく、覚える。</p>
+        <p class="desc">CEFR-J 準拠 約7,600語を収録した英単語マッチングゲーム。60秒チャレンジとタイムアタックの2モードで、瞬発的な判断力と語彙力を鍛えます。</p>
+        <div class="tile-badges">
           <span class="badge">教育</span>
-          <span class="badge platform">iPhone</span>
-          <span class="badge platform">無料</span>
+          <span class="badge">CEFR-J</span>
+          <span class="badge muted">iPhone</span>
+          <span class="badge muted">無料</span>
         </div>
+        <span class="tile-cta">詳しく見る <span class="arrow-icon">&rarr;</span></span>
       </div>
-      <span class="arrow">›</span>
     </a>
+  </div>
+
+  <div class="coming">
+    <h2>More to come.</h2>
+    <p>新しいアプリを開発中です。<br>日常の学びをもっと楽しく、もっと身近に。</p>
   </div>
 
   <footer>
