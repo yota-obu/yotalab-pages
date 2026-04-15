@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Palettly - yotalab</title>
+  <meta name="description" content="写真の色を、パレットに。写真から美しいカラーパレットを作るオフライン iOS アプリ。">
+  <style>
+    :root {
+      --bg: #fbfbfd;
+      --dark: #1d1d1f;
+      --sub: #86868b;
+      --accent: #1d1d1f;
+      --accent2: #424245;
+      --border: rgba(0,0,0,0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Hiragino Sans", "ヒラギノ角ゴシック", sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(251,251,253,0.72);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 0.5px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 980px; margin: 0 auto; padding: 0 22px;
+      height: 48px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { font-size: 21px; font-weight: 700; color: var(--dark); letter-spacing: -0.3px; }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { font-size: 14px; color: var(--sub); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--dark); }
+    .nav-links a.active { color: var(--dark); font-weight: 600; }
+
+    /* ── Hero (dark) ── */
+    .hero {
+      padding: 140px 24px 100px;
+      text-align: center;
+      background: var(--dark);
+      color: #f5f5f7;
+      overflow: hidden;
+      position: relative;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -40%; left: 50%; transform: translateX(-50%);
+      width: 900px; height: 900px; border-radius: 50%;
+      background: conic-gradient(from 0deg,
+        rgba(255,107,107,0.12),
+        rgba(255,217,61,0.12),
+        rgba(107,203,119,0.12),
+        rgba(77,150,255,0.12),
+        rgba(155,114,255,0.12),
+        rgba(255,107,107,0.12));
+      filter: blur(80px);
+      pointer-events: none;
+    }
+    .hero-icon {
+      width: 148px; height: 148px; border-radius: 34px;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.4);
+      margin-bottom: 32px; position: relative;
+      background: #f5f5f7;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .hero-icon .swatch-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+      width: 96px; height: 96px;
+    }
+    .hero-icon .swatch-grid span {
+      border-radius: 10px;
+    }
+    .hero h1 {
+      font-size: clamp(44px, 8vw, 72px);
+      font-weight: 800; letter-spacing: -2.5px; line-height: 1.05;
+      position: relative;
+    }
+    .hero .en-name {
+      font-size: 20px; color: #86868b; margin-top: 4px;
+      font-weight: 400; position: relative;
+    }
+    .hero .catchcopy {
+      font-size: clamp(24px, 4.5vw, 36px);
+      font-weight: 700;
+      background: linear-gradient(90deg, #FF6B6B, #FFD93D, #6BCB77, #4D96FF, #9B72FF);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-top: 24px; letter-spacing: -0.5px; position: relative;
+      display: inline-block;
+    }
+    .hero .desc {
+      font-size: 19px; color: #a1a1a6; max-width: 580px;
+      margin: 20px auto 0; line-height: 1.65; position: relative;
+    }
+    .hero-badges {
+      display: flex; justify-content: center; gap: 10px;
+      margin-top: 28px; flex-wrap: wrap; position: relative;
+    }
+    .hero-badges .badge {
+      font-size: 13px; font-weight: 600; padding: 7px 18px;
+      border-radius: 100px; border: 1px solid rgba(245,245,247,0.22);
+      color: #f5f5f7;
+    }
+    .hero-badges .badge.alt {
+      border-color: rgba(255,255,255,0.12); color: #86868b;
+    }
+
+    /* ── Section: Light ── */
+    .section-light {
+      padding: 100px 22px;
+      text-align: center;
+    }
+    .section-light .inner { max-width: 900px; margin: 0 auto; }
+    .section-light h2 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 700; letter-spacing: -1px; margin-bottom: 16px;
+    }
+    .section-light .subtitle {
+      font-size: 19px; color: var(--sub); margin-bottom: 48px;
+    }
+
+    /* ── Section: Dark ── */
+    .section-dark {
+      padding: 100px 22px;
+      text-align: center;
+      background: var(--dark); color: #f5f5f7;
+    }
+    .section-dark .inner { max-width: 900px; margin: 0 auto; }
+    .section-dark h2 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 700; letter-spacing: -1px; margin-bottom: 16px;
+    }
+    .section-dark .subtitle {
+      font-size: 19px; color: #86868b; margin-bottom: 48px;
+    }
+
+    /* ── Creation Modes ── */
+    .modes {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    }
+    .mode-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px; padding: 44px 32px;
+      transition: background 0.3s, transform 0.3s;
+      text-align: left;
+    }
+    .mode-card:hover {
+      background: rgba(255,255,255,0.09);
+      transform: translateY(-4px);
+    }
+    .mode-swatches {
+      display: flex; gap: 6px; margin-bottom: 24px;
+    }
+    .mode-swatches span {
+      width: 32px; height: 32px; border-radius: 8px;
+    }
+    .mode-card h3 {
+      font-size: 24px; font-weight: 700; margin-bottom: 12px;
+      letter-spacing: -0.3px;
+    }
+    .mode-card p {
+      font-size: 15px; color: #a1a1a6; line-height: 1.65;
+    }
+
+    /* ── Palette Preview ── */
+    .palette-preview {
+      display: flex; justify-content: center; gap: 6px;
+      max-width: 540px; margin: 0 auto 40px;
+      padding: 22px;
+      background: #fff;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+    .palette-preview .chip {
+      flex: 1; aspect-ratio: 1 / 1.2;
+      border-radius: 12px;
+      display: flex; align-items: flex-end; justify-content: center;
+      padding-bottom: 10px;
+      font-family: -apple-system-monospaced, Menlo, monospace;
+      font-size: 11px; font-weight: 600;
+      color: rgba(255,255,255,0.92);
+      letter-spacing: 0.5px;
+    }
+    .palette-preview .chip.light { color: rgba(29,29,31,0.85); }
+
+    /* ── Feature Grid ── */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .feat {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px; padding: 32px 24px;
+      text-align: left;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .feat:hover {
+      background: rgba(255,255,255,0.09);
+      transform: translateY(-4px);
+    }
+    .feat .feat-icon {
+      font-size: 32px; margin-bottom: 16px; display: block;
+    }
+    .feat h3 {
+      font-size: 18px; font-weight: 700; margin-bottom: 8px;
+      letter-spacing: -0.2px;
+    }
+    .feat p {
+      font-size: 14px; color: #a1a1a6; line-height: 1.6;
+    }
+
+    /* ── Recommend ── */
+    .recommend-list {
+      list-style: none; max-width: 600px; margin: 0 auto; text-align: left;
+    }
+    .recommend-list li {
+      font-size: 17px; color: #424245; padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: baseline; gap: 14px; line-height: 1.5;
+    }
+    .recommend-list li:last-child { border-bottom: none; }
+    .recommend-list .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--dark); flex-shrink: 0;
+      margin-top: 7px;
+    }
+
+    /* ── Privacy link ── */
+    .privacy-bar {
+      padding: 60px 22px; text-align: center;
+      background: #f5f5f7;
+    }
+    .privacy-bar a {
+      font-size: 17px; font-weight: 600; color: var(--dark);
+      transition: opacity 0.2s;
+    }
+    .privacy-bar a:hover { opacity: 0.6; }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--dark); border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 20px 22px;
+    }
+    .footer-inner {
+      max-width: 980px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+    footer p, footer a { font-size: 13px; color: #86868b; }
+    footer a:hover { color: #f5f5f7; }
+    .footer-links { display: flex; gap: 20px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 680px) {
+      .modes { grid-template-columns: 1fr; }
+      .features { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; text-align: center; }
+      .palette-preview .chip { font-size: 9px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="../../" class="logo">yotalab</a>
+      <ul class="nav-links">
+        <li><a href="../" class="active">Apps</a></li>
+        <li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ▓▓ Hero ▓▓ -->
+  <div class="hero">
+    <div class="hero-icon">
+      <div class="swatch-grid">
+        <span style="background:#FF6B6B"></span>
+        <span style="background:#FFD93D"></span>
+        <span style="background:#6BCB77"></span>
+        <span style="background:#4D96FF"></span>
+      </div>
+    </div>
+    <h1>Palettly</h1>
+    <p class="en-name">Photo Color Palette</p>
+    <p class="catchcopy">写真の色を、パレットに。</p>
+    <p class="desc">写真から美しいカラーパレットを作るオフラインアプリ。自動抽出とスポイトの2つの方法で、お気に入りの色をいつでも手元に。デザイナー、フォトグラファー、クリエイターのための色の記録帳。</p>
+    <div class="hero-badges">
+      <span class="badge">完全オフライン</span>
+      <span class="badge">自動抽出</span>
+      <span class="badge alt">iPhone</span>
+      <span class="badge alt">iOS 17+</span>
+    </div>
+  </div>
+
+  <!-- ▓▓ Palette Preview (light) ▓▓ -->
+  <div class="section-light">
+    <div class="inner">
+      <h2>写真1枚から、<br>5色のハーモニー。</h2>
+      <p class="subtitle">k-means クラスタリングで、写真の代表色を瞬時に抽出。</p>
+      <div class="palette-preview">
+        <div class="chip" style="background:#2C3639">#2C3639</div>
+        <div class="chip" style="background:#3F4E4F">#3F4E4F</div>
+        <div class="chip" style="background:#A27B5C">#A27B5C</div>
+        <div class="chip light" style="background:#DCD7C9">#DCD7C9</div>
+        <div class="chip light" style="background:#F5F1E8">#F5F1E8</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ▓▓ Creation Modes (dark) ▓▓ -->
+  <div class="section-dark">
+    <div class="inner">
+      <h2>2つの作り方</h2>
+      <p class="subtitle">お任せで瞬時に、もしくは自分の目で一色ずつ。</p>
+      <div class="modes">
+        <div class="mode-card">
+          <div class="mode-swatches">
+            <span style="background:#FF6B6B"></span>
+            <span style="background:#FFA463"></span>
+            <span style="background:#FFD93D"></span>
+            <span style="background:#6BCB77"></span>
+            <span style="background:#4D96FF"></span>
+          </div>
+          <h3>自動抽出</h3>
+          <p>写真を選ぶだけで、k-means クラスタリングが代表色を3〜8色で瞬時に抽出。構図と色のバランスを読み取り、調和の取れたパレットを生成します。</p>
+        </div>
+        <div class="mode-card">
+          <div class="mode-swatches">
+            <span style="background:#2C3639"></span>
+            <span style="background:#3F4E4F"></span>
+            <span style="background:#A27B5C"></span>
+            <span style="background:#DCD7C9"></span>
+            <span style="background:#F5F1E8"></span>
+          </div>
+          <h3>スポイトピッカー</h3>
+          <p>虫眼鏡付きのスポイトで、写真の任意の位置から色をピック。最大8色まで選べるので、こだわりの色だけを集めたパレットを自由に構成できます。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ▓▓ Features (light) ▓▓ -->
+  <div class="section-light">
+    <div class="inner">
+      <h2>すべてが、色のために。</h2>
+      <p class="subtitle">作ったパレットを、あらゆる場所で活用できる機能。</p>
+      <div class="features" style="color: var(--dark);">
+        <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
+          <span class="feat-icon">&#128195;</span>
+          <h3 style="color: var(--dark);">HEX / RGB / HSL</h3>
+          <p style="color: var(--sub);">タップひとつでクリップボードにコピー。3種類の表記を切り替えられ、どんなワークフローにも溶け込みます。</p>
+        </div>
+        <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
+          <span class="feat-icon">&#128193;</span>
+          <h3 style="color: var(--dark);">フォルダ整理</h3>
+          <p style="color: var(--sub);">テーマやプロジェクト別にフォルダでパレットを分類。リネームや移動もスムーズ。数が増えても迷いません。</p>
+        </div>
+        <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
+          <span class="feat-icon">&#128444;</span>
+          <h3 style="color: var(--dark);">画像書き出し</h3>
+          <p style="color: var(--sub);">写真にパレットを重ねた画像を4つのレイアウトで生成。SNSシェアやムードボードにそのまま使えます。</p>
+        </div>
+        <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
+          <span class="feat-icon">&#128247;</span>
+          <h3 style="color: var(--dark);">写真保存・共有</h3>
+          <p style="color: var(--sub);">書き出した画像は写真アルバムへ保存、または ShareLink から他のアプリへ直接シェアできます。</p>
+        </div>
+        <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
+          <span class="feat-icon">&#9992;</span>
+          <h3 style="color: var(--dark);">完全オフライン</h3>
+          <p style="color: var(--sub);">ネットワーク通信ゼロ。すべての処理が端末内で完結するので、電波が届かない場所でも安心して使えます。</p>
+        </div>
+        <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
+          <span class="feat-icon">&#128274;</span>
+          <h3 style="color: var(--dark);">プライバシー</h3>
+          <p style="color: var(--sub);">個人情報の収集なし。写真もパレットもすべて端末内に保存され、外部に送信されることはありません。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ▓▓ Recommend (dark) ▓▓ -->
+  <div class="section-dark">
+    <div class="inner">
+      <h2>こんな方におすすめ</h2>
+      <ul class="recommend-list" style="color: #f5f5f7;">
+        <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>写真から配色のアイデアを得たいデザイナー</li>
+        <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>撮影した色の美しさを記録したいフォトグラファー</li>
+        <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>ブランドカラーやムードボードを作りたいクリエイター</li>
+        <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>インテリアや服装の参考色を探している方</li>
+        <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>Web/UI デザインのカラースキームを作りたい方</li>
+        <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08); border-bottom: none;"><span class="dot" style="background: #f5f5f7;"></span>完全オフラインで使える色ツールを探している方</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ▓▓ Privacy ▓▓ -->
+  <div class="privacy-bar">
+    <a href="privacy.html">Privacy Policy &rarr;</a>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <p>© 2026 yotalab</p>
+      <div class="footer-links">
+        <a href="../../">Home</a>
+        <a href="../">Apps</a>
+        <a href="mailto:yotalab.tech@gmail.com">Contact</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
