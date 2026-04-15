@@ -54,26 +54,23 @@
       padding: 24px;
       box-shadow: 0 4px 16px rgba(91,103,162,0.08);
       margin-bottom: 16px;
+      text-decoration: none;
+      display: block;
+      transition: box-shadow 0.2s;
+    }
+    .card:hover {
+      box-shadow: 0 6px 24px rgba(91,103,162,0.15);
     }
     .card h3 {
       margin: 0 0 6px;
       font-size: 18px;
+      color: var(--text);
     }
     .card p {
-      margin: 0 0 12px;
+      margin: 0;
       color: var(--sub);
       font-size: 14px;
     }
-    .card a {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 14px;
-    }
-    .card a:hover { text-decoration: underline; }
     footer {
       margin-top: 80px;
       padding-top: 24px;
@@ -82,6 +79,11 @@
       font-size: 13px;
       text-align: center;
     }
+    footer a {
+      color: var(--sub);
+      text-decoration: none;
+    }
+    footer a:hover { color: var(--accent); }
   </style>
 </head>
 <body>
@@ -91,14 +93,13 @@
 
     <h2>Apps</h2>
 
-    <div class="card">
+    <a class="card" href="apps/english-karuta/">
       <h3>英単語かるた</h3>
       <p>CEFR-J 準拠 約7,600語。タップで瞬発的に覚える英単語マッチングゲーム。</p>
-      <a href="english-karuta/privacy.html">Privacy Policy →</a>
-    </div>
+    </a>
 
     <footer>
-      © 2026 yotalab
+      <p>© 2026 yotalab — <a href="mailto:yotalab.tech@gmail.com">Contact</a></p>
     </footer>
   </div>
 </body>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>英単語かるた - yotalab</title>
+  <style>
+    :root {
+      --bg: #F8F9FC;
+      --card: #FFFFFF;
+      --text: #545051;
+      --sub: #7B86AA;
+      --accent: #738BE7;
+      --accent2: #5B67A2;
+      --border: rgba(91,103,162,0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "ヒラギノ角ゴシック", sans-serif;
+      background: linear-gradient(180deg, var(--bg) 0%, rgba(191,200,234,0.35) 100%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.8;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .breadcrumb {
+      color: var(--sub);
+      font-size: 13px;
+      margin-bottom: 32px;
+    }
+    .breadcrumb a {
+      color: var(--sub);
+      text-decoration: none;
+    }
+    .breadcrumb a:hover { color: var(--accent); }
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      margin: 0 0 8px;
+      color: var(--text);
+    }
+    .subtitle {
+      color: var(--sub);
+      font-size: 15px;
+      margin: 0 0 32px;
+    }
+    .description {
+      font-size: 15px;
+      color: #6B7280;
+      margin: 0 0 12px;
+    }
+    .features {
+      margin: 32px 0;
+    }
+    .features h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 16px;
+    }
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .feature-list li {
+      font-size: 15px;
+      color: #6B7280;
+      padding: 6px 0;
+      padding-left: 24px;
+      position: relative;
+    }
+    .feature-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .links {
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .links a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .links a:hover { text-decoration: underline; }
+    footer {
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--sub);
+      font-size: 13px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="../../">yotalab</a> / Apps / 英単語かるた
+    </div>
+
+    <h1>英単語かるた</h1>
+    <p class="subtitle">English Vocabulary Karuta</p>
+
+    <p class="description">CEFR-J 準拠 約7,600語を収録。英単語と日本語訳をタップでマッチングする、瞬発力を鍛える英単語学習ゲームです。</p>
+
+    <div class="features">
+      <h2>Features</h2>
+      <ul class="feature-list">
+        <li>CEFR-J (A1〜B2) レベル別の英単語を収録</li>
+        <li>1 Minute Challenge — 60秒で何ペア取れるかに挑戦</li>
+        <li>Time Attack — 20ペアをどれだけ速く取れるかに挑戦</li>
+        <li>間違えた単語を自動記録、復習機能で定着</li>
+        <li>オフライン完全対応、データ通信不要</li>
+        <li>個人情報の収集なし、安心して利用可能</li>
+      </ul>
+    </div>
+
+    <div class="links">
+      <a href="privacy.html">Privacy Policy →</a>
+    </div>
+
+    <footer>
+      © 2026 yotalab
+    </footer>
+  </div>
+</body>
+</html>
