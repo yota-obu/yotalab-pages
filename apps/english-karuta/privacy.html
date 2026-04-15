@@ -3,92 +3,171 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>プライバシーポリシー - 英単語かるた</title>
+  <title>Privacy Policy - 英単語かるた - yotalab</title>
   <style>
     :root {
-      --bg: #F8F9FC;
-      --card: #FFFFFF;
-      --text: #545051;
-      --sub: #7B86AA;
+      --bg: #fbfbfd;
+      --text: #1d1d1f;
+      --sub: #6e6e73;
       --accent: #738BE7;
       --accent2: #5B67A2;
-      --border: rgba(91,103,162,0.12);
+      --border: rgba(0,0,0,0.06);
     }
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "ヒラギノ角ゴシック", sans-serif;
-      background: linear-gradient(180deg, var(--bg) 0%, rgba(191,200,234,0.35) 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Hiragino Sans", "ヒラギノ角ゴシック", sans-serif;
+      background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
-      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
     }
-    .container {
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(251,251,253,0.72);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 0.5px solid var(--border);
+    }
+    nav .nav-inner {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 22px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    nav .logo {
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.3px;
+    }
+    nav .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+    nav .nav-links a {
+      font-size: 14px;
+      color: var(--sub);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    nav .nav-links a:hover { color: var(--text); }
+
+    /* Breadcrumb */
+    .breadcrumb {
       max-width: 720px;
       margin: 0 auto;
-      padding: 48px 24px 80px;
-    }
-    .breadcrumb {
-      color: var(--sub);
+      padding: 72px 22px 0;
       font-size: 13px;
-      margin-bottom: 24px;
+      color: var(--sub);
     }
     .breadcrumb a {
       color: var(--sub);
       text-decoration: none;
     }
     .breadcrumb a:hover { color: var(--accent); }
-    h1 {
-      font-size: 28px;
+    .breadcrumb .sep { margin: 0 6px; }
+
+    /* Content */
+    .content {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px 22px 100px;
+    }
+    .content h1 {
+      font-size: 34px;
       font-weight: 800;
-      margin: 0 0 4px;
-      color: var(--text);
+      letter-spacing: -1px;
+      margin-bottom: 4px;
     }
-    .app-name {
-      color: var(--sub);
-      font-size: 14px;
-      margin: 0 0 8px;
-    }
-    .updated {
-      color: var(--sub);
-      font-size: 13px;
-      margin: 0 0 40px;
-    }
-    h2 {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
-      margin: 36px 0 12px;
-    }
-    p {
+    .content .app-name {
       font-size: 15px;
       color: var(--sub);
-      margin: 0 0 12px;
+      margin-bottom: 4px;
     }
-    .container p {
-      color: #6B7280;
+    .content .updated {
+      font-size: 13px;
+      color: var(--sub);
+      margin-bottom: 48px;
     }
-    a {
+    .content h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 40px 0 12px;
+      letter-spacing: -0.3px;
+    }
+    .content p {
+      font-size: 15px;
+      color: #424245;
+      line-height: 1.8;
+      margin-bottom: 12px;
+    }
+    .content a {
       color: var(--accent);
       text-decoration: none;
     }
-    a:hover { text-decoration: underline; }
+    .content a:hover { text-decoration: underline; }
+
+    /* Footer */
     footer {
-      margin-top: 60px;
-      padding-top: 24px;
       border-top: 1px solid var(--border);
-      color: var(--sub);
-      font-size: 13px;
+      padding: 24px 22px;
       text-align: center;
+    }
+    footer .footer-inner {
+      max-width: 980px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    footer p {
+      font-size: 13px;
+      color: var(--sub);
+    }
+    footer a {
+      font-size: 13px;
+      color: var(--sub);
+      text-decoration: none;
+    }
+    footer a:hover { color: var(--text); }
+    footer .footer-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    @media (max-width: 600px) {
+      footer .footer-inner { flex-direction: column; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="breadcrumb">
-      <a href="../../">yotalab</a> / <a href="./">英単語かるた</a> / Privacy Policy
+  <nav>
+    <div class="nav-inner">
+      <a href="../../" class="logo">yotalab</a>
+      <ul class="nav-links">
+        <li><a href="../">Apps</a></li>
+        <li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li>
+      </ul>
     </div>
+  </nav>
 
+  <div class="breadcrumb">
+    <a href="../../">yotalab</a><span class="sep">/</span><a href="../">Apps</a><span class="sep">/</span><a href="./">英単語かるた</a><span class="sep">/</span>Privacy Policy
+  </div>
+
+  <div class="content">
     <h1>プライバシーポリシー</h1>
     <p class="app-name">英単語かるた (English Vocabulary Karuta)</p>
     <p class="updated">Last updated: April 11, 2026</p>
@@ -117,10 +196,17 @@
     <h2>8. お問い合わせ</h2>
     <p>本プライバシーポリシーに関するご質問やご意見がございましたら、以下までお問い合わせください。</p>
     <p>Email: <a href="mailto:yotalab.tech@gmail.com">yotalab.tech@gmail.com</a></p>
-
-    <footer>
-      © 2026 yotalab
-    </footer>
   </div>
+
+  <footer>
+    <div class="footer-inner">
+      <p>© 2026 yotalab</p>
+      <div class="footer-links">
+        <a href="../../">Home</a>
+        <a href="../">Apps</a>
+        <a href="./">英単語かるた</a>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>

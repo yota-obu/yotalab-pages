@@ -8,9 +8,12 @@ Public pages for yotalab apps, served via GitHub Pages at **https://yotalab.tech
 yotalab-pages/
 ├── index.html                                # Landing (https://yotalab.tech/)
 ├── CNAME                                     # Custom domain config
+├── assets/
+│   └── english-karuta-icon.png               # App icon
 ├── apps/
+│   ├── index.html                            # App gallery
 │   └── english-karuta/
-│       ├── index.html                        # App page for 英単語かるた
+│       ├── index.html                        # App detail page
 │       └── privacy.html                      # Privacy policy
 └── english-karuta/
     └── privacy.html                          # Redirect (old URL → new)
@@ -19,6 +22,7 @@ yotalab-pages/
 ## Pages
 
 - **Home**: https://yotalab.tech/
+- **Apps**: https://yotalab.tech/apps/
 - **英単語かるた**: https://yotalab.tech/apps/english-karuta/
 - **英単語かるた Privacy Policy**: https://yotalab.tech/apps/english-karuta/privacy.html
 
