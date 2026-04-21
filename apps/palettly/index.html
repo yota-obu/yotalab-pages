@@ -67,15 +67,7 @@
       width: 148px; height: 148px; border-radius: 34px;
       box-shadow: 0 12px 48px rgba(0,0,0,0.4);
       margin-bottom: 32px; position: relative;
-      background: #f5f5f7;
-      display: inline-flex; align-items: center; justify-content: center;
-    }
-    .hero-icon .swatch-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
-      width: 96px; height: 96px;
-    }
-    .hero-icon .swatch-grid span {
-      border-radius: 10px;
+      object-fit: cover;
     }
     .hero h1 {
       font-size: clamp(44px, 8vw, 72px);
@@ -284,14 +276,7 @@
 
   <!-- ▓▓ Hero ▓▓ -->
   <div class="hero">
-    <div class="hero-icon">
-      <div class="swatch-grid">
-        <span style="background:#FF6B6B"></span>
-        <span style="background:#FFD93D"></span>
-        <span style="background:#6BCB77"></span>
-        <span style="background:#4D96FF"></span>
-      </div>
-    </div>
+    <img class="hero-icon" src="../../assets/palettly-icon.png" alt="Palettly">
     <h1>Palettly</h1>
     <p class="en-name">Photo Color Palette</p>
     <p class="catchcopy">写真の色を、パレットに。</p>
