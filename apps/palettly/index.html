@@ -81,12 +81,8 @@
     .hero .catchcopy {
       font-size: clamp(24px, 4.5vw, 36px);
       font-weight: 700;
-      background: linear-gradient(90deg, #FF6B6B, #FFD93D, #6BCB77, #4D96FF, #9B72FF);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: #f5f5f7;
       margin-top: 24px; letter-spacing: -0.5px; position: relative;
-      display: inline-block;
     }
     .hero .desc {
       font-size: 19px; color: #a1a1a6; max-width: 580px;
@@ -103,6 +99,49 @@
     }
     .hero-badges .badge.alt {
       border-color: rgba(255,255,255,0.12); color: #86868b;
+    }
+
+    /* ── Showcase ── */
+    .showcase-section {
+      padding: 100px 22px;
+      background: var(--dark); color: #f5f5f7;
+    }
+    .showcase-section .inner { max-width: 980px; margin: 0 auto; text-align: center; }
+    .showcase-section h2 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 700; letter-spacing: -1px; margin-bottom: 16px;
+    }
+    .showcase-section .subtitle {
+      font-size: 19px; color: #86868b; margin-bottom: 56px;
+    }
+    .showcase-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
+    }
+    .showcase-item {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px; overflow: hidden;
+      transition: transform 0.3s, background 0.3s;
+      text-align: left;
+    }
+    .showcase-item:hover {
+      transform: translateY(-4px);
+      background: rgba(255,255,255,0.07);
+    }
+    .showcase-item .shot {
+      width: 100%; aspect-ratio: 1 / 1;
+      object-fit: cover; display: block;
+      background: #000;
+    }
+    .showcase-item .caption {
+      padding: 22px 24px 26px;
+    }
+    .showcase-item h3 {
+      font-size: 20px; font-weight: 700; margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+    .showcase-item p {
+      font-size: 14px; color: #a1a1a6; line-height: 1.6;
     }
 
     /* ── Section: Light ── */
@@ -258,6 +297,7 @@
     @media (max-width: 680px) {
       .modes { grid-template-columns: 1fr; }
       .features { grid-template-columns: 1fr; }
+      .showcase-grid { grid-template-columns: 1fr; }
       .footer-inner { flex-direction: column; text-align: center; }
       .palette-preview .chip { font-size: 9px; }
     }
@@ -269,6 +309,7 @@
       <a href="../../" class="logo">yotalab</a>
       <ul class="nav-links">
         <li><a href="../" class="active">Apps</a></li>
+        <li><a href="../../articles/">Articles</a></li>
         <li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li>
       </ul>
     </div>
@@ -276,11 +317,11 @@
 
   <!-- ▓▓ Hero ▓▓ -->
   <div class="hero">
-    <img class="hero-icon" src="../../assets/palettly-icon.png" alt="Palettly">
+    <img class="hero-icon" src="assets/icon.png" alt="Palettly">
     <h1>Palettly</h1>
     <p class="en-name">Photo Color Palette</p>
-    <p class="catchcopy">写真の色を、パレットに。</p>
-    <p class="desc">写真から美しいカラーパレットを作るオフラインアプリ。自動抽出とスポイトの2つの方法で、お気に入りの色をいつでも手元に。デザイナー、フォトグラファー、クリエイターのための色の記録帳。</p>
+    <p class="catchcopy">写真の色を、パレットに</p>
+    <p class="desc">写真からカラーパレットを作るオフラインアプリ。自動抽出とスポイトの2つの方法で、お気に入りの色をいつでも手元に。デザイナー、フォトグラファー、クリエイターのための色の記録帳。</p>
     <div class="hero-badges">
       <span class="badge">完全オフライン</span>
       <span class="badge">自動抽出</span>
@@ -289,10 +330,48 @@
     </div>
   </div>
 
+  <!-- ▓▓ Showcase ▓▓ -->
+  <div class="showcase-section">
+    <div class="inner">
+      <h2>Plettlyの特徴</h2>
+      <p class="subtitle">写真からカラーパレットを作る過程で欲しい機能が揃っています。</p>
+      <div class="showcase-grid">
+        <div class="showcase-item">
+          <img class="shot" src="assets/auto-extract.png" alt="写真から自動でカラーパレットを生成" loading="lazy">
+          <div class="caption">
+            <h3>写真から自動生成</h3>
+            <p>選んだ写真の代表色を、設定不要で瞬時にパレット化。</p>
+          </div>
+        </div>
+        <div class="showcase-item">
+          <img class="shot" src="assets/eyedropper.png" alt="スポイト機能で色をピック" loading="lazy">
+          <div class="caption">
+            <h3>スポイトで好みの色を</h3>
+            <p>虫眼鏡付きスポイトで、写真の任意の場所からこだわりの色を抽出。</p>
+          </div>
+        </div>
+        <div class="showcase-item">
+          <img class="shot" src="assets/bg-remove.png" alt="背景除去機能" loading="lazy">
+          <div class="caption">
+            <h3>背景除去で被写体だけ抽出</h3>
+            <p>背景を自動で除外し、被写体の色だけを集めた純度の高いパレットに。</p>
+          </div>
+        </div>
+        <div class="showcase-item">
+          <img class="shot" src="assets/export.png" alt="多様なフォーマットで出力" loading="lazy">
+          <div class="caption">
+            <h3>多様なフォーマットで出力</h3>
+            <p>好みのレイアウトで画像書き出し。SNS やムードボードにそのまま使える。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ▓▓ Palette Preview (light) ▓▓ -->
   <div class="section-light">
     <div class="inner">
-      <h2>写真1枚から、<br>5色のハーモニー。</h2>
+      <h2>写真1枚から、<br>カラーパレットができる。</h2>
       <p class="subtitle">k-means クラスタリングで、写真の代表色を瞬時に抽出。</p>
       <div class="palette-preview">
         <div class="chip" style="background:#2C3639">#2C3639</div>
@@ -343,11 +422,6 @@
       <p class="subtitle">作ったパレットを、あらゆる場所で活用できる機能。</p>
       <div class="features" style="color: var(--dark);">
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
-          <span class="feat-icon">&#128195;</span>
-          <h3 style="color: var(--dark);">HEX / RGB / HSL</h3>
-          <p style="color: var(--sub);">タップひとつでクリップボードにコピー。3種類の表記を切り替えられ、どんなワークフローにも溶け込みます。</p>
-        </div>
-        <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
           <span class="feat-icon">&#128193;</span>
           <h3 style="color: var(--dark);">フォルダ整理</h3>
           <p style="color: var(--sub);">テーマやプロジェクト別にフォルダでパレットを分類。リネームや移動もスムーズ。数が増えても迷いません。</p>
@@ -355,7 +429,7 @@
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
           <span class="feat-icon">&#128444;</span>
           <h3 style="color: var(--dark);">画像書き出し</h3>
-          <p style="color: var(--sub);">写真にパレットを重ねた画像を4つのレイアウトで生成。SNSシェアやムードボードにそのまま使えます。</p>
+          <p style="color: var(--sub);">写真にパレットを重ねた画像を複数レイアウトで生成。SNSシェアやムードボードにそのまま使えます。</p>
         </div>
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
           <span class="feat-icon">&#128247;</span>

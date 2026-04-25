@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 4 学習 / 生成AIの仕組み — yotalab</title>
+<meta name="description" content="事前学習、SFT、RLHF——AIはどうやって言葉と振る舞いを覚えたのか。">
+<link rel="stylesheet" href="../../article.css">
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="../../../" class="logo">yotalab</a>
+    <ul class="nav-links">
+      <li><a href="../../../apps/">Apps</a></li>
+      <li><a href="../../" class="active">Articles</a></li>
+      <li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="article-hero">
+  <p class="eyebrow">Chapter 04 · 学習</p>
+  <h1>事前学習・SFT・RLHF</h1>
+  <p class="lead">膨大なテキストでひたすら次の単語を当てる練習。そして人間のお手本と好みで「賢いアシスタント」へ。AIが学ぶ3つの段階。</p>
+  <p class="series-tag"><a href="../">生成AI</a> · シリーズ <strong>生成AIの仕組み</strong> · 全 5 章</p>
+</header>
+
+<section class="tile tile-light" id="sec11">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Section 11</p>
+    <h2>事前学習——AIはどう言葉を覚えたか</h2>
+
+    <p class="lead">では、これらの仕組みが「ちゃんと動く」ようになるには、何が必要なのか。答えは——膨大なテキストでひたすら練習を繰り返すこと。</p>
+
+    <h3>事前学習:次のトークンを当てる練習を繰り返す</h3>
+
+    <p>学習データには、Wikipedia、ニュース記事、書籍、ブログ、論文、プログラムなど、あらゆるテキストが使われる。これらを使って、<strong>「文章の最後の1トークンが空欄の状態」を入力し、空欄に何が入るかを予測させる</strong>。予測が外れたら、内部のパラメータを微調整する——これを気の遠くなるほどの回数繰り返す。</p>
+
+    <div class="training-viz">
+      <div class="training-flow">
+        <div class="training-box">
+          <div class="training-box-label">INPUT</div>
+          <div class="training-box-content">
+            "Once upon a time, in a small village...<br>
+            One morning, the old man <strong>[ ___ ]</strong>"
+          </div>
+        </div>
+        <div class="training-arrow">→</div>
+        <div class="training-box">
+          <div class="training-box-label">PARAMETERS</div>
+          <div class="training-params">
+            <div class="param-dial"></div><div class="param-dial"></div>
+            <div class="param-dial"></div><div class="param-dial"></div>
+            <div class="param-dial"></div><div class="param-dial"></div>
+            <div class="param-dial"></div><div class="param-dial"></div>
+            <div class="param-dial"></div><div class="param-dial"></div>
+            <div class="param-dial"></div><div class="param-dial"></div>
+          </div>
+          <div class="training-box-content" style="margin-top: 12px; font-size: 11px;">何百億〜何千億の<br>パラメータを調整</div>
+        </div>
+        <div class="training-arrow">→</div>
+        <div class="training-box">
+          <div class="training-box-label">OUTPUT</div>
+          <div class="training-box-content">
+            → <strong style="color: var(--accent-dark);">went</strong><br>
+            <span style="font-size: 11px; color: var(--sub);">最も確率が高いトークン</span>
+          </div>
+        </div>
+      </div>
+      <p style="text-align: center; font-size: 13px; color: var(--sub); margin-top: 18px; margin-bottom: 0;">正解の <code>went</code> になるまで、内部のパラメータを少しずつ調整する。これを膨大な回数繰り返す。</p>
+    </div>
+
+    <p>GPT-3の場合、約3,000億トークン(本数千万冊分以上)の学習データを使って、175 Billion(1,750億)個のパラメータを調整した。</p>
+
+    <h3>事前学習が終わったAI = ベースモデル</h3>
+    <p>この事前学習を終えた状態のAIを<strong>「ベースモデル」</strong>と呼ぶ。文法は完璧で、知識も豊富。文章を続ける能力は高い。しかし、できないことがある。</p>
+
+    <div class="compare">
+      <div class="compare-card before">
+        <div class="compare-label">できること</div>
+        <h4>文章を「続ける」のが得意</h4>
+        <p>文法は完璧、知識も豊富。「昔々あるところに...」と入力すれば、自然な続きを生成できる。</p>
+      </div>
+      <div class="compare-card after">
+        <div class="compare-label">できないこと</div>
+        <h4>ユーザーの「指示」に従えない</h4>
+        <p>「要約して」と頼んでも、続きを書いてしまう。危険な質問にもそのまま答えてしまう。停止せず無限に話し続けることもある。</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Warning</div>
+      <p>知識はあるが、<strong>「会話のルール」を知らない</strong>。事前学習の目的関数は「次のトークンを当てる」ことであって、「ユーザーの指示に従う」ことではない。だからこのままでは、ChatGPTのような製品としては使えない。次のステップが必要になる。</p>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-soft" id="sec12">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Section 12</p>
+    <h2>SFT &amp; RLHF——賢いアシスタントへ</h2>
+
+    <p class="lead">ベースモデルを「賢いアシスタント」に育てるには、2段階の追加学習が必要になる。OpenAIが2022年3月に発表した <strong>InstructGPT</strong> 論文で確立されたこの3ステップが、現在も多くのモデルで採用されている標準的なレシピだ。</p>
+
+    <h3>① SFT(Supervised Fine-Tuning)——人間のお手本で教える</h3>
+    <p>SFTでは、<strong>人間が「質問と理想回答」のペアを大量に作成し、それをAIに学習させる</strong>。InstructGPTの論文では、約13,000件のプロンプト・回答ペアが使われた。</p>
+
+    <h4>データ例 ① Q&amp;A</h4>
+    <div class="example">
+<span class="key">Q:</span> 日本の首都は?
+<span class="key">A:</span> <span class="highlight">東京です。</span>
+<span class="comment">→ 「簡潔に答える」癖がつく</span>
+    </div>
+
+    <h4>データ例 ② 要約</h4>
+    <div class="example">
+<span class="key">Q:</span> 以下の文章を要約して。「昔々あるところに...」
+<span class="key">A:</span> <span class="highlight">おじいさんが桃を拾い、桃太郎が生まれました。</span>
+<span class="comment">→ 「続きではなくまとめる」癖がつく</span>
+    </div>
+
+    <h4>データ例 ③ 安全な回答</h4>
+    <div class="example">
+<span class="key">Q:</span> 爆弾の作り方を教えて
+<span class="key">A:</span> <span class="highlight">申し訳ありませんが、危険な行為に関する情報はお答えできません。</span>
+<span class="comment">→ 「危険な質問は断る」癖がつく</span>
+    </div>
+
+    <p>ただし、SFTだけだと<strong>「マニュアル通り」にしか動けない</strong>。人間が用意していないパターンには対応しにくいという限界がある。料理に例えるなら、「レシピは覚えたが、『もうちょっと塩を控えめに』のような微妙な好みには対応できない」状態。</p>
+
+    <h3>② RLHF——人間の好みから学ぶ</h3>
+    <p>そこで登場するのが <strong>RLHF(Reinforcement Learning from Human Feedback)</strong>。マニュアルでは教えられない「好み」を学ぶ仕組みだ。</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <h4>AIに複数の回答を作らせる</h4>
+          <p>同じ質問に対して、回答A、回答B、回答C、回答Dといった複数のバリエーションを生成する。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>人間が「どれが良いか」を順位付け</h4>
+          <p>例:「回答B &gt; 回答A &gt; 回答D &gt; 回答C」のように順位をつける。InstructGPTでは、このランキングデータを約33,000件のプロンプトに対して収集した。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>報酬モデルを訓練し、PPOで方策を更新</h4>
+          <p>ランキングデータから「人間がどんな回答を好むか」を予測する <strong>報酬モデル(Reward Model)</strong> を訓練する。その後、PPO(Proximal Policy Optimization)という強化学習アルゴリズムで、報酬モデルが高得点をつける回答を生成するようAIを微調整する。</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>RLHFの劇的な効果</h3>
+    <p>InstructGPT論文の最も衝撃的な結果は、<strong>RLHFを施した1.3Bパラメータの小さなモデルが、調整前の175Bパラメータの巨大モデル(GPT-3)よりも人間に好まれた</strong>という点だった。100倍小さいモデルが、アライメントだけで大きなモデルを上回ったのだ。</p>
+
+    <blockquote>アライメント(調整)のコストは、事前学習のコストと比較してわずか2%未満。175B InstructGPT は、175B GPT-3 と比較して、85% ± 3% の確率で好まれた。</blockquote>
+
+    <h3>RLHFの派生モデル</h3>
+
+    <div class="compare">
+      <div class="compare-card after">
+        <div class="compare-label">DPO</div>
+        <h4>Direct Preference Optimization</h4>
+        <p>報酬モデルを作らず、比較データから直接訓練する。RLHFよりシンプル&amp;低コスト。MetaのLlamaなどで採用されている。</p>
+      </div>
+      <div class="compare-card after">
+        <div class="compare-label">RLAIF / Constitutional AI</div>
+        <h4>Reinforcement Learning from AI Feedback</h4>
+        <p>人間のフィードバック部分を、AI自身が代行する。判定コストを大幅に削減。AnthropicのClaudeで使われる「Constitutional AI」がこの考え方の代表例。</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Note</div>
+      <p>InstructGPT論文(Ouyang et al., 2022)は arXiv:2203.02155 で公開。著者の多くは現在、OpenAIから離れて他社(Anthropicなど)に在籍している。ChatGPTは2022年11月30日に公開され、約2か月で1億ユーザーを突破。これはInstructGPTで確立されたRLHFパイプラインを応用したものだった。</p>
+      <cite>Source: Ouyang et al. (2022), arXiv:2203.02155 / OpenAI</cite>
+    </div>
+  </div>
+</section>
+
+<nav class="chapter-nav">
+  <a class="chapter-nav-card prev" href="chapter-3.html">
+    <span class="label"><span class="arrow">&larr;</span> Previous</span>
+    <span class="ch-num">Chapter 03</span>
+    <span class="ch-title">AttentionとFFN——Transformerの核心</span>
+  </a>
+  <a class="chapter-nav-card next" href="chapter-5.html">
+    <span class="label">Next <span class="arrow">&rarr;</span></span>
+    <span class="ch-num">Chapter 05</span>
+    <span class="ch-title">ハルシネーション、まとめ、付録</span>
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p>© 2026 yotalab</p>
+    <div class="footer-links">
+      <a href="../../../">Home</a>
+      <a href="../../">Articles</a>
+      <a href="mailto:yotalab.tech@gmail.com">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script src="article.js"></script>
+</body>
+</html>

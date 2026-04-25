@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 3 Transformerの核心 / 生成AIの仕組み — yotalab</title>
+<meta name="description" content="Attention、FFN、Transformer全体像、そしてプロンプトの重要性を仕組みから理解する。">
+<link rel="stylesheet" href="../../article.css">
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="../../../" class="logo">yotalab</a>
+    <ul class="nav-links">
+      <li><a href="../../../apps/">Apps</a></li>
+      <li><a href="../../" class="active">Articles</a></li>
+      <li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="article-hero">
+  <p class="eyebrow">Chapter 03 · Transformerの核心</p>
+  <h1>AttentionとFFNが、意味を磨く</h1>
+  <p class="lead">文脈を読み、知識を呼び出す——Transformerの中核メカニズムを、可視化と具体例でじっくり解きほぐす。プロンプトの効きどころも、ここで腑に落ちる。</p>
+  <p class="series-tag"><a href="../">生成AI</a> · シリーズ <strong>生成AIの仕組み</strong> · 全 5 章</p>
+</header>
+
+<section class="tile tile-light" id="sec7">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Section 07</p>
+    <h2>Attention——文脈に応じて意味を更新する</h2>
+
+    <p class="lead">でも、単語のベクトルが固定されているだけでは、本当の意味は分からないのではないか?</p>
+
+    <p>たとえば<strong>「数学の問題に時間をかけた」</strong>という文を考えてみる。「問題」には「トラブルの問題」と「クエスチョンの問題」がある。「かける(た)」にも「装着のかける」と「費やすのかける」がある。どうやってAIは、文脈に応じた意味を認識しているのか。</p>
+
+    <p>ここで登場するのが <strong>Attention(アテンション)</strong> という仕組みだ。Transformer論文で核となる発明であり、論文タイトル「Attention Is All You Need(注意機構さえあればよい)」が示すとおり、Transformerの中心メカニズムだ。</p>
+
+    <p>Attentionは、<strong>各単語が「他のどの単語にどれだけ注目すべきか」を計算し、その注目度に応じて自分のベクトルを更新する</strong>。</p>
+
+    <h3>例:「問題」から見た各単語への注目度</h3>
+
+    <div class="attention-viz">
+      <div class="attention-sentence" id="attSentence">
+        <div class="att-token" data-key="数学"><span>数学</span><span class="att-pct" data-pct=""></span></div>
+        <div class="att-token" data-key="の"><span>の</span><span class="att-pct" data-pct=""></span></div>
+        <div class="att-token source"><span>問題</span><span class="att-pct">基準</span></div>
+        <div class="att-token" data-key="に"><span>に</span><span class="att-pct" data-pct=""></span></div>
+        <div class="att-token" data-key="時間"><span>時間</span><span class="att-pct" data-pct=""></span></div>
+        <div class="att-token" data-key="を"><span>を</span><span class="att-pct" data-pct=""></span></div>
+        <div class="att-token" data-key="かけた"><span>かけた</span><span class="att-pct" data-pct=""></span></div>
+      </div>
+      <p style="text-align: center; font-size: 13px; color: var(--sub); margin: 0;">↓ 「問題」が周囲のどの単語に注目するかが、Attentionで決まる(下のボタンで実際の動きを確認)</p>
+    </div>
+
+    <h3>ベクトルの更新を、空間で見てみる</h3>
+
+    <p>Attentionによる注目度をもとに、「問題」のベクトルが意味空間の中で<strong>移動していく様子</strong>をアニメーションで見てみよう。下のボタンを順番に押すと、各ステップでベクトルがどう動くかが確認できる。</p>
+
+    <div class="vector-viz">
+      <div class="vector-viz-header">
+        <div class="vector-viz-title">// SEMANTIC SPACE — 「問題」の意味の遷移</div>
+        <div class="vector-viz-controls">
+          <button class="viz-btn active" data-step="0">① 初期</button>
+          <button class="viz-btn" data-step="1">② 数学で更新</button>
+          <button class="viz-btn" data-step="2">③ 時間/かけた</button>
+          <button class="viz-btn" data-step="auto">▶ 自動再生</button>
+        </div>
+      </div>
+      <div class="vector-stage" id="problemStage">
+        <div class="vec-axis vec-axis-x"></div>
+        <div class="vec-axis vec-axis-y"></div>
+        <div class="vec-axis-label x">具体性 →</div>
+        <div class="vec-axis-label y">↑ 学習関連</div>
+        <div class="vec-point dim" style="left: 18%; bottom: 22%;"></div>
+        <div class="vec-label dim" style="left: 18%; bottom: 22%;">トラブル</div>
+        <div class="vec-point dim" style="left: 26%; bottom: 30%;"></div>
+        <div class="vec-label dim" style="left: 26%; bottom: 30%;">懸念点</div>
+        <div class="vec-point dim" style="left: 14%; bottom: 35%;"></div>
+        <div class="vec-label dim" style="left: 14%; bottom: 35%;">いざこざ</div>
+        <div class="vec-point dim" style="left: 60%; bottom: 70%;"></div>
+        <div class="vec-label dim" style="left: 60%; bottom: 70%;">宿題</div>
+        <div class="vec-point dim" style="left: 70%; bottom: 65%;"></div>
+        <div class="vec-label dim" style="left: 70%; bottom: 65%;">設問</div>
+        <div class="vec-point dim" style="left: 80%; bottom: 88%;"></div>
+        <div class="vec-label dim" style="left: 80%; bottom: 88%;">難問</div>
+        <div class="vec-point dim" style="left: 88%; bottom: 80%;"></div>
+        <div class="vec-label dim" style="left: 88%; bottom: 80%;">取り組んだ問題</div>
+        <div class="vec-point highlight" id="problemVec" style="left: 22%; bottom: 28%;"></div>
+        <div class="vec-label highlight" id="problemLabel" style="left: 22%; bottom: 28%;">「問題」</div>
+        <div id="trailContainer"></div>
+      </div>
+      <div class="vector-caption" id="problemCaption">
+        <span class="step-num">// STEP 01 / INITIAL</span>
+        更新前の「問題」は、<strong>「トラブル」「懸念点」「いざこざ」</strong>などネガティブな意味の近くに配置されている。
+      </div>
+    </div>
+
+    <h3>Attentionの2つのメリット</h3>
+
+    <h4>① 複数の意味を持つ単語の使い分けができる</h4>
+    <p>同じ「高い」でも、注目する単語によってベクトルの座標が変わり、意味も変わる。<strong>初期位置(0.5, 0.5)</strong>から、文脈に応じて別々の方向へ移動する。</p>
+
+    <div class="vector-viz">
+      <div class="vector-viz-header">
+        <div class="vector-viz-title">// 「高い」の意味は文脈で変わる</div>
+        <div class="vector-viz-controls">
+          <button class="viz-btn active" data-takai="0">初期</button>
+          <button class="viz-btn" data-takai="1">時計に注目</button>
+          <button class="viz-btn" data-takai="2">山に注目</button>
+        </div>
+      </div>
+      <div class="vector-stage" id="takaiStage">
+        <div class="vec-axis vec-axis-x"></div>
+        <div class="vec-axis vec-axis-y"></div>
+        <div class="vec-axis-label x">物理的な高さ →</div>
+        <div class="vec-axis-label y">↑ 価値・価格</div>
+        <div class="vec-point dim" style="left: 22%; bottom: 88%;"></div>
+        <div class="vec-label dim" style="left: 22%; bottom: 88%;">高級</div>
+        <div class="vec-point dim" style="left: 18%; bottom: 78%;"></div>
+        <div class="vec-label dim" style="left: 18%; bottom: 78%;">高価</div>
+        <div class="vec-point dim" style="left: 88%; bottom: 18%;"></div>
+        <div class="vec-label dim" style="left: 88%; bottom: 18%;">標高</div>
+        <div class="vec-point dim" style="left: 80%; bottom: 22%;"></div>
+        <div class="vec-label dim" style="left: 80%; bottom: 22%;">山頂</div>
+        <div class="vec-point highlight" id="takaiVec" style="left: 50%; bottom: 50%;"></div>
+        <div class="vec-label highlight" id="takaiLabel" style="left: 50%; bottom: 50%;">「高い」</div>
+      </div>
+      <div class="vector-caption" id="takaiCaption">
+        <span class="step-num">// INITIAL</span>
+        初期位置 <strong>(0.5, 0.5)</strong>。文脈情報がないため、中立的な位置にある。
+      </div>
+    </div>
+
+    <h4>② 違う表現でも、同じ意味の言葉を同一にとらえられる</h4>
+    <p>「太郎は朝早く起きた...(中略)...彼は遅刻しそう」のような文章で、間にどんなに長い文章があっても、Attentionは「彼」から直接「太郎」に注目できる。<strong>結果として「彼」のベクトルは「太郎」に近づき、AIは「彼=太郎」だと認識できる</strong>。</p>
+
+    <div class="vector-viz">
+      <div class="vector-viz-header">
+        <div class="vector-viz-title">// 「彼」が「太郎」に近づく</div>
+        <div class="vector-viz-controls">
+          <button class="viz-btn active" data-kare="0">初期</button>
+          <button class="viz-btn" data-kare="1">Attention後</button>
+        </div>
+      </div>
+      <div class="vector-stage" id="kareStage">
+        <div class="vec-axis vec-axis-x"></div>
+        <div class="vec-axis vec-axis-y"></div>
+        <div class="vec-point" style="left: 75%; bottom: 75%; background: var(--accent);"></div>
+        <div class="vec-label" style="left: 75%; bottom: 75%;">太郎 (0.7, 0.7)</div>
+        <div class="vec-point dim" style="left: 35%; bottom: 60%;"></div>
+        <div class="vec-label dim" style="left: 35%; bottom: 60%;">花子</div>
+        <div class="vec-point dim" style="left: 25%; bottom: 35%;"></div>
+        <div class="vec-label dim" style="left: 25%; bottom: 35%;">次郎</div>
+        <div class="vec-point highlight" id="kareVec" style="left: 18%; bottom: 78%;"></div>
+        <div class="vec-label highlight" id="kareLabel" style="left: 18%; bottom: 78%;">「彼」</div>
+      </div>
+      <div class="vector-caption" id="kareCaption">
+        <span class="step-num">// INITIAL</span>
+        「彼」は当初、誰を指すか確定していない位置 <strong>(0.1, 0.8)</strong> にある。
+      </div>
+    </div>
+
+    <p>この「離れた位置にあるトークン同士でも直接結びつけられる」という性質こそ、Attentionが従来のRNN/LSTMより優れている本質的な理由だ。RNNは「順番に1つずつ」処理する必要があったため、長い文では遠くの依存関係を捉えにくかった。Attentionはそれを並列計算で一気に解決した。</p>
+
+    <div class="callout">
+      <div class="callout-title">Note</div>
+      <p>Transformerが革命的だった理由のひとつは、<strong>並列処理が可能になったこと</strong>。RNNはトークンを順次処理する必要があったため学習が遅かったが、AttentionではすべてのトークンペアのスコアをGPUで並列計算できる。
+      オリジナルのTransformer(2017)は8つの「ヘッド」を持つMulti-Head Attentionを使っていた。各ヘッドが異なる種類の関係(代名詞-名詞の参照、局所的な文脈など)を並行して捉える。</p>
+      <cite>Source: Vaswani et al. (2017), "Attention Is All You Need"</cite>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-soft" id="sec8">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Section 08</p>
+    <h2>FFN——文章をより深く理解する</h2>
+
+    <p class="lead">Attentionで文脈を読み取った後、FFN(Feed Forward Network)が情報を解釈し変換することで、深い理解が実現される。</p>
+
+    <p>Attentionが「他の単語の情報を集める(文脈を読み取る)」役割なら、FFNは<strong>「集めた情報の意味を深め、磨く」</strong>役割を担う。AttentionとFFNの2つは、Transformerの各層で必ずペアで現れる。</p>
+
+    <h3>「問題」の例で考える</h3>
+    <p>Attentionによって「時間をかけた数学の問題」に意味が寄ってきた「問題」だが、この時点でも「数学以外の科目」や「トラブル」の意味成分がまだ少し残っている。FFNは、ここから不要な意味を削ぎ落とし、必要な知識を加算する。</p>
+
+    <h3>FFNの内部:次元の展開と圧縮</h3>
+    <p>Attentionがベクトルを更新しても、「問題」には「トラブル」と「クエスチョン」の<strong>両方の成分が混ざり合った重ね合わせの状態</strong>になっている。FFNはこれを次の3ステップで処理する。</p>
+
+    <div class="ffn-viz">
+      <div class="ffn-stages">
+        <div class="ffn-stage">
+          <div class="ffn-stage-label">入力</div>
+          <div class="ffn-stage-dims">
+            <div class="ffn-dim"></div><div class="ffn-dim"></div>
+            <div class="ffn-dim"></div><div class="ffn-dim"></div>
+          </div>
+          <div class="ffn-stage-text">混ざった状態の<br>「問題」ベクトル</div>
+        </div>
+        <div class="ffn-arrow">→</div>
+        <div class="ffn-stage expanded">
+          <div class="ffn-stage-label">次元展開 + 知識加算</div>
+          <div class="ffn-stage-dims">
+            <div class="ffn-dim expanded-dim"></div><div class="ffn-dim expanded-dim"></div>
+            <div class="ffn-dim expanded-dim"></div><div class="ffn-dim expanded-dim"></div>
+            <div class="ffn-dim expanded-dim"></div><div class="ffn-dim expanded-dim"></div>
+            <div class="ffn-dim expanded-dim"></div><div class="ffn-dim expanded-dim"></div>
+          </div>
+          <div class="ffn-stage-text">独立した軸に分離し、<br>関連知識を加算</div>
+        </div>
+        <div class="ffn-arrow">→</div>
+        <div class="ffn-stage">
+          <div class="ffn-stage-label">圧縮(活性化関数)</div>
+          <div class="ffn-stage-dims">
+            <div class="ffn-dim"></div><div class="ffn-dim zeroed"></div>
+            <div class="ffn-dim"></div><div class="ffn-dim zeroed"></div>
+          </div>
+          <div class="ffn-stage-text">不要な成分を<br>ゼロに抑制</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <h4>① 次元の展開</h4>
+          <p>モデルの次元を一時的に大きくして、混ざっていた特徴を独立した軸として引き離す。「トラブル」と「クエスチョン」が別々の次元に分離される。<strong>GPT-3の場合、12,288次元から49,152次元(=4倍)に展開される。</strong></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>② 知識の呼び出し(表現加算)</h4>
+          <p>学習データから得た知識を使って、現在の表現に加算する。「数学/時間/問題」という文脈なら「難問」「論理/思考力」「粘り強く」といった関連知識が呼び出される。FFNは、モデルが学習で獲得した「世界の知識」を保持している場所だと考えられている。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>③ 活性化関数による圧縮</h4>
+          <p>「しきい値」を使って、不要な成分をゼロに抑制する。「トラブル」「法律/民事」「金銭/職場」「いざこざ」のような今回の文脈に不要な意味が落とされ、磨かれた「問題」のベクトルが残る。最後に元の次元(12,288)に戻される。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Tip</div>
+      <p>Attentionで文脈情報を集め、FFNで知識を呼び出して意味を磨く。これが繰り返されることで、<strong>「粘り強く時間をかけて解いた難しい数学の問題」</strong>という、文脈に応じた具体的な意味が確定していく。実は、<strong>Transformerのパラメータの大部分はFFNに使われている</strong>。GPT-3の総パラメータ約1750億のうち、各層の大半がFFNの重みだ。</p>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light" id="sec9">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Section 09</p>
+    <h2>Transformer全体像</h2>
+
+    <p class="lead">生成AIの基礎となっているTransformerは、ここまで説明してきたEmbedding、Attention、FFNの組み合わせで、その大部分がカバーできる。</p>
+
+    <p>Transformerの内部では、<strong>AttentionとFFNが何層も繰り返し</strong>適用される。層を経るごとに意味がより磨かれていき、最終的にその磨かれたベクトルから「次のトークン」の確率が計算される。</p>
+
+    <h3>GPT-3を例に、スケールを実感する</h3>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-value">175B</span>
+        <span class="stat-label">パラメータ数<br>(1,750億)</span>
+        <div class="stat-source">// GPT-3</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">96</span>
+        <span class="stat-label">Transformer<br>レイヤー数</span>
+        <div class="stat-source">// GPT-3</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">12,288</span>
+        <span class="stat-label">埋め込み<br>次元数</span>
+        <div class="stat-source">// GPT-3</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">96</span>
+        <span class="stat-label">Attention<br>ヘッド数</span>
+        <div class="stat-source">// GPT-3</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">~50K</span>
+        <span class="stat-label">語彙サイズ<br>(トークン種類)</span>
+        <div class="stat-source">// GPT-3</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">300B</span>
+        <span class="stat-label">学習トークン数<br>(3,000億)</span>
+        <div class="stat-source">// GPT-3</div>
+      </div>
+    </div>
+
+    <p>GPT-3では、12,288次元のベクトルが96層を経由しながら、AttentionとFFNを繰り返し受けて、意味が磨かれていく。各層を1回通るたびに、トークンのベクトルは「より文脈を理解した」状態に更新される。</p>
+
+    <div class="callout">
+      <div class="callout-title">Note</div>
+      <p>GPT-3の175Bパラメータの内訳は、<strong>約173B(99%以上)がTransformerの96層分の重み</strong>に使われている。残りはトークン埋め込み(約0.62B)、位置埋め込み(約0.025B)、出力射影など。各Transformer層には、Attention(Q/K/V/O射影で4×d²)、FFN(2×d×4d)、LayerNorm などが含まれる。学習データはCommon Crawlが約60%、WebText2が約22%、Books1+Books2が約16%、Wikipediaなどから構成される(合計約3,000億トークン)。</p>
+      <cite>Source: Brown et al. (2020), "Language Models are Few-Shot Learners" / OpenAI GPT-3 Paper</cite>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-soft" id="sec10">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Section 10</p>
+    <h2>プロンプトの重要性を仕組みから理解する</h2>
+
+    <p class="lead">ここまでの仕組みを理解すると、「プロンプトを具体的に書くと精度が上がる理由」も腑に落ちる。</p>
+
+    <p>プロンプトの情報量が増えると、<strong>Attentionが注目すべきキーワードが増え、FFNでより具体的な知識が加算される</strong>。結果として、回答の精度が上がる。</p>
+
+    <div class="compare">
+      <div class="compare-card before">
+        <div class="compare-label">曖昧な指示</div>
+        <h4>「おいしい料理教えて」</h4>
+        <p>「料理」ベクトルが他のキーワードで更新されない → 抽象的な回答になる。「おいしい料理」の概念が広すぎて、AIは焦点を絞れない。</p>
+      </div>
+      <div class="compare-card after">
+        <div class="compare-label">具体的な指示</div>
+        <h4>「冬に食べる、体が温まる日本の家庭料理を教えて」</h4>
+        <p>「料理」ベクトルが「冬」「温まる」「日本」「家庭」によって更新される → 鍋、おでん、シチューなど具体的な回答になる。</p>
+      </div>
+    </div>
+
+    <h3>コンテキスト長の問題:長すぎても効かない</h3>
+    <p>一方で、<strong>「とにかく長く書けば精度が上がる」というわけでもない</strong>。LLMには「Lost in the Middle(中盤忘却)」と呼ばれる現象が知られていて、長い文章の真ん中に置かれた情報には注意が向きにくい傾向がある。重要な指示は文の冒頭や末尾に置くのが効果的だ。</p>
+
+    <p>また、最近のモデルは数万〜数十万トークンのコンテキストウィンドウを持つが、コンテキストが大きいほど計算コストが上がる(Attentionの計算量はトークン数の2乗に比例する)。RAG(Retrieval-Augmented Generation)などで本当に必要な情報だけを渡すのが、品質とコストのバランスを取る上で重要になる。</p>
+
+    <div class="callout">
+      <div class="callout-title">Warning</div>
+      <p>これがプロンプト設計が大事な理由のすべてではない。学習データに含まれる指示パターンへの適合、モデルが訓練された会話形式、温度パラメータなどさまざまな要因が絡む。ただ、Attentionで意味が更新される仕組みを背景として知っておくと、コンテキスト設計の重要性をより深く理解できる。</p>
+    </div>
+  </div>
+</section>
+
+<nav class="chapter-nav">
+  <a class="chapter-nav-card prev" href="chapter-2.html">
+    <span class="label"><span class="arrow">&larr;</span> Previous</span>
+    <span class="ch-num">Chapter 02</span>
+    <span class="ch-title">文章生成の基本——次トークン予測とトークン化</span>
+  </a>
+  <a class="chapter-nav-card next" href="chapter-4.html">
+    <span class="label">Next <span class="arrow">&rarr;</span></span>
+    <span class="ch-num">Chapter 04</span>
+    <span class="ch-title">事前学習・SFT・RLHF</span>
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p>© 2026 yotalab</p>
+    <div class="footer-links">
+      <a href="../../../">Home</a>
+      <a href="../../">Articles</a>
+      <a href="mailto:yotalab.tech@gmail.com">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script src="article.js"></script>
+</body>
+</html>

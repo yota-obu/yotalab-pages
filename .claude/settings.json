@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git mv *)",
+      "Bash(awk 'NR==1380,NR==1410' /Users/user/Documents/yotalab-pages/articles/generative-ai/genai_mechanism.html)"
+    ]
+  }
+}

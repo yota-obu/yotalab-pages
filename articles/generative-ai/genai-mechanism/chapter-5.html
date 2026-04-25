@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 5 課題とまとめ / 生成AIの仕組み — yotalab</title>
+<meta name="description" content="ハルシネーション、まとめ、推論モデルと参考文献。シリーズの締めくくり。">
+<link rel="stylesheet" href="../../article.css">
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="../../../" class="logo">yotalab</a>
+    <ul class="nav-links">
+      <li><a href="../../../apps/">Apps</a></li>
+      <li><a href="../../" class="active">Articles</a></li>
+      <li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="article-hero">
+  <p class="eyebrow">Chapter 05 · 課題とまとめ・付録</p>
+  <h1>ハルシネーション、まとめ、そしてその先</h1>
+  <p class="lead">仕組みを理解した今、なぜAIが「もっともらしい嘘」をつくのかが見えてくる。シリーズ全体のまとめと、さらに学びたい人への参考資料。</p>
+  <p class="series-tag"><a href="../">生成AI</a> · シリーズ <strong>生成AIの仕組み</strong> · 全 5 章</p>
+</header>
+
+<section class="tile tile-light" id="sec13">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Section 13</p>
+    <h2>ハルシネーションはなぜ起きるのか</h2>
+
+    <p class="lead">ここまで仕組みを理解すると、生成AIの大きな課題である「ハルシネーション(もっともらしい嘘をつく現象)」がなぜ起きるかも見えてくる。</p>
+
+    <h3>本質的な原因:「次トークン予測」という設計</h3>
+    <p>LLMは設計上、<strong>「事実を検証する」ことではなく「もっとも確率の高い次のトークンを予測する」ことに最適化されている</strong>。これがハルシネーションの本質的な原因だ。</p>
+
+    <p>たとえば「熟したバナナの色は…」と入力すれば、「黄色」が99%の確率で選ばれる。ハルシネーションのリスクは低い。だが「Einsteinと蒸気機関の関係をカント哲学の視点から説明して」のような、学習データにあまり現れない組み合わせを聞くと、どのトークンも確率が低くなる。それでもAIは何かを生成しなければならず、<strong>「もっともらしく聞こえる」けれど事実無根の答えを作り出してしまう</strong>。</p>
+
+    <h3>雪だるま効果:嘘が嘘を呼ぶ</h3>
+    <p>一度間違ったトークンを出力すると、それが次の予測の入力になる。論理的に一貫させるため、AIは最初の嘘に合わせてさらに嘘を重ねていく。これが<strong>「雪だるま効果(Snowball Effect)」</strong>と呼ばれる現象だ。</p>
+
+    <h3>RLHFの限界:「自信を持って答える」ことが評価される</h3>
+    <p>OpenAIが2025年9月に発表した論文 "Why Language Models Hallucinate" によれば、現在の学習・評価方法そのものが、<strong>「自信を持った推測」を「分からないと答える」ことより優遇している</strong>。多くのベンチマークが「I don't know」を罰するため、モデルは曖昧でも答えを返すよう学習されてしまう。RLHFの段階でも、人間の評価者は長く詳細な回答を好む傾向があり、これがバイアスを増幅する。</p>
+
+    <div class="callout">
+      <div class="callout-title">Warning</div>
+      <p>ハルシネーションを完全に消すことは現状不可能だが、緩和する方法はいくつかある:<br>
+      ・<strong>RAG(検索拡張生成)</strong>: 外部の信頼できる情報源を参照させる<br>
+      ・<strong>Chain of Thought</strong>: 段階的に推論させる(o1モデルの基本)<br>
+      ・<strong>Citation</strong>: 出典付きで回答させる<br>
+      ・<strong>低い温度パラメータ</strong>: 創造性を抑え、最も確率の高い予測を優先<br>
+      ・<strong>クリティカルシンキング</strong>: 結局、人間によるファクトチェックが最後の砦</p>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Note</div>
+      <p>Nature誌2024年6月号に掲載された論文(Farquhar et al.)では、「セマンティック・エントロピー」と呼ばれる手法でハルシネーションを検出する研究が報告されている。同じ質問に対する複数の回答が意味的に大きくばらつく場合、その回答は信頼性が低い可能性が高い、という考え方だ。</p>
+      <cite>Source: Farquhar et al. (2024), Nature; OpenAI (2025), "Why Language Models Hallucinate"</cite>
+    </div>
+  </div>
+</section>
+
+<section class="summary" id="sec14">
+  <div class="tile-inner">
+    <p class="section-eyebrow">Summary</p>
+    <h2>まとめ</h2>
+
+    <p>生成AI(Transformer)の根っこにある仕組みは <strong>「次トークン予測」</strong> という極めてシンプルなもの。ただ、それが実用的なサービスとして動いているのは、<strong>Embedding・Attention・FFN</strong> による文脈理解と、<strong>SFT・RLHF</strong> によるアライメントという、複数の仕組みが組み合わさっているおかげだ。</p>
+
+    <p>生成AIが「重要な意思決定」の材料に使われるようになった今、安全に使いこなすためには、<strong>「最低限の理解」がリテラシーとして求められる時代</strong>に入っている。仕組みを知ることは、ハルシネーションがなぜ起きるのか、なぜ具体的なプロンプトが必要なのかを腹落ちさせ、AIの限界と可能性を見極める目を与えてくれる。</p>
+
+    <div class="summary-cta">
+      目まぐるしく変わる生成AIの情報に惑わされないためにも、<br>
+      まずは仕組みという『土台』を固めていこう。<br>
+      生成AIのトレンドを、これからも最前線でキャッチアップしていきたい。
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light" id="sec15">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Appendix</p>
+    <h2>付録</h2>
+
+    <h3>補論:推論モデル(o1, o3)の登場</h3>
+    <p>2024年9月にOpenAIが公開した <strong>o1-preview</strong> は、回答を生成する前に<strong>「思考の連鎖(Chain of Thought)」</strong>を内部で長く展開する「推論モデル」だ。これは、Daniel Kahnemanが『ファスト&スロー』で論じた「システム2(熟考型)思考」をAIに導入する試みと言える。</p>
+
+    <p>o1は強化学習で「考え方」自体を訓練することで、数学のオリンピック問題、競技プログラミング、博士レベルの科学問題などで、それまでのモデルを大きく上回る性能を示した。その後、AnthropicのClaude、DeepSeek R1なども同様の推論能力を備え、業界標準となりつつある。</p>
+
+    <p>ただし、Apple の研究者らが2024年10月に発表した論文では、<strong>同じ問題でも数字や名前を変えるだけで性能が落ちる</strong>ことが報告された。LLMが本当に「推論」しているのか、それとも巧妙なパターンマッチングなのかは、現在も活発に議論されている。</p>
+
+    <h3>生成AIの仕組みに興味を持った方へ おすすめ動画</h3>
+    <p>日本語で生成AIの仕組みを学ぶなら、3Blue1BrownJapanのチャンネルが圧倒的におすすめ。映像と数式の橋渡しが秀逸。</p>
+
+    <ul class="link-list">
+      <li><a href="https://www.youtube.com/@3Blue1BrownJapan" target="_blank" rel="noopener">3Blue1BrownJapan(YouTubeチャンネル)</a></li>
+      <li><a href="https://www.youtube.com/@3Blue1BrownJapan" target="_blank" rel="noopener">LLMの仕組み(簡単バージョン)</a></li>
+      <li><a href="https://www.youtube.com/@3Blue1BrownJapan" target="_blank" rel="noopener">ニューラルネットワークの仕組み | Chapter 1, 深層学習</a></li>
+      <li><a href="https://www.youtube.com/@3Blue1BrownJapan" target="_blank" rel="noopener">GPTとは何か Transformerの視覚化 | Chapter 5</a></li>
+      <li><a href="https://www.youtube.com/@3Blue1BrownJapan" target="_blank" rel="noopener">GPT解説2 アテンションの仕組み | Chapter 6</a></li>
+      <li><a href="https://www.youtube.com/@3Blue1BrownJapan" target="_blank" rel="noopener">LLMはどう知識を記憶しているか | Chapter 7</a></li>
+    </ul>
+
+    <h3>主な参考文献</h3>
+    <ul class="link-list">
+      <li><a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">Vaswani et al. (2017) "Attention Is All You Need" — arXiv:1706.03762</a></li>
+      <li><a href="https://arxiv.org/abs/2005.14165" target="_blank" rel="noopener">Brown et al. (2020) "Language Models are Few-Shot Learners" (GPT-3)</a></li>
+      <li><a href="https://arxiv.org/abs/2203.02155" target="_blank" rel="noopener">Ouyang et al. (2022) "Training language models to follow instructions with human feedback" (InstructGPT)</a></li>
+      <li><a href="https://arxiv.org/abs/2506.06941" target="_blank" rel="noopener">[2506.06941] The Illusion of Thinking: Strengths and Limitations of Reasoning Models</a></li>
+      <li><a href="https://arxiv.org/abs/2507.07313" target="_blank" rel="noopener">[2507.07313] Frontier LLMs Still Struggle with Simple Reasoning Tasks</a></li>
+      <li><a href="https://arxiv.org/abs/2508.01191" target="_blank" rel="noopener">[2508.01191] Is Chain-of-Thought Reasoning of LLMs a Mirage?</a></li>
+      <li><a href="https://www.nature.com/articles/s41586-024-07421-0" target="_blank" rel="noopener">Farquhar et al. (2024) "Detecting hallucinations in large language models using semantic entropy" — Nature</a></li>
+    </ul>
+  </div>
+</section>
+
+<nav class="chapter-nav">
+  <a class="chapter-nav-card prev" href="chapter-4.html">
+    <span class="label"><span class="arrow">&larr;</span> Previous</span>
+    <span class="ch-num">Chapter 04</span>
+    <span class="ch-title">事前学習・SFT・RLHF</span>
+  </a>
+  <a class="chapter-nav-card next" href="../">
+    <span class="label">Done <span class="arrow">&rarr;</span></span>
+    <span class="ch-num">Series</span>
+    <span class="ch-title">シリーズ一覧へ</span>
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p>© 2026 yotalab</p>
+    <div class="footer-links">
+      <a href="../../../">Home</a>
+      <a href="../../">Articles</a>
+      <a href="mailto:yotalab.tech@gmail.com">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script src="article.js"></script>
+</body>
+</html>

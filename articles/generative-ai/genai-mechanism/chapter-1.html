@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 1 はじめに / 生成AIの仕組み — yotalab</title>
+<meta name="description" content="生成AIとは何か、なぜ仕組みを学ぶのか、世の中の理解度。シリーズの導入。">
+<link rel="stylesheet" href="../../article.css">
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="../../../" class="logo">yotalab</a>
+    <ul class="nav-links">
+      <li><a href="../../../apps/">Apps</a></li>
+      <li><a href="../../" class="active">Articles</a></li>
+      <li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="article-hero">
+  <p class="eyebrow">Chapter 01 · はじめに</p>
+  <h1>生成AIとは、なぜ仕組みを学ぶのか</h1>
+  <p class="lead">8年で爆発的に進化した生成AI。もはや「ちょっと便利なツール」ではない時代に、なぜあらためて仕組みを学ぶ必要があるのか。</p>
+  <p class="series-tag"><a href="../">生成AI</a> · シリーズ <strong>生成AIの仕組み</strong> · 全 5 章</p>
+</header>
+
+<section class="tile tile-light" id="sec1">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Section 01</p>
+    <h2>あらためて、生成AIとは何か</h2>
+    <p class="lead">
+      生成AIとは、新しいデータを作り出すAIである。テキスト、画像、音声・音楽、動画——あらゆるモダリティで「これまでなかったもの」を生成できる。
+    </p>
+    <p>
+      たとえばテキストならメール、レポート、物語、コード。画像ならイラストや写真風のビジュアル、ロゴデザイン。音声・音楽ならナレーションや BGM、歌。動画なら映像やアニメ。これらが、簡単な指示だけで作れるようになった。
+      <strong>本記事ではこの中でもテキスト生成にフォーカスする。</strong>
+    </p>
+
+    <h3>たった 8 年で爆発的に進化した</h3>
+    <p>
+      出発点となる論文「Attention Is All You Need」が発表されたのは 2017 年 6 月。Google Brain の研究者 8 名による論文だった。それから 10 年も経たないうちに、AI にできることは劇的に変わった。
+    </p>
+
+    <div class="timeline" id="mainTimeline">
+      <div class="timeline-item">
+        <div class="timeline-year">2017</div>
+        <div class="timeline-content">
+          <h4>Transformer 登場</h4>
+          <p>Vaswani らが「Attention Is All You Need」を発表。RNN や CNN を使わず、Attention だけでシーケンスを処理する革新的なアーキテクチャ。これが現在のあらゆる生成AIの基礎となる。</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2020</div>
+        <div class="timeline-content">
+          <h4>GPT-3 公開</h4>
+          <p>OpenAI が 1750 億パラメータの巨大モデルを発表。少数の例示だけで多様なタスクをこなす「Few-shot 学習」能力を示した。</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2022</div>
+        <div class="timeline-content">
+          <h4>ChatGPT 公開</h4>
+          <p>11 月 30 日に OpenAI が ChatGPT を公開。InstructGPT(RLHF で調整した GPT-3)をベースとした対話モデル。約 2 か月で 1 億ユーザーを突破した。</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2023</div>
+        <div class="timeline-content">
+          <h4>マルチモーダル化</h4>
+          <p>GPT-4V や Claude 3 など、画像も理解できるモデルが続々登場。AI が「目」を持ち始めた。</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2024</div>
+        <div class="timeline-content">
+          <h4>推論モデル(o1)登場</h4>
+          <p>OpenAI が 9 月に o1-preview を公開。回答前に長い「思考の連鎖(Chain of Thought)」を生成し、複雑な数学・科学・コーディング問題で大きく性能向上。</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2025</div>
+        <div class="timeline-content">
+          <h4>AI エージェントの普及</h4>
+          <p>タスクを分解し、ツールを自律的に呼び出して複数ステップを実行できる AI エージェントが本格的に実用化されはじめる。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Note</div>
+      <p>「Attention Is All You Need」の正確な発表日は 2017 年 6 月 12 日。著者 8 名は全員 Google 所属で、論文では「equal contributors(同等の貢献者)」と記載され、著者順はランダムに決められた。論文タイトルはビートルズの「All You Need Is Love」が由来。</p>
+      <cite>Source: Vaswani et al. (2017), arXiv:1706.03762</cite>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-soft" id="sec2">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Section 02</p>
+    <h2>なぜ今さら、仕組みを学ぶ必要があるのか</h2>
+    <p class="lead">生成AIは、もはや「ちょっと便利なツール」ではなくなっている。</p>
+    <p>以前は、報告書の叩き台を作ったり、メールの下書きを作ったり、ちょっとした質問に答えてもらったりする使い方が中心だった。<strong>間違えても影響は限定的</strong>だった。</p>
+    <p>しかし今は違う。経営戦略の方向性の検討、重要な意思決定の判断材料、医療・法務・金融での活用、業務プロセスの自動化——<strong>間違えれば大きな影響が出る領域</strong>でも、当たり前に使われ始めている。</p>
+
+    <div class="compare">
+      <div class="compare-card before">
+        <div class="compare-label">以前の使い方</div>
+        <h4>間違えても影響が少ない</h4>
+        <p>報告書の叩き台、メールの下書き、ちょっとした質問への回答など、人間が必ずレビューする前提の補助的な用途。</p>
+      </div>
+      <div class="compare-card after">
+        <div class="compare-label">今の使い方</div>
+        <h4>間違えたら大きな影響がある</h4>
+        <p>経営戦略の検討、重要な意思決定、医療・法務・金融での活用、業務プロセスの自動化など、結果が直接重要な領域に。</p>
+      </div>
+    </div>
+
+    <h3>運転手に求められる、乗り物の知識レベル</h3>
+    <p>乗り物に例えるなら、自転車に乗るのに仕組みの理解はほぼ不要だが、車を運転するなら最低限のメカニズムは知っておくべきで、飛行機のパイロットには深い理解が求められる。生成AIも、用途が「重要なこと」に拡がるほど、仕組みの理解が求められるようになる。</p>
+
+    <div class="skill-levels">
+      <div class="skill-level">
+        <span class="skill-icon" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="8" cy="22" r="5"/>
+            <circle cx="24" cy="22" r="5"/>
+            <path d="M12 22 L17 12 L22 22"/>
+            <path d="M14 12 L20 12"/>
+            <path d="M22 22 L19 12"/>
+          </svg>
+        </span>
+        <div class="skill-name">自転車</div>
+        <div class="skill-bar"><div class="skill-fill" data-width="25"></div></div>
+        <div class="skill-desc">仕組みを知らなくても操作ができればまあ大丈夫</div>
+      </div>
+      <div class="skill-level">
+        <span class="skill-icon" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 21 L5 17 C5 16 5.8 15 7 15 L9.5 15 L11.5 11 C11.9 10.4 12.5 10 13.2 10 L18.8 10 C19.5 10 20.1 10.4 20.5 11 L22.5 15 L25 15 C26.2 15 27 16 27 17 L27 21"/>
+            <path d="M5 21 L27 21"/>
+            <circle cx="10" cy="22" r="2.4"/>
+            <circle cx="22" cy="22" r="2.4"/>
+          </svg>
+        </span>
+        <div class="skill-name">自動車</div>
+        <div class="skill-bar"><div class="skill-fill" data-width="60"></div></div>
+        <div class="skill-desc">最低限の仕組みは知っておいてほしい</div>
+      </div>
+      <div class="skill-level">
+        <span class="skill-icon" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 4 L18 14 L28 18 L28 20 L18 18 L17 24 L20 26 L20 27 L16 26 L12 27 L12 26 L15 24 L14 18 L4 20 L4 18 L14 14 Z"/>
+          </svg>
+        </span>
+        <div class="skill-name">飛行機</div>
+        <div class="skill-bar"><div class="skill-fill" data-width="95"></div></div>
+        <div class="skill-desc">パイロットには仕組みを理解してほしい</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Tip</div>
+      <p>「重要なこと」に使われるようになった今、より仕組みの理解が求められる。仕組みを知らないまま使い続けることは、適切な使いどころを判断できないリスクと表裏一体だ。</p>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light" id="sec3">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Section 03</p>
+    <h2>仕組みの理解度——意外と知られていない実態</h2>
+    <p>では実際、生成AI の仕組みはどのくらい知られているのか。社内でアンケートを取ってみたところ、<strong>「次単語予測で文章を作っている」以上のことが、意外と知られていない</strong>ことがわかった。</p>
+
+    <div class="survey">
+      <div class="survey-title">生成AIについて知っていることのアンケート</div>
+      <div class="survey-row">
+        <div class="survey-label"><span>生成AIが次単語予測であること</span><span class="survey-pct">93%</span></div>
+        <div class="survey-bar"><div class="survey-fill" data-width="93"></div></div>
+      </div>
+      <div class="survey-row highlight">
+        <div class="survey-label"><span>文脈に応じて単語の意味を更新していること(Attention)</span><span class="survey-pct">62%</span></div>
+        <div class="survey-bar"><div class="survey-fill" data-width="62"></div></div>
+      </div>
+      <div class="survey-row highlight">
+        <div class="survey-label"><span>単語の意味をより深く理解していること(FFN)</span><span class="survey-pct">23%</span></div>
+        <div class="survey-bar"><div class="survey-fill" data-width="23"></div></div>
+      </div>
+      <div class="survey-row highlight">
+        <div class="survey-label"><span>強化学習をしていること(RLHF, SFT)</span><span class="survey-pct">31%</span></div>
+        <div class="survey-bar"><div class="survey-fill" data-width="31"></div></div>
+      </div>
+      <p class="survey-note">※ 社内アンケート(N=13)。「1. 理解している、2. ある程度理解している、3. 少し知っている、4. 知らない」の四段階で調査。知っている割合 = 1, 2, 3 と答えた人の割合。</p>
+    </div>
+
+    <p>Attention・FFN・強化学習——これらを知れば、AI を「知っている側」になれるチャンスがある。本記事ではこの 3 つを丁寧に解説していく。</p>
+
+    <h3>仕組みの理解が、最新トレンドの把握につながる</h3>
+    <p>絶えず進化する生成AIの世界だからこそ、基本の仕組みを紐解くことが、<strong>最新トレンドを乗りこなす大事な基盤になる</strong>。本シリーズでは、生成AI 理解の知識基盤となる体系的な理解をゴールとする。専門用語や数式は、できるだけ一般用語に置き換えて説明していく。</p>
+  </div>
+</section>
+
+<nav class="chapter-nav">
+  <span class="chapter-nav-card prev disabled">
+    <span class="label"><span class="arrow">&larr;</span> Previous</span>
+    <span class="ch-num">—</span>
+    <span class="ch-title">最初の章です</span>
+  </span>
+  <a class="chapter-nav-card next" href="chapter-2.html">
+    <span class="label">Next <span class="arrow">&rarr;</span></span>
+    <span class="ch-num">Chapter 02</span>
+    <span class="ch-title">文章生成の基本——次トークン予測とトークン化</span>
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p>© 2026 yotalab</p>
+    <div class="footer-links">
+      <a href="../../../">Home</a>
+      <a href="../../">Articles</a>
+      <a href="mailto:yotalab.tech@gmail.com">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script src="article.js"></script>
+</body>
+</html>

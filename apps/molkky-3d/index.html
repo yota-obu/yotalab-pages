@@ -42,20 +42,19 @@
     .nav-links a:hover { color: var(--dark); }
     .nav-links a.active { color: var(--dark); font-weight: 600; }
 
-    /* ── Hero (grass green) ── */
+    /* ── Hero (dark) ── */
     .hero {
       padding: 140px 24px 100px;
       text-align: center;
-      background: linear-gradient(180deg, #4A8C5E 0%, #3F6E47 100%);
+      background: var(--dark);
       color: #f5f5f7;
       overflow: hidden;
       position: relative;
     }
     .hero::before {
-      content: ''; position: absolute; inset: 0;
-      background:
-        radial-gradient(circle at 20% 30%, rgba(255,255,255,0.06), transparent 35%),
-        radial-gradient(circle at 80% 70%, rgba(255,255,255,0.05), transparent 35%);
+      content: ''; position: absolute; top: -40%; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 800px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(74,140,94,0.18), transparent 70%);
       pointer-events: none;
     }
     .hero-icon {
@@ -70,18 +69,17 @@
       position: relative;
     }
     .hero .en-name {
-      font-size: 20px; color: rgba(245,245,247,0.7); margin-top: 4px;
+      font-size: 20px; color: #86868b; margin-top: 4px;
       font-weight: 400; position: relative;
     }
     .hero .catchcopy {
       font-size: clamp(24px, 4.5vw, 36px);
       font-weight: 700;
-      color: #FFD56B;
+      color: #f5f5f7;
       margin-top: 24px; letter-spacing: -0.5px; position: relative;
-      display: inline-block;
     }
     .hero .desc {
-      font-size: 19px; color: rgba(245,245,247,0.85); max-width: 580px;
+      font-size: 19px; color: #a1a1a6; max-width: 580px;
       margin: 20px auto 0; line-height: 1.65; position: relative;
     }
     .hero-badges {
@@ -90,11 +88,11 @@
     }
     .hero-badges .badge {
       font-size: 13px; font-weight: 600; padding: 7px 18px;
-      border-radius: 100px; border: 1px solid rgba(245,245,247,0.32);
+      border-radius: 100px; border: 1px solid rgba(245,245,247,0.22);
       color: #f5f5f7;
     }
     .hero-badges .badge.alt {
-      border-color: rgba(255,255,255,0.18); color: rgba(245,245,247,0.7);
+      border-color: rgba(255,255,255,0.12); color: #86868b;
     }
 
     /* ── Section: Light ── */
@@ -255,6 +253,7 @@
       <a href="../../" class="logo">yotalab</a>
       <ul class="nav-links">
         <li><a href="../" class="active">Apps</a></li>
+        <li><a href="../../articles/">Articles</a></li>
         <li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li>
       </ul>
     </div>
@@ -262,7 +261,7 @@
 
   <!-- ▓▓ Hero ▓▓ -->
   <div class="hero">
-    <img class="hero-icon" src="../../assets/molkky-3d-icon.png" alt="Mölkky 3D">
+    <img class="hero-icon" src="assets/icon.png" alt="Mölkky 3D">
     <h1>Mölkky 3D</h1>
     <p class="en-name">3D Physics Mölkky</p>
     <p class="catchcopy">指 1 本で、ピンが転がる。</p>

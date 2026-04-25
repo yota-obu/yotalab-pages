@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 2 文章生成の基本 / 生成AIの仕組み — yotalab</title>
+<meta name="description" content="次トークン予測、トークン化、Embedding——AIが文字を意味として扱う仕組みの基本。">
+<link rel="stylesheet" href="../../article.css">
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="../../../" class="logo">yotalab</a>
+    <ul class="nav-links">
+      <li><a href="../../../apps/">Apps</a></li>
+      <li><a href="../../" class="active">Articles</a></li>
+      <li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="article-hero">
+  <p class="eyebrow">Chapter 02 · 文章生成の基本</p>
+  <h1>次トークン予測、トークン化、Embedding</h1>
+  <p class="lead">AIはどう文章を作っているのか。文字を数字に、数字を意味に変換する——LLMの「言葉の取り扱い」を順を追って見ていく。</p>
+  <p class="series-tag"><a href="../">生成AI</a> · シリーズ <strong>生成AIの仕組み</strong> · 全 5 章</p>
+</header>
+
+<section class="tile tile-light" id="sec4">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Section 04</p>
+    <h2>AIはどのように文章を生成しているのか</h2>
+    <p class="lead">答えは至ってシンプル。「次に来る確率が一番高いトークン(≒単語)をつなげていく」——これを延々と繰り返している。</p>
+    <p>たとえば「昔々、あるところに、おじいさんと…」という入力に対して、AIは次に来るトークンの確率を計算する。語彙(モデルが知っている全トークン)の中から、それぞれの「来る確率」を弾き出す。</p>
+
+    <div class="prob-list">
+      <div class="prob-row"><div class="prob-word">「おばあさん」</div><div class="prob-bar"><div class="prob-fill high" data-width="90"></div></div><div class="prob-pct">90%</div></div>
+      <div class="prob-row"><div class="prob-word">「犬」</div><div class="prob-bar"><div class="prob-fill mid" data-width="5"></div></div><div class="prob-pct">5%</div></div>
+      <div class="prob-row"><div class="prob-word">「ロボット」</div><div class="prob-bar"><div class="prob-fill low" data-width="1"></div></div><div class="prob-pct">1%</div></div>
+      <div class="prob-row"><div class="prob-word">「その他多数」</div><div class="prob-bar"><div class="prob-fill low" data-width="4"></div></div><div class="prob-pct">4%</div></div>
+    </div>
+
+    <p>最も高い確率の「おばあさん」が選ばれる(※実際は確率分布から「サンプリング」する場合もある)。そして、選ばれたトークンを入力に追加して、次のトークンをまた予測する。これを<strong>愚直に繰り返すことで、長い文章が生まれる</strong>。</p>
+
+    <h3>順次生成の様子を見てみよう</h3>
+
+    <div class="generation-flow" id="genFlow">
+      <div class="gen-step"><span class="gen-step-num">01</span><span class="gen-step-text">昔々 <span class="gen-arrow">→</span> <span class="gen-new">ある</span></span></div>
+      <div class="gen-step"><span class="gen-step-num">02</span><span class="gen-step-text">昔々 ある <span class="gen-arrow">→</span> <span class="gen-new">ところに</span></span></div>
+      <div class="gen-step"><span class="gen-step-num">03</span><span class="gen-step-text">昔々 ある ところに <span class="gen-arrow">→</span> <span class="gen-new">おじいさん</span></span></div>
+      <div class="gen-step"><span class="gen-step-num">04</span><span class="gen-step-text">昔々 ある ところに おじいさん <span class="gen-arrow">→</span> <span class="gen-new">と</span></span></div>
+      <div class="gen-step"><span class="gen-step-num">05</span><span class="gen-step-text">昔々 ある ところに おじいさん と <span class="gen-arrow">→</span> <span class="gen-new">おばあさん</span></span></div>
+      <div class="gen-step"><span class="gen-step-num">06</span><span class="gen-step-text">昔々 ある ところに おじいさん と おばあさん <span class="gen-arrow">→</span> <span class="gen-new">が</span></span></div>
+      <div class="gen-step"><span class="gen-step-num">07</span><span class="gen-step-text">…続く…</span></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Note</div>
+      <p>厳密には「単語」ではなく「トークン」と呼ばれる単位で予測している。トークンは単語より細かい場合もあれば、複数の単語をまとめた単位の場合もある。OpenAIのGPTでは平均して、英語1単語あたり約1〜2トークン、英語の1トークンあたり約4文字に相当する。日本語などのCJK言語では、英語に比べて1文字あたりのトークン数が多くなりやすい(おおむね1文字あたり1〜2トークン)。</p>
+      <cite>Source: OpenAI tiktoken documentation, Hugging Face Tokenization docs</cite>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-soft" id="sec5">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Section 05</p>
+    <h2>トークン化——言葉を数字にする</h2>
+    <p class="lead">コンピュータは「数字」しか理解できない。だから、文章をまず数字に変換する必要がある。これが<strong>トークン化(Tokenization)</strong>と呼ばれる第一ステップだ。</p>
+    <p>現代のLLMの多くは、<strong>BPE(Byte Pair Encoding)</strong>という手法、もしくはその派生であるWordPiece、SentencePieceなどでトークン化を行う。BPEは、頻繁に登場する文字の組み合わせを徐々に「1つのトークン」としてまとめていく方法だ。</p>
+
+    <h3>日本語と英語でトークン化を見てみる</h3>
+
+    <div class="tokenizer-demo">
+      <div class="tokenizer-input">「私は猫が好き」</div>
+      <div class="tokenizer-arrow">↓</div>
+      <div class="token-row">
+        <div class="token color-1"><div class="token-text">私</div><div class="token-id">101</div></div>
+        <div class="token color-2"><div class="token-text">は</div><div class="token-id">55</div></div>
+        <div class="token color-3"><div class="token-text">猫</div><div class="token-id">892</div></div>
+        <div class="token color-4"><div class="token-text">が</div><div class="token-id">33</div></div>
+        <div class="token color-5"><div class="token-text">好き</div><div class="token-id">415</div></div>
+      </div>
+      <div class="tokenizer-result">→ 5トークン</div>
+    </div>
+
+    <div class="tokenizer-demo">
+      <div class="tokenizer-input">"I like cats"</div>
+      <div class="tokenizer-arrow">↓</div>
+      <div class="token-row">
+        <div class="token color-1"><div class="token-text">I</div><div class="token-id">40</div></div>
+        <div class="token color-2"><div class="token-text">like</div><div class="token-id">301</div></div>
+        <div class="token color-3"><div class="token-text">cats</div><div class="token-id">8820</div></div>
+      </div>
+      <div class="tokenizer-result">→ 3トークン</div>
+    </div>
+
+    <h3>長い単語はサブワードに分割される</h3>
+    <p>BPEの面白い性質として、頻繁に登場する単語は1つのトークンに、珍しい単語は複数のサブワードに分割される。たとえば英語の "tokenizing" は、GPT-4のトークナイザーで <code>token / iz / ing</code> の3トークンに分かれる。"ing" は英語で頻出する語尾なので、独立したトークンとして登録されているわけだ。</p>
+
+    <div class="tokenizer-demo">
+      <div class="tokenizer-input">"tokenizing"</div>
+      <div class="tokenizer-arrow">↓</div>
+      <div class="token-row">
+        <div class="token color-1"><div class="token-text">token</div><div class="token-id">11959</div></div>
+        <div class="token color-2"><div class="token-text">iz</div><div class="token-id">337</div></div>
+        <div class="token color-3"><div class="token-text">ing</div><div class="token-id">750</div></div>
+      </div>
+      <div class="tokenizer-result">→ 3トークン (cl100k_base / GPT-4)</div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Note</div>
+      <p>GPT-2は語彙サイズ50,257(256バイトトークン + 50,000マージ + 特殊トークン1個)。GPT-4は約100,000語彙(cl100k_base)、GPT-4oは約200,000語彙(o200k_base)を使う。日本語などの非ラテン文字言語は、英語ベースで設計されたトークナイザーで処理すると、英語の同じ意味の文章より1.5〜2倍ほどトークン数が多くなる傾向がある。</p>
+      <cite>Source: OpenAI tiktoken / Hugging Face docs</cite>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light" id="sec6">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Section 06</p>
+    <h2>Embedding——数字に意味を持たせる</h2>
+    <p class="lead">トークン化しただけでは、ただ文字が数字になっただけ。意味の関係性は表現できていない。そこで、各数字を<strong>「ベクトル」(複数の数値の組)に変換する</strong>。これがEmbeddingだ。</p>
+
+    <div class="example">
+猫 <span class="arrow">→</span> 892 <span class="arrow">→</span> <span class="highlight">(0.9, 0.8)</span>
+<span class="comment">トークン     数字ID         ベクトル(2次元の例)</span>
+    </div>
+
+    <p>このベクトルが配置される空間では、<strong>意味が似ている言葉ほど近い座標に配置される</strong>。下の2次元の例で見てみよう。</p>
+
+    <div class="vector-viz">
+      <div class="vector-viz-header">
+        <div class="vector-viz-title">// EMBEDDING SPACE — 2次元の例</div>
+      </div>
+      <div class="vector-stage">
+        <div class="vec-axis vec-axis-x"></div>
+        <div class="vec-axis vec-axis-y"></div>
+        <div class="vec-axis-label x">x →</div>
+        <div class="vec-axis-label y">↑ y</div>
+        <div class="vec-point highlight" style="left:82%;bottom:78%"></div>
+        <div class="vec-label highlight" style="left:82%;bottom:78%">猫 (0.9, 0.8)</div>
+        <div class="vec-point" style="left:75%;bottom:70%"></div>
+        <div class="vec-label" style="left:75%;bottom:70%">犬 (0.8, 0.7)</div>
+        <div class="vec-point" style="left:68%;bottom:35%"></div>
+        <div class="vec-label" style="left:68%;bottom:35%">象 (0.7, 0.3)</div>
+        <div class="vec-point" style="left:18%;bottom:22%"></div>
+        <div class="vec-label" style="left:18%;bottom:22%">冷蔵庫 (0.1, 0.2)</div>
+        <div class="vec-point" style="left:28%;bottom:30%"></div>
+        <div class="vec-label" style="left:28%;bottom:30%">電子レンジ</div>
+        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1">
+          <line x1="82%" y1="22%" x2="75%" y2="30%" stroke="#5B7DC6" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.7"/>
+          <text x="78%" y="20%" font-size="10" fill="#3F5996" font-style="italic">近い!</text>
+        </svg>
+      </div>
+      <div class="vector-caption">
+        <span class="step-num">// 観察</span>
+        「猫」と「犬」は座標上でも近く、「冷蔵庫」は遠い。<strong>意味の近さが、空間上の距離として表現されている</strong>。
+      </div>
+    </div>
+
+    <p>※ 上の図は説明のため2次元にしているが、実際のモデルでは数千次元のベクトルが使われる。<strong>GPT-3の場合、各トークンは12,288次元のベクトルで表現される。</strong></p>
+
+    <h3>ベクトル化された単語は「計算」ができる</h3>
+    <p>座標上の位置関係で意味を表現できるということは、<strong>意味を「計算」できる</strong>ということでもある。Mikolovらが2013年に発表したword2vecで広く知られるようになった、有名な例:</p>
+
+    <blockquote>king − man + woman ≈ queen</blockquote>
+
+    <p>「王様」から「男性」の要素を引き、「女性」を足すと「女王」のベクトルに近い場所にたどり着く。「日本における寿司」と「ドイツにおける何か」を同じ関係性で結べばソーセージが出てくる、といった例もある。座標空間における<strong>「方向(差)」が、意味の関係を捉えている</strong>のだ。</p>
+
+    <p>また、特定の軸(次元)が特定の意味と対応することもある。たとえば数字の「one, two, three, four」を空間にプロットすると、ある軸方向に数字が大きくなる順に並んで配置されるなど、<strong>軸そのものが「数字の大きさ」のような意味を担う</strong>ことがある。</p>
+
+    <div class="callout">
+      <div class="callout-title">Note</div>
+      <p>「king − man + woman = queen」は、word2vec/GloVeなどの単語埋め込みで観測される有名な性質。Mikolov et al. (2013) の論文 "Linguistic Regularities in Continuous Space Word Representations" で報告された。なお、厳密には入力された単語(king, man, woman)を結果から除外した上で最近傍を取らないと、計算結果が "king" 自身に最も近くなることが多い、という注意点もある。</p>
+      <cite>Source: Mikolov et al., 2013 / MIT Technology Review (2015)</cite>
+    </div>
+  </div>
+</section>
+
+<nav class="chapter-nav">
+  <a class="chapter-nav-card prev" href="chapter-1.html">
+    <span class="label"><span class="arrow">&larr;</span> Previous</span>
+    <span class="ch-num">Chapter 01</span>
+    <span class="ch-title">生成AIとは、なぜ仕組みを学ぶのか</span>
+  </a>
+  <a class="chapter-nav-card next" href="chapter-3.html">
+    <span class="label">Next <span class="arrow">&rarr;</span></span>
+    <span class="ch-num">Chapter 03</span>
+    <span class="ch-title">AttentionとFFN——Transformerの核心</span>
+  </a>
+</nav>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p>© 2026 yotalab</p>
+    <div class="footer-links">
+      <a href="../../../">Home</a>
+      <a href="../../">Articles</a>
+      <a href="mailto:yotalab.tech@gmail.com">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script src="article.js"></script>
+</body>
+</html>
