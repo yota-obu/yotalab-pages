@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - Mölkky 3D - yotalab</title>
+  <style>
+    :root {
+      --bg: #fbfbfd;
+      --dark: #1d1d1f;
+      --sub: #86868b;
+      --accent: #1d1d1f;
+      --border: rgba(0,0,0,0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Hiragino Sans", "ヒラギノ角ゴシック", sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { text-decoration: none; }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(251,251,253,0.72);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 0.5px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 980px; margin: 0 auto; padding: 0 22px;
+      height: 48px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { font-size: 21px; font-weight: 700; color: var(--dark); letter-spacing: -0.3px; }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { font-size: 14px; color: var(--sub); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--dark); }
+
+    .page-header {
+      padding: 120px 24px 48px;
+      text-align: center;
+      background: linear-gradient(180deg, #f5f5f7, var(--bg));
+    }
+    .breadcrumb {
+      font-size: 13px; color: var(--sub); margin-bottom: 24px;
+    }
+    .breadcrumb a { color: var(--sub); }
+    .breadcrumb a:hover { color: var(--dark); }
+    .breadcrumb .sep { margin: 0 6px; opacity: 0.5; }
+    .page-header h1 {
+      font-size: clamp(32px, 6vw, 48px);
+      font-weight: 800; letter-spacing: -1.5px;
+    }
+    .page-header .meta {
+      font-size: 15px; color: var(--sub); margin-top: 8px;
+    }
+
+    .content {
+      max-width: 680px; margin: 0 auto;
+      padding: 48px 22px 100px;
+    }
+    .content h2 {
+      font-size: 22px; font-weight: 700;
+      margin: 48px 0 12px; letter-spacing: -0.3px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .content h2:first-of-type { margin-top: 0; }
+    .content p {
+      font-size: 16px; color: #424245;
+      line-height: 1.85; margin-bottom: 12px;
+    }
+    .content a { color: var(--dark); font-weight: 600; }
+    .content a:hover { text-decoration: underline; }
+
+    .back-link {
+      text-align: center; padding: 40px 22px 60px;
+    }
+    .back-link a {
+      font-size: 17px; font-weight: 600; color: var(--dark);
+      transition: opacity 0.2s;
+    }
+    .back-link a:hover { opacity: 0.6; }
+
+    footer {
+      background: var(--dark); padding: 20px 22px;
+    }
+    .footer-inner {
+      max-width: 980px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+    footer p, footer a { font-size: 13px; color: #86868b; }
+    footer a:hover { color: #f5f5f7; }
+    .footer-links { display: flex; gap: 20px; }
+
+    @media (max-width: 600px) {
+      .footer-inner { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="../../" class="logo">yotalab</a>
+      <ul class="nav-links">
+        <li><a href="../">Apps</a></li>
+        <li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <div class="breadcrumb">
+      <a href="../../">yotalab</a><span class="sep">/</span><a href="../">Apps</a><span class="sep">/</span><a href="./">Mölkky 3D</a><span class="sep">/</span>Privacy
+    </div>
+    <h1>プライバシーポリシー</h1>
+    <p class="meta">Mölkky 3D &mdash; Last updated: April 25, 2026</p>
+  </div>
+
+  <div class="content">
+    <h2>1. はじめに</h2>
+    <p>本アプリ「Mölkky 3D」(以下「本アプリ」)は、ユーザーのプライバシーを尊重し、個人情報の保護に努めます。本ポリシーは、本アプリにおける情報の取り扱いについて説明します。</p>
+
+    <h2>2. 収集する情報</h2>
+    <p>本アプリは、ユーザーの個人情報(氏名、メールアドレス、電話番号、位置情報、端末識別子など)を一切収集しません。プレイヤー名、スコア、設定(BGM / 効果音 / 言語)などはすべてユーザーの端末内にのみ保存され、外部のサーバーに送信されることはありません。</p>
+
+    <h2>3. ネットワーク通信</h2>
+    <p>本アプリは、ゲームプレイにおいてネットワーク通信を一切行いません。すべての処理(物理シミュレーション、CPU の思考、スコア計算、設定の保存)は端末内で完結します。</p>
+
+    <h2>4. 写真・カメラ・マイク・連絡先</h2>
+    <p>本アプリは、写真ライブラリ、カメラ、マイク、連絡先などへのアクセスを要求しません。</p>
+
+    <h2>5. 解析・広告</h2>
+    <p>本アプリは、解析ツール(Firebase Analytics、Google Analytics 等)や広告 SDK を一切使用していません。ユーザーの行動データを収集・送信することはありません。</p>
+
+    <h2>6. データの利用</h2>
+    <p>端末内に保存されるデータ(プレイヤー名・スコア・設定)は、ゲームの進行と環境の保持のためにのみ使用されます。</p>
+
+    <h2>7. データの第三者提供</h2>
+    <p>本アプリは、ユーザーのデータを第三者に提供、販売、共有することはありません。</p>
+
+    <h2>8. データの削除</h2>
+    <p>ユーザーは本アプリをアンインストールすることで、端末内に保存されたすべてのデータを削除できます。</p>
+
+    <h2>9. 子どものプライバシー</h2>
+    <p>本アプリはあらゆる年齢のユーザーが安全にご利用いただけるよう設計されており、年齢を問わず個人情報を収集することはありません。</p>
+
+    <h2>10. 本ポリシーの変更</h2>
+    <p>本プライバシーポリシーは、必要に応じて更新されることがあります。重要な変更があった場合は、本アプリのアップデートまたは本ページを通じてお知らせします。</p>
+
+    <h2>11. お問い合わせ</h2>
+    <p>本プライバシーポリシーに関するご質問やご意見がございましたら、以下までお問い合わせください。</p>
+    <p>Email: <a href="mailto:yotalab.tech@gmail.com">yotalab.tech@gmail.com</a></p>
+  </div>
+
+  <div class="back-link">
+    <a href="./">&larr; Mölkky 3D に戻る</a>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <p>© 2026 yotalab</p>
+      <div class="footer-links">
+        <a href="../../">Home</a>
+        <a href="../">Apps</a>
+        <a href="./">Mölkky 3D</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
