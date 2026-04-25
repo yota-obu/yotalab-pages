@@ -95,6 +95,57 @@
       border-color: rgba(255,255,255,0.12); color: #86868b;
     }
 
+    /* ── Showcase ── */
+    .showcase-section {
+      padding: 100px 22px;
+      background: var(--dark); color: #f5f5f7;
+    }
+    .showcase-section .inner { max-width: 980px; margin: 0 auto; text-align: center; }
+    .showcase-section h2 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 700; letter-spacing: -1px; margin-bottom: 16px;
+    }
+    .showcase-section .subtitle {
+      font-size: 19px; color: #86868b; margin-bottom: 56px;
+    }
+    .showcase-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
+    }
+    .showcase-grid .full {
+      grid-column: 1 / -1;
+    }
+    .showcase-item {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px; overflow: hidden;
+      transition: transform 0.3s, background 0.3s;
+      text-align: left;
+    }
+    .showcase-item:hover {
+      transform: translateY(-4px);
+      background: rgba(255,255,255,0.07);
+    }
+    .showcase-item .shot {
+      width: 100%; aspect-ratio: 1 / 1;
+      object-fit: cover; display: block;
+      background: #000;
+    }
+    .showcase-item.full .shot {
+      aspect-ratio: 21 / 9;
+      object-fit: contain;
+      background: #000;
+    }
+    .showcase-item .caption {
+      padding: 22px 24px 26px;
+    }
+    .showcase-item h3 {
+      font-size: 20px; font-weight: 700; margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+    .showcase-item p {
+      font-size: 14px; color: #a1a1a6; line-height: 1.6;
+    }
+
     /* ── Section: Light ── */
     .section-light {
       padding: 100px 22px;
@@ -243,6 +294,7 @@
     @media (max-width: 680px) {
       .modes { grid-template-columns: 1fr; }
       .features { grid-template-columns: 1fr; }
+      .showcase-grid { grid-template-columns: 1fr; }
       .footer-inner { flex-direction: column; text-align: center; }
     }
   </style>
@@ -264,14 +316,60 @@
     <img class="hero-icon" src="assets/icon.png" alt="Mölkky 3D">
     <h1>Mölkky 3D</h1>
     <p class="en-name">3D Physics Mölkky</p>
-    <p class="catchcopy">指 1 本で、ピンが転がる。</p>
-    <p class="desc">フィンランド発祥のアウトドアスポーツ「モルック」を、本格 3D 物理シミュレーションで再現。スワイプで投げて、ピンが豪快に倒れる爽快感を片手で味わえます。</p>
+    <p class="catchcopy">指 1 本でモルックの爽快感を
+    </p>
+    <p class="desc">フィンランド発祥のアウトドアスポーツ「モルック」を、3D 物理シミュレーションで再現。スワイプで投げて、ピンが豪快に倒れる爽快感を片手で味わえます。</p>
     <div class="hero-badges">
-      <span class="badge">3D 物理</span>
+      <span class="badge">3D</span>
       <span class="badge">マルチプレイ</span>
       <span class="badge">CPU 戦</span>
       <span class="badge alt">iPhone</span>
       <span class="badge alt">iOS 14+</span>
+    </div>
+  </div>
+
+  <!-- ▓▓ Showcase ▓▓ -->
+  <div class="showcase-section">
+    <div class="inner">
+      <h2>遊び方を、ひと目で。</h2>
+      <p class="subtitle">スワイプの長さ・速さで弾道を操り、12 本のピンを倒す。</p>
+      <div class="showcase-grid">
+        <div class="showcase-item full">
+          <img class="shot" src="assets/swipe-modes.png" alt="スワイプでモルック / vs CPU / 1台でみんなと対戦" loading="lazy">
+          <div class="caption">
+            <h3>swipe でモルック</h3>
+            <p>vs CPU でソロプレイも、1 台を回してみんなで対戦も。気分に合わせて選べる。</p>
+          </div>
+        </div>
+        <div class="showcase-item">
+          <img class="shot" src="assets/swipe-control.png" alt="スワイプの長さと速さでコントロール" loading="lazy">
+          <div class="caption">
+            <h3>長さと速さでコントロール</h3>
+            <p>長くスワイプで弾道 UP、速くスワイプでスピード UP。指 1 本で繊細な操作。</p>
+          </div>
+        </div>
+        <div class="showcase-item">
+          <img class="shot" src="assets/orientation.png" alt="縦持ち横持ち切り替え / 視点変更" loading="lazy">
+          <div class="caption">
+            <h3>縦横と視点を自由に</h3>
+            <p>モルックタップで縦持ち / 横持ちを切り替え。左右スクロールで視点も変えられる。</p>
+          </div>
+        </div>
+        <div class="showcase-item">
+          <img class="shot" src="assets/out-of-bounds.png" alt="場外に落ちたスキットルは初期位置に戻る" loading="lazy">
+          <div class="caption">
+            <h3>場外リセットの特殊ルール</h3>
+            <p>場外に落ちたスキットルは点数判定外となり、初期位置にリセット。盤面が荒れない。</p>
+          </div>
+        </div>
+        <div class="showcase-item">
+          <img class="shot" src="assets/rules.png" alt="モルックの基本ルール" loading="lazy">
+          <div class="caption">
+            <h3>ルールはシンプル</h3>
+            <p>1 本だけ倒れたら書かれている数字、複数本なら倒れた本数が点数。50 点ぴったりで勝利。</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -280,13 +378,6 @@
     <div class="inner">
       <h2>ルールはシンプル、<br>戦略は奥深い。</h2>
       <p class="subtitle">12 本のピンを倒して、ちょうど 50 点で勝利。</p>
-      <div class="formation">
-        <div class="row"><span class="pin">1</span></div>
-        <div class="row"><span class="pin">2</span><span class="pin">3</span></div>
-        <div class="row"><span class="pin">10</span><span class="pin">4</span><span class="pin">11</span></div>
-        <div class="row"><span class="pin">8</span><span class="pin">9</span><span class="pin">5</span><span class="pin">12</span></div>
-        <div class="row"><span class="pin">7</span><span class="pin">6</span></div>
-      </div>
       <p style="font-size: 15px; color: var(--sub); max-width: 540px; margin: 0 auto; line-height: 1.7;">
         1 本だけ倒れたらピンの番号、2 本以上ならその本数が得点。<br>
         50 点を超えると 25 点に戻るので、終盤は数字選びが勝負。
@@ -322,7 +413,7 @@
       <div class="features">
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
           <span class="feat-icon">&#128293;</span>
-          <h3 style="color: var(--dark);">本格 3D 物理</h3>
+          <h3 style="color: var(--dark);">3D 物理</h3>
           <p style="color: var(--sub);">Jolt Physics エンジンで、棒の回転・ピンの倒れ方・連鎖まで全てリアルに再現。同じ投げ方でも結果が変わる本物の感触。</p>
         </div>
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
@@ -361,7 +452,7 @@
       <ul class="recommend-list" style="color: #f5f5f7;">
         <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>モルックの試合の感触を手元で楽しみたい方</li>
         <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>友達や家族と 1 台の iPhone で気軽に遊びたい方</li>
-        <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>本格的な 3D 物理ゲームが好きな方</li>
+        <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>3D 物理ゲームが好きな方</li>
         <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>スキマ時間にサッと遊べるカジュアルゲームを探している方</li>
         <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08); border-bottom: none;"><span class="dot" style="background: #f5f5f7;"></span>モルックを始める前に雰囲気を掴みたい方</li>
       </ul>

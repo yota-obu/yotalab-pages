@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProgressTimer - yotalab</title>
+  <meta name="description" content="時間の流れを、バー一本で。横向き専用、画面いっぱいのプログレスバーで進捗を一目で。Live Activity 対応のシンプルタイマー。">
+  <style>
+    :root {
+      --bg: #fbfbfd;
+      --dark: #1d1d1f;
+      --sub: #86868b;
+      --accent: #1d1d1f;
+      --accent-light: #424245;
+      --border: rgba(0,0,0,0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Hiragino Sans", "ヒラギノ角ゴシック", sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(251,251,253,0.72);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 0.5px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 980px; margin: 0 auto; padding: 0 22px;
+      height: 48px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { font-size: 21px; font-weight: 700; color: var(--dark); letter-spacing: -0.3px; }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { font-size: 14px; color: var(--sub); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--dark); }
+    .nav-links a.active { color: var(--dark); font-weight: 600; }
+
+    /* ── Hero (dark, monochrome) ── */
+    .hero {
+      padding: 140px 24px 100px;
+      text-align: center;
+      background: var(--dark);
+      color: #f5f5f7;
+      overflow: hidden;
+      position: relative;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -40%; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 800px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.06), transparent 70%);
+      pointer-events: none;
+    }
+    .hero-icon {
+      width: 148px; height: 148px; border-radius: 34px;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.5);
+      margin-bottom: 32px; position: relative;
+      object-fit: cover;
+    }
+    .hero h1 {
+      font-size: clamp(44px, 8vw, 72px);
+      font-weight: 800; letter-spacing: -2.5px; line-height: 1.05;
+      position: relative;
+    }
+    .hero .en-name {
+      font-size: 20px; color: #86868b; margin-top: 4px;
+      font-weight: 400; position: relative;
+    }
+    .hero .catchcopy {
+      font-size: clamp(24px, 4.5vw, 36px);
+      font-weight: 700; color: #f5f5f7;
+      margin-top: 24px; letter-spacing: -0.5px; position: relative;
+    }
+    .hero .desc {
+      font-size: 19px; color: #a1a1a6; max-width: 580px;
+      margin: 20px auto 0; line-height: 1.65; position: relative;
+    }
+    .hero-badges {
+      display: flex; justify-content: center; gap: 10px;
+      margin-top: 28px; flex-wrap: wrap; position: relative;
+    }
+    .hero-badges .badge {
+      font-size: 13px; font-weight: 600; padding: 7px 18px;
+      border-radius: 100px; border: 1px solid rgba(245,245,247,0.22);
+      color: #f5f5f7;
+    }
+    .hero-badges .badge.alt {
+      border-color: rgba(255,255,255,0.12); color: #86868b;
+    }
+    .hero-showcase {
+      margin: 56px auto 0; max-width: 1100px;
+      border-radius: 24px; overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .hero-showcase img { width: 100%; height: auto; display: block; }
+
+    /* ── Showcase (dark) ── */
+    .showcase-section {
+      padding: 100px 22px;
+      background: var(--dark); color: #f5f5f7;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .showcase-section .inner { max-width: 1000px; margin: 0 auto; text-align: center; }
+    .showcase-section h2 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 700; letter-spacing: -1px; margin-bottom: 16px;
+    }
+    .showcase-section .subtitle {
+      font-size: 19px; color: #86868b; margin-bottom: 56px;
+    }
+    .showcase-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    }
+    .showcase-item {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px; overflow: hidden;
+      transition: transform 0.3s, background 0.3s;
+      text-align: left;
+      display: flex; flex-direction: column;
+    }
+    .showcase-item:hover {
+      transform: translateY(-4px);
+      background: rgba(255,255,255,0.07);
+    }
+    .showcase-item .shot-wrap {
+      background: #000;
+      display: flex; align-items: center; justify-content: center;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+    }
+    .showcase-item.portrait .shot-wrap {
+      aspect-ratio: 4 / 5;
+    }
+    .showcase-item .shot {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    .showcase-item.portrait .shot {
+      object-fit: contain;
+      max-height: 100%;
+      width: auto;
+    }
+    .showcase-item .caption {
+      padding: 22px 24px 26px;
+    }
+    .showcase-item h3 {
+      font-size: 20px; font-weight: 700; margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+    .showcase-item p {
+      font-size: 14px; color: #a1a1a6; line-height: 1.6;
+    }
+
+    /* ── Section: Light ── */
+    .section-light {
+      padding: 100px 22px;
+      text-align: center;
+    }
+    .section-light .inner { max-width: 900px; margin: 0 auto; }
+    .section-light h2 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 700; letter-spacing: -1px; margin-bottom: 16px;
+    }
+    .section-light .subtitle {
+      font-size: 19px; color: var(--sub); margin-bottom: 48px;
+    }
+
+    /* ── Section: Dark ── */
+    .section-dark {
+      padding: 100px 22px;
+      text-align: center;
+      background: var(--dark); color: #f5f5f7;
+    }
+    .section-dark .inner { max-width: 900px; margin: 0 auto; }
+    .section-dark h2 {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 700; letter-spacing: -1px; margin-bottom: 16px;
+    }
+    .section-dark .subtitle {
+      font-size: 19px; color: #86868b; margin-bottom: 48px;
+    }
+
+    /* ── Modes ── */
+    .modes {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    }
+    .mode-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px; padding: 44px 32px;
+      transition: background 0.3s, transform 0.3s;
+      text-align: left;
+    }
+    .mode-card:hover {
+      background: rgba(255,255,255,0.09);
+      transform: translateY(-4px);
+    }
+    .mode-icon {
+      font-size: 36px; margin-bottom: 18px; display: block;
+      letter-spacing: 4px;
+    }
+    .mode-card h3 {
+      font-size: 24px; font-weight: 700; margin-bottom: 12px;
+      letter-spacing: -0.3px;
+    }
+    .mode-card p {
+      font-size: 15px; color: #a1a1a6; line-height: 1.65;
+    }
+
+    /* ── Features ── */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .feat {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 20px; padding: 32px 24px;
+      text-align: left;
+      transition: transform 0.3s, box-shadow 0.3s;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+    }
+    .feat:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.06);
+    }
+    .feat .feat-icon {
+      font-size: 28px; margin-bottom: 14px; display: block;
+    }
+    .feat h3 {
+      font-size: 18px; font-weight: 700; margin-bottom: 8px;
+      letter-spacing: -0.2px; color: var(--dark);
+    }
+    .feat p {
+      font-size: 14px; color: var(--sub); line-height: 1.6;
+    }
+
+    /* ── Recommend ── */
+    .recommend-list {
+      list-style: none; max-width: 600px; margin: 0 auto; text-align: left;
+    }
+    .recommend-list li {
+      font-size: 17px; color: #a1a1a6; padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: baseline; gap: 14px; line-height: 1.5;
+    }
+    .recommend-list li:last-child { border-bottom: none; }
+    .recommend-list .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #f5f5f7; flex-shrink: 0; margin-top: 9px;
+    }
+
+    /* ── Privacy bar ── */
+    .privacy-bar {
+      padding: 60px 22px; text-align: center;
+      background: #f5f5f7;
+    }
+    .privacy-bar a {
+      font-size: 17px; font-weight: 600; color: var(--dark);
+      transition: opacity 0.2s;
+    }
+    .privacy-bar a:hover { opacity: 0.6; }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--dark); border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 20px 22px;
+    }
+    .footer-inner {
+      max-width: 980px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+    footer p, footer a { font-size: 13px; color: #86868b; }
+    footer a:hover { color: #f5f5f7; }
+    .footer-links { display: flex; gap: 20px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 680px) {
+      .modes { grid-template-columns: 1fr; }
+      .features { grid-template-columns: 1fr; }
+      .showcase-grid { grid-template-columns: 1fr; }
+      .showcase-item .shot-wrap { aspect-ratio: 16 / 9; }
+      .footer-inner { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="../" class="logo">yotalab</a>
+      <ul class="nav-links">
+        <li><a href="../" class="active">Apps</a></li>
+        <li><a href="../../articles/">Articles</a></li>
+        <li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ▓▓ Hero ▓▓ -->
+  <div class="hero">
+    <img class="hero-icon" src="assets/icon.png" alt="Progress Bar Timer">
+    <h1>Progress Bar Timer</h1>
+    <p class="en-name">Progress Bar Timer</p>
+    <p class="catchcopy">画面いっぱいのプログレスバーで時間を管理。</p>
+    <p class="desc">画面いっぱいのプログレスバーで進捗を一目で把握。横向き専用、Live Activity 対応のシンプルなタイマー。</p>
+    <div class="hero-badges">
+      <span class="badge">横向き専用</span>
+      <span class="badge">Live Activity</span>
+      <span class="badge alt">iPhone</span>
+      <span class="badge alt">iOS 17+</span>
+    </div>
+    <div class="hero-showcase">
+      <img src="assets/countdown-dark.png" alt="ProgressTimer ダークモード カウントダウン画面" loading="lazy">
+    </div>
+  </div>
+
+  <!-- ▓▓ Showcase ▓▓ -->
+  <div class="showcase-section">
+    <div class="inner">
+      <h2>使い方を、ひと目で。</h2>
+      <p class="subtitle">設定して、再生して、見守るだけ。</p>
+      <div class="showcase-grid">
+        <div class="showcase-item">
+          <div class="shot-wrap">
+            <img class="shot" src="assets/setup.png" alt="モード選択と時間設定画面" loading="lazy">
+          </div>
+          <div class="caption">
+            <h3>モード選択 → 時間設定 → 再生</h3>
+            <p>砂時計でカウントダウン、ストップウォッチでカウントアップ。3 タップで開始。</p>
+          </div>
+        </div>
+        <div class="showcase-item">
+          <div class="shot-wrap">
+            <img class="shot" src="assets/countdown-light.png" alt="ライトモードのカウントダウン画面" loading="lazy">
+          </div>
+          <div class="caption">
+            <h3>画面全体がプログレスバー</h3>
+            <p>離れた場所からも進捗が一目でわかる、視認性最優先のモノクロデザイン。</p>
+          </div>
+        </div>
+        <div class="showcase-item">
+          <div class="shot-wrap">
+            <img class="shot" src="assets/countdown-dark.png" alt="ダークモードのカウントダウン画面" loading="lazy">
+          </div>
+          <div class="caption">
+            <h3>ライト / ダーク両対応</h3>
+            <p>システム連動・ライト・ダークから選択。</p>
+          </div>
+        </div>
+        <div class="showcase-item portrait">
+          <div class="shot-wrap">
+            <img class="shot" src="assets/lockscreen.png" alt="ロック画面の Live Activity" loading="lazy">
+          </div>
+          <div class="caption">
+            <h3>ロック画面 / Dynamic Island</h3>
+            <p>Live Activity で残り時間とバーを常時表示。再生・一時停止・リスタートもアプリを開かずに。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ▓▓ Modes (light) ▓▓ -->
+  <div class="section-light">
+    <div class="inner">
+      <h2>2 つのモード。</h2>
+      <p class="subtitle">時間の見方は、向きで選ぶ。</p>
+      <div class="modes" style="background: var(--dark); padding: 32px; border-radius: 28px; color: #f5f5f7;">
+        <div class="mode-card">
+          <span class="mode-icon">⌛</span>
+          <h3>カウントダウン</h3>
+          <p>設定した時間からゼロへ。残り時間がバーで埋まっていく。集中作業のポモドーロや料理の時間管理に。</p>
+        </div>
+        <div class="mode-card">
+          <span class="mode-icon">⏱</span>
+          <h3>カウントアップ</h3>
+          <p>ゼロから設定した時間まで計測。経過時間がバーで進んでいく。運動やプレゼンのリハーサルに。</p>
+        </div>
+      </div>
+      <p style="font-size: 15px; color: var(--sub); margin-top: 24px; line-height: 1.7;">
+        どちらのモードも、設定時間に到達すると自動停止して<br>選択したアラーム音(Beep / Chime / Bell / Digital)で通知。
+      </p>
+    </div>
+  </div>
+
+  <!-- ▓▓ Features (dark) ▓▓ -->
+  <div class="section-dark">
+    <div class="inner">
+      <h2>すべてが、集中のために。</h2>
+      <p class="subtitle">余計な要素を削ぎ落とした、最低限の機能セット。</p>
+      <div class="features">
+        <div class="feat" style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); box-shadow: none; color: #f5f5f7;">
+          <span class="feat-icon">📱</span>
+          <h3 style="color: #f5f5f7;">Live Activity</h3>
+          <p style="color: #a1a1a6;">ロック画面と Dynamic Island に進捗バーと残り時間を常時表示。再生 / 一時停止 / リスタートをアプリ外で操作。</p>
+        </div>
+        <div class="feat" style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); box-shadow: none;">
+          <span class="feat-icon">🔔</span>
+          <h3 style="color: #f5f5f7;">4 種類のアラーム</h3>
+          <p style="color: #a1a1a6;">Beep / Chime / Bell / Digital + なし。システム音量と独立したアプリ内音量スライダーも搭載。</p>
+        </div>
+        <div class="feat" style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); box-shadow: none;">
+          <span class="feat-icon">🕓</span>
+          <h3 style="color: #f5f5f7;">最大 24 時間</h3>
+          <p style="color: #a1a1a6;">hr / min / sec のホイールで自由に時間を設定。秒単位の短時間から、終日タイマーまで。</p>
+        </div>
+        <div class="feat" style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); box-shadow: none;">
+          <span class="feat-icon">💤</span>
+          <h3 style="color: #f5f5f7;">バックグラウンド対応</h3>
+          <p style="color: #a1a1a6;">ホームに戻っても、画面をロックしても、設定時間が来ればローカル通知で知らせる。</p>
+        </div>
+        <div class="feat" style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); box-shadow: none;">
+          <span class="feat-icon">🌙</span>
+          <h3 style="color: #f5f5f7;">テーマ切替</h3>
+          <p style="color: #a1a1a6;">システム連動 / ライト / ダークの 3 種類。完全モノクロのデザインで、どのテーマでも視認性が高い。</p>
+        </div>
+        <div class="feat" style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); box-shadow: none;">
+          <span class="feat-icon">🔒</span>
+          <h3 style="color: #f5f5f7;">完全オフライン</h3>
+          <p style="color: #a1a1a6;">ネットワーク通信ゼロ。広告もトラッキングもなし。すべてが端末内で完結する。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ▓▓ Recommend (dark) ▓▓ -->
+  <div class="section-dark" style="border-top: 1px solid rgba(255,255,255,0.06);">
+    <div class="inner">
+      <h2>こんな方におすすめ</h2>
+      <ul class="recommend-list">
+        <li><span class="dot"></span>ポモドーロやタイムブロッキングで集中作業をしたい方</li>
+        <li><span class="dot"></span>運動やストレッチの時間を計りたい方</li>
+        <li><span class="dot"></span>プレゼンテーションや面接のリハーサル</li>
+        <li><span class="dot"></span>料理の調理時間を計りたい方</li>
+        <li><span class="dot"></span>横向き画面で離れた場所からも進捗を確認したい方</li>
+        <li><span class="dot"></span>シンプルで広告のないタイマーを探している方</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ▓▓ Privacy ▓▓ -->
+  <div class="privacy-bar">
+    <a href="privacy.html">Privacy Policy &rarr;</a>
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <p>© 2026 yotalab</p>
+      <div class="footer-links">
+        <a href="../../">Home</a>
+        <a href="../">Apps</a>
+        <a href="mailto:yotalab.tech@gmail.com">Contact</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

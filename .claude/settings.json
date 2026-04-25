@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "Bash(git mv *)",
-      "Bash(awk 'NR==1380,NR==1410' /Users/user/Documents/yotalab-pages/articles/generative-ai/genai_mechanism.html)"
+      "Bash(awk 'NR==1380,NR==1410' /Users/user/Documents/yotalab-pages/articles/generative-ai/genai_mechanism.html)",
+      "Bash(cp /Users/user/Documents/create_app/progressbar_timer/Sources/ProgressTimer/Assets.xcassets/AppIcon.appiconset/icon.png /Users/user/Documents/yotalab-pages/apps/progress-bar-timer/assets/icon.png)",
+      "Bash(mv \"通常のカウントダウン.png\" countdown-light.png)",
+      "Bash(mv \"ダークモードカウントダウン.png\" countdown-dark.png)",
+      "Bash(mv \"時間設定画面.png\" setup.png)",
+      "Bash(mv \"ロック画面.png\" lockscreen.png)"
+    ],
+    "additionalDirectories": [
+      "/Users/user/Documents/create_app/progressbar_timer/docs"
     ]
   }
 }

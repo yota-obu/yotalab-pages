@@ -42,6 +42,10 @@
 
     <p>Attentionは、<strong>各単語が「他のどの単語にどれだけ注目すべきか」を計算し、その注目度に応じて自分のベクトルを更新する</strong>。</p>
 
+    <h3>Q・K・V——3つの役割で「注目」を計算する</h3>
+    <p>Attentionの内部では、各トークンのベクトルから <strong>Q(Query:問い合わせ)</strong>、<strong>K(Key:見出し)</strong>、<strong>V(Value:中身)</strong> の3種類のベクトルが作られる。直感的には、QKVは図書館の検索になぞらえると分かりやすい。「自分が何を知りたいか」というQを掲げ、周囲の各トークンの「見出し」であるKと照合し、一致度が高いものから「中身」のVを多めに受け取る、という仕組みだ。</p>
+    <p>具体的には、QとKの内積で各ペアの類似度(注目度)を計算し、それを <strong>√d_k(Kの次元の平方根)で割って</strong> Softmaxで正規化する。√d_kで割るのは、次元が大きくなると内積の値が大きくなりすぎてSoftmaxが極端に偏る(勾配が消える)のを防ぐためのスケーリングで、原論文ではこれを <strong>Scaled Dot-Product Attention</strong> と呼んでいる。</p>
+
     <h3>例:「問題」から見た各単語への注目度</h3>
 
     <div class="attention-viz">
@@ -167,11 +171,18 @@
 
     <p>この「離れた位置にあるトークン同士でも直接結びつけられる」という性質こそ、Attentionが従来のRNN/LSTMより優れている本質的な理由だ。RNNは「順番に1つずつ」処理する必要があったため、長い文では遠くの依存関係を捉えにくかった。Attentionはそれを並列計算で一気に解決した。</p>
 
+    <h3>Multi-Head Attention——複数の視点で同時に注目する</h3>
+    <p>Attentionは1つだけでなく、複数の「ヘッド」に分割して並行に計算される。これが <strong>Multi-Head Attention</strong> だ。各ヘッドは別々のQ/K/V射影を持ち、それぞれが異なる関係パターン(代名詞と名詞の参照、構文的な係り受け、局所的な共起など)を独立に捉える。最後にすべてのヘッドの出力を連結し、再び元の次元に射影する。</p>
+    <p>原論文のbase modelは <strong>8ヘッド</strong>、big modelは <strong>16ヘッド</strong>。GPT-3では <strong>96ヘッド</strong> と、モデルが大規模になるほどヘッド数も増える傾向にある。</p>
+
+    <h3>Self-Attention と Causal Mask</h3>
+    <p>GPT系のような <strong>デコーダ専用モデル</strong> では、各トークンが「自分より前のトークンだけ」に注目できるよう <strong>Causal Mask(因果マスク)</strong> がかけられている。次トークン予測の学習中に未来の答えを覗き見しないためだ。一方、原論文のEncoder-Decoder構成では、デコーダがエンコーダの出力に注目する <strong>Cross-Attention</strong> も使われ、翻訳のように「ソース文を参照しながら別の言語を生成する」タスクで活躍する。</p>
+
     <div class="callout">
       <div class="callout-title">Note</div>
       <p>Transformerが革命的だった理由のひとつは、<strong>並列処理が可能になったこと</strong>。RNNはトークンを順次処理する必要があったため学習が遅かったが、AttentionではすべてのトークンペアのスコアをGPUで並列計算できる。
-      オリジナルのTransformer(2017)は8つの「ヘッド」を持つMulti-Head Attentionを使っていた。各ヘッドが異なる種類の関係(代名詞-名詞の参照、局所的な文脈など)を並行して捉える。</p>
-      <cite>Source: Vaswani et al. (2017), "Attention Is All You Need"</cite>
+      オリジナル論文(2017)のbase modelは <strong>エンコーダ6層+デコーダ6層、d_model=512、ヘッド数8、各ヘッドの次元d_k=d_v=64、FFNの中間次元d_ff=2048</strong> という構成だった。big modelはこれを倍程度に拡大し、ヘッド数16・d_model=1024・d_ff=4096となっている。</p>
+      <cite>Source: Vaswani et al. (2017), "Attention Is All You Need" (arXiv:1706.03762)</cite>
     </div>
   </div>
 </section>
@@ -184,6 +195,8 @@
     <p class="lead">Attentionで文脈を読み取った後、FFN(Feed Forward Network)が情報を解釈し変換することで、深い理解が実現される。</p>
 
     <p>Attentionが「他の単語の情報を集める(文脈を読み取る)」役割なら、FFNは<strong>「集めた情報の意味を深め、磨く」</strong>役割を担う。AttentionとFFNの2つは、Transformerの各層で必ずペアで現れる。</p>
+
+    <p>正確には、FFNは <strong>position-wise(位置ごと)</strong> に適用される。つまり、各トークン位置に対して<strong>同じ重みのネットワークが独立に適用</strong>される。トークン間の情報のやり取りはAttentionに任せ、FFNは各位置の表現を「単独で深く磨く」役割に徹する設計だ。中身は <strong>線形層 → 非線形活性化 → 線形層</strong> の2層MLPで、活性化関数は原論文ではReLU、BERTやGPT-2/3では <strong>GELU</strong>、Llama・PaLMなどの最近のLLMでは <strong>SwiGLU</strong>(Swish + Gated Linear Unit)が使われる。</p>
 
     <h3>「問題」の例で考える</h3>
     <p>Attentionによって「時間をかけた数学の問題」に意味が寄ってきた「問題」だが、この時点でも「数学以外の科目」や「トラブル」の意味成分がまだ少し残っている。FFNは、ここから不要な意味を削ぎ落とし、必要な知識を加算する。</p>
@@ -247,7 +260,13 @@
 
     <div class="callout">
       <div class="callout-title">Tip</div>
-      <p>Attentionで文脈情報を集め、FFNで知識を呼び出して意味を磨く。これが繰り返されることで、<strong>「粘り強く時間をかけて解いた難しい数学の問題」</strong>という、文脈に応じた具体的な意味が確定していく。実は、<strong>Transformerのパラメータの大部分はFFNに使われている</strong>。GPT-3の総パラメータ約1750億のうち、各層の大半がFFNの重みだ。</p>
+      <p>Attentionで文脈情報を集め、FFNで知識を呼び出して意味を磨く。これが繰り返されることで、<strong>「粘り強く時間をかけて解いた難しい数学の問題」</strong>という、文脈に応じた具体的な意味が確定していく。実は、<strong>Transformerのパラメータの大部分はFFNに使われている</strong>。GPT-3の総パラメータ約1750億のうち、各層の大半がFFNの重みだ。FFNの中間次元は <strong>d_modelの4倍</strong> に設定されることが多い(原論文でもd_model=512に対しd_ff=2048)。</p>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Note</div>
+      <p>FFNは単なる「変換層」ではなく、<strong>キー・バリュー型の連想記憶</strong>として機能している、という解釈がある。1段目の線形層の各行が「キー(訓練データ中の特定パターンと反応する検出器)」として働き、それと一致したときに2段目の対応する行が「バリュー(出力語彙への分布)」として加算される——つまりFFNは、学習で獲得した「世界の知識」を保持する場所だ、というモデルだ。下層は表層的なパターン、上層はより意味的なパターンを捉える傾向も報告されている。</p>
+      <cite>Source: Geva et al. (2021), "Transformer Feed-Forward Layers Are Key-Value Memories" (arXiv:2012.14913, EMNLP 2021)</cite>
     </div>
   </div>
 </section>
@@ -260,6 +279,16 @@
     <p class="lead">生成AIの基礎となっているTransformerは、ここまで説明してきたEmbedding、Attention、FFNの組み合わせで、その大部分がカバーできる。</p>
 
     <p>Transformerの内部では、<strong>AttentionとFFNが何層も繰り返し</strong>適用される。層を経るごとに意味がより磨かれていき、最終的にその磨かれたベクトルから「次のトークン」の確率が計算される。</p>
+
+    <h3>残差接続とLayerNorm——深い層を学習可能にする2つの仕組み</h3>
+    <p>各サブ層(AttentionとFFN)の周りには、<strong>残差接続(Residual Connection)</strong> と <strong>Layer Normalization</strong> が必ず挿入されている。残差接続は「入力をそのままバイパスして出力に足す」仕組みで、勾配が層を貫通しやすくなり、数十〜百を超える深い層でも安定して学習できる。LayerNormは活性化値の平均と分散を整え、スケールの暴走を防ぐ。</p>
+    <p>原論文は「サブ層の出力にLayerNormをかける」<strong>Post-LN</strong> 構成だったが、深いモデルでは学習が不安定になりやすかった。GPT-2以降の多くのLLMは、サブ層の入力側にLayerNormを置く <strong>Pre-LN</strong> 構成を採用していて、こちらのほうが学習率Warmupに頼らずに安定して訓練できる。現代の大規模モデルではPre-LNが事実上の標準だ。</p>
+
+    <h3>3つの構成——Encoder-only、Decoder-only、Encoder-Decoder</h3>
+    <p>Transformerは構成の選び方で性質が変わる。<strong>Encoder-only</strong>(BERTなど)は文章理解・分類に強く、<strong>Encoder-Decoder</strong>(原論文・T5・BARTなど)は翻訳や要約のように「入力を読み込んで別の出力を作る」タスクに向く。そして現在主流のLLM(GPT・Llama・Claudeなど)は <strong>Decoder-only</strong> 構成だ。次トークン予測という単一の自己回帰目的関数だけで、テキスト中のあらゆるタスクを学習できる、というシンプルさとスケール則の良さが、Decoder-onlyが選ばれている主な理由になっている。</p>
+
+    <h3>位置情報の与え方——Sinusoidal、Learned、RoPE、ALiBi</h3>
+    <p>Attentionそのものは順序情報を持たないので、トークンの位置を別途モデルに伝える必要がある。原論文は <strong>正弦波(sinusoidal)</strong> による固定の位置エンコーディングを採用していた。GPT-2/3などは <strong>学習型の位置埋め込み(learned)</strong> を使う。最近の主流は <strong>RoPE(Rotary Position Embedding、Su et al. 2021)</strong> で、Q・Kを位置に応じて回転させることで相対位置を自然に表現できる。Llama・Mistral・GPT-NeoXなどがこれを採用している。ほかに、注目スコアに位置距離に応じたバイアスを足すだけの <strong>ALiBi</strong> もある。</p>
 
     <h3>GPT-3を例に、スケールを実感する</h3>
 
@@ -298,6 +327,33 @@
 
     <p>GPT-3では、12,288次元のベクトルが96層を経由しながら、AttentionとFFNを繰り返し受けて、意味が磨かれていく。各層を1回通るたびに、トークンのベクトルは「より文脈を理解した」状態に更新される。</p>
 
+    <h3>主要モデルのアーキテクチャ比較</h3>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-value">1.5B</span>
+        <span class="stat-label">48層 / 1,600次元<br>25ヘッド</span>
+        <div class="stat-source">// GPT-2 XL</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">175B</span>
+        <span class="stat-label">96層 / 12,288次元<br>96ヘッド</span>
+        <div class="stat-source">// GPT-3</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">70B</span>
+        <span class="stat-label">80層 / 8,192次元<br>64クエリヘッド(GQA)</span>
+        <div class="stat-source">// Llama-3 70B</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">?</span>
+        <span class="stat-label">公式仕様非公開<br>(MoE構成と推測)</span>
+        <div class="stat-source">// GPT-4</div>
+      </div>
+    </div>
+
+    <p>※ Llama-3 70Bは、推論を高速化するため <strong>GQA(Grouped-Query Attention)</strong> を採用していて、64個のクエリヘッドに対しKey/Valueは8グループのみで共有される。GPT-4はOpenAIから詳細仕様が公表されておらず、パラメータ数や層数の数字は外部の推測値しかない点に注意。</p>
+
     <div class="callout">
       <div class="callout-title">Note</div>
       <p>GPT-3の175Bパラメータの内訳は、<strong>約173B(99%以上)がTransformerの96層分の重み</strong>に使われている。残りはトークン埋め込み(約0.62B)、位置埋め込み(約0.025B)、出力射影など。各Transformer層には、Attention(Q/K/V/O射影で4×d²)、FFN(2×d×4d)、LayerNorm などが含まれる。学習データはCommon Crawlが約60%、WebText2が約22%、Books1+Books2が約16%、Wikipediaなどから構成される(合計約3,000億トークン)。</p>
@@ -314,6 +370,15 @@
     <p class="lead">ここまでの仕組みを理解すると、「プロンプトを具体的に書くと精度が上がる理由」も腑に落ちる。</p>
 
     <p>プロンプトの情報量が増えると、<strong>Attentionが注目すべきキーワードが増え、FFNでより具体的な知識が加算される</strong>。結果として、回答の精度が上がる。</p>
+
+    <h3>なぜ「例を見せる」と精度が上がるのか(In-Context Learning)</h3>
+    <p>プロンプトに数個の入出力例を入れるだけでタスクをこなせる現象は、GPT-3の論文で <strong>Few-shot / In-Context Learning</strong> として広く知られるようになった。仕組みから見れば、新しいトークンの表現はAttentionで「過去の全トークン」に注目しながら更新される。つまり、<strong>プロンプトに置いた例題そのものが、その後のトークン予測に影響を与えるバイアス源</strong>として働いている、と理解できる。重みは更新されないが、文脈による条件付けで出力分布が大きく変わる。</p>
+
+    <h3>なぜChain-of-Thought(CoT)は効くのか</h3>
+    <p>「ステップ・バイ・ステップで考えて」と促すと正答率が上がるCoTも、仕組みから自然に説明できる。Transformerは1トークンを生成するごとに固定の計算量しか使えないため、<strong>難しい問いに即答させる=計算量が足りない</strong>という構造的な制約がある。CoTは中間トークンを書き出させることで、その分だけモデルに「考える計算ステップ」を与え、しかも自分自身が書いた途中経過にAttentionで戻って参照できるようになる。</p>
+
+    <h3>「あなたは経理のプロです」が効く本当の理由</h3>
+    <p>役割を割り当てるプロンプトが効く理由は、モデルに「人格」が宿るからではない。学習データの統計から、その役割らしい文体・語彙・推論パターンに高い確率が割り振られ、<strong>出力分布がその「らしい完成形」へ偏る</strong>からだ。あくまで条件付き確率分布の話であって、内部に専門家が現れるわけではない、という点を冷静に押さえておきたい。</p>
 
     <div class="compare">
       <div class="compare-card before">
@@ -336,6 +401,12 @@
     <div class="callout">
       <div class="callout-title">Warning</div>
       <p>これがプロンプト設計が大事な理由のすべてではない。学習データに含まれる指示パターンへの適合、モデルが訓練された会話形式、温度パラメータなどさまざまな要因が絡む。ただ、Attentionで意味が更新される仕組みを背景として知っておくと、コンテキスト設計の重要性をより深く理解できる。</p>
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Note</div>
+      <p>大規模化に伴って突然できるようになる「創発(Emergent Abilities)」も話題になった。一方で、Schaeffer et al. (2023) は <strong>「創発の多くは評価指標の選び方によるアーティファクト」</strong> と論じている。完全一致のような不連続な指標を使うと急に立ち上がって見えるが、対数尤度のような連続的な指標で測ると、性能はスケールに対して滑らかに伸びている、というのが彼らの主張だ。「ある日突然賢くなった」と素朴に解釈する前に、メトリクスを疑う目を持っておきたい。</p>
+      <cite>Source: Brown et al. (2020), "Language Models are Few-Shot Learners" (arXiv:2005.14165) / Wei et al. (2022), "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models" (arXiv:2201.11903) / Schaeffer et al. (2023), "Are Emergent Abilities of Large Language Models a Mirage?" (arXiv:2304.15004, NeurIPS 2023)</cite>
     </div>
   </div>
 </section>

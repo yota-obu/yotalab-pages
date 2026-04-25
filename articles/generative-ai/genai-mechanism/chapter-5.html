@@ -36,32 +36,84 @@
 
     <p class="lead">ここまで仕組みを理解すると、生成AIの大きな課題である「ハルシネーション(もっともらしい嘘をつく現象)」がなぜ起きるかも見えてくる。</p>
 
+    <h3>2 種類のハルシネーション:Intrinsic と Extrinsic</h3>
+    <p>Ji らによる包括的サーベイ「Survey of Hallucination in Natural Language Generation」(<cite>arXiv:2202.03629, ACM Computing Surveys 55, 2023</cite>)では、ハルシネーションを次の 2 種類に整理している。</p>
+
+    <div class="compare">
+      <div class="compare-card before">
+        <div class="compare-label">Intrinsic(内在的)</div>
+        <h4>入力に矛盾する</h4>
+        <p>与えられた文脈・ソース文書と<strong>直接矛盾</strong>する出力。たとえば「彼は 2010 年に生まれた」と書かれた記事を要約させたら「2001 年生まれ」と返してくる、といったケース。</p>
+      </div>
+      <div class="compare-card after">
+        <div class="compare-label">Extrinsic(外在的)</div>
+        <h4>世界の事実として誤っている</h4>
+        <p>入力には矛盾しないが、<strong>現実世界の事実と食い違う</strong>出力。実在しない論文・判例・API・人物を堂々と引用してくるのが典型例。検出が難しいのはこちら。</p>
+      </div>
+    </div>
+
     <h3>本質的な原因:「次トークン予測」という設計</h3>
     <p>LLMは設計上、<strong>「事実を検証する」ことではなく「もっとも確率の高い次のトークンを予測する」ことに最適化されている</strong>。これがハルシネーションの本質的な原因だ。</p>
 
     <p>たとえば「熟したバナナの色は…」と入力すれば、「黄色」が99%の確率で選ばれる。ハルシネーションのリスクは低い。だが「Einsteinと蒸気機関の関係をカント哲学の視点から説明して」のような、学習データにあまり現れない組み合わせを聞くと、どのトークンも確率が低くなる。それでもAIは何かを生成しなければならず、<strong>「もっともらしく聞こえる」けれど事実無根の答えを作り出してしまう</strong>。</p>
 
-    <h3>雪だるま効果:嘘が嘘を呼ぶ</h3>
-    <p>一度間違ったトークンを出力すると、それが次の予測の入力になる。論理的に一貫させるため、AIは最初の嘘に合わせてさらに嘘を重ねていく。これが<strong>「雪だるま効果(Snowball Effect)」</strong>と呼ばれる現象だ。</p>
+    <h3>原因はもう少し細かく分解できる</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <h4>① 学習目的のミスマッチ</h4>
+          <p>事前学習が報酬として与えるのは「次トークンの尤度」であって「真実性」ではない。<strong>もっともらしい文</strong>を作る練習は果てしなく積むが、<strong>事実かどうか</strong>を判定する仕組みは内蔵されていない。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>② 知識のカットオフ</h4>
+          <p>モデルは学習データの締め日以降の出来事を知らない。聞かれれば「知らない」と返すべき場面で、それまでの似た文脈から<strong>もっともらしい嘘を補完</strong>してしまう。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>③ キャリブレーションの失敗</h4>
+          <p>モデルは「自分が何を知らないか」を確実には把握できない。確信度と正答率がそろっていないため、誤りでも自信満々に出力する。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>④ 雪だるま効果(Snowball Effect)</h4>
+          <p>一度間違ったトークンを出力すると、それが次の予測の入力になる。論理的に一貫させるため、AIは最初の嘘に合わせてさらに嘘を重ねていく。</p>
+        </div>
+      </div>
+    </div>
 
-    <h3>RLHFの限界:「自信を持って答える」ことが評価される</h3>
-    <p>OpenAIが2025年9月に発表した論文 "Why Language Models Hallucinate" によれば、現在の学習・評価方法そのものが、<strong>「自信を持った推測」を「分からないと答える」ことより優遇している</strong>。多くのベンチマークが「I don't know」を罰するため、モデルは曖昧でも答えを返すよう学習されてしまう。RLHFの段階でも、人間の評価者は長く詳細な回答を好む傾向があり、これがバイアスを増幅する。</p>
+    <h3>RLHFと評価の限界:「自信を持って答える」ことが評価される</h3>
+    <p>OpenAI 等が 2025 年 9 月に発表した論文「Why Language Models Hallucinate」(Kalai, Nachum, Vempala, Zhang)は、現在の学習・評価方法そのものが、<strong>「自信を持った推測」を「分からないと答える」ことより優遇している</strong>と統計的に示した。多くのベンチマークが「I don't know」を 0 点扱いするため、モデルは曖昧でも答えを返すよう最適化されてしまう。RLHFの段階でも、人間の評価者は長く詳細な回答を好む傾向があり、これがバイアスを増幅する。</p>
+
+    <h3>緩和策:完全には消えないが、減らす技術はある</h3>
 
     <div class="callout">
-      <div class="callout-title">Warning</div>
-      <p>ハルシネーションを完全に消すことは現状不可能だが、緩和する方法はいくつかある:<br>
-      ・<strong>RAG(検索拡張生成)</strong>: 外部の信頼できる情報源を参照させる<br>
-      ・<strong>Chain of Thought</strong>: 段階的に推論させる(o1モデルの基本)<br>
-      ・<strong>Citation</strong>: 出典付きで回答させる<br>
-      ・<strong>低い温度パラメータ</strong>: 創造性を抑え、最も確率の高い予測を優先<br>
-      ・<strong>クリティカルシンキング</strong>: 結局、人間によるファクトチェックが最後の砦</p>
+      <div class="callout-title">Mitigations</div>
+      <p>ハルシネーションを完全に消すことは現状不可能だが、緩和する方法はいくつもある。</p>
+      <p>・<strong>RAG(検索拡張生成)</strong>: 質問時に外部の信頼できる文書を検索し、コンテキストに差し込んでから答えさせる。Lewis らの原論文は 2020 年。<br>
+      ・<strong>Self-Consistency</strong>: 同じ質問について Chain-of-Thought を複数サンプリングし、多数決で最終回答を決める。GSM8K で +17.9 ポイントの改善が報告されている。<br>
+      ・<strong>Semantic Entropy</strong>: 同じ質問への複数回答が意味的にばらつく(=確信できていない)ことを検出する。<br>
+      ・<strong>Tool Use / Function Calling</strong>: 計算・検索・DB 参照などをモデル本体ではなく外部ツールに任せる。<br>
+      ・<strong>Citation-Grounded Responses</strong>: 出典 URL を必ず付けさせる(Perplexity 方式)。捏造されたソースは人間がすぐ見抜ける。<br>
+      ・<strong>低い温度パラメータ</strong>: 創造性を抑え、最確トークンを優先。<br>
+      ・<strong>クリティカルシンキング</strong>: 結局、人間によるファクトチェックが最後の砦。</p>
+      <cite>Sources: Lewis et al. (2020) arXiv:2005.11401 / Wang et al. (2022) arXiv:2203.11171 / Farquhar et al. (2024) Nature</cite>
     </div>
 
     <div class="callout">
-      <div class="callout-title">Note</div>
-      <p>Nature誌2024年6月号に掲載された論文(Farquhar et al.)では、「セマンティック・エントロピー」と呼ばれる手法でハルシネーションを検出する研究が報告されている。同じ質問に対する複数の回答が意味的に大きくばらつく場合、その回答は信頼性が低い可能性が高い、という考え方だ。</p>
-      <cite>Source: Farquhar et al. (2024), Nature; OpenAI (2025), "Why Language Models Hallucinate"</cite>
+      <div class="callout-title">Note · Semantic Entropy</div>
+      <p>Nature 誌 2024 年 6 月号に掲載された Farquhar らの論文では、「セマンティック・エントロピー」と呼ばれる手法が提案された。同じ質問に対する複数回答が<strong>意味的に</strong>大きくばらつく場合(言い回しではなく主張そのものが揺れる場合)、その回答は信頼性が低いと判定する——というシンプルな指標で、ハルシネーション検出に有効だと示された。</p>
+      <cite>Source: Farquhar et al. (2024), Nature; Kalai, Nachum, Vempala, Zhang (2025), "Why Language Models Hallucinate", arXiv:2509.04664</cite>
     </div>
+
+    <h3>「推論」もパターンマッチング?——GSM-Symbolic の発見</h3>
+    <p>Apple の Mirzadeh らが 2024 年 10 月に発表した「GSM-Symbolic」(<cite>arXiv:2410.05229</cite>)は、定番の数学ベンチマーク GSM8K の問題から、<strong>登場人物の名前や数字だけを差し替えた変種</strong>を作って各モデルを再評価した。結果、平均精度の落差はモデル次第で 0.3%(GPT-4o)から 9.2%(Mistral-7B)。名前だけの置換は影響が小さい一方、<strong>数字の置換は同じ手順の問題でも明確に精度を下げた</strong>。これは LLM の「推論」のかなりの部分が、論理的演繹ではなく学習データへのパターンマッチングであることを示唆している。</p>
+
+    <h3>フロンティアモデルでも消えていない</h3>
+    <p>ハルシネーションはアーキテクチャレベルで未解決の問題で、最新モデルでも「減った」だけで「消えた」わけではない。Vectara が 2025 年末に刷新した HHEM-2.3 ベースの Hallucination Leaderboard では、長文要約タスクにおいて Gemini-2.5-flash-lite が 3.3% と最も低い一方、Claude Sonnet 4.5・GPT-5・Grok-4・DeepSeek-R1 といった主力モデルはいずれも <strong>10% を超える</strong>ハルシネーション率を記録している。「賢い」ことと「正直」なこととは別物だ。</p>
   </div>
 </section>
 
@@ -72,7 +124,9 @@
 
     <p>生成AI(Transformer)の根っこにある仕組みは <strong>「次トークン予測」</strong> という極めてシンプルなもの。ただ、それが実用的なサービスとして動いているのは、<strong>Embedding・Attention・FFN</strong> による文脈理解と、<strong>SFT・RLHF</strong> によるアライメントという、複数の仕組みが組み合わさっているおかげだ。</p>
 
-    <p>生成AIが「重要な意思決定」の材料に使われるようになった今、安全に使いこなすためには、<strong>「最低限の理解」がリテラシーとして求められる時代</strong>に入っている。仕組みを知ることは、ハルシネーションがなぜ起きるのか、なぜ具体的なプロンプトが必要なのかを腹落ちさせ、AIの限界と可能性を見極める目を与えてくれる。</p>
+    <p>このシリーズを最後まで読んだあなたは、もう自分の言葉で次のことを説明できるはずだ——文章はトークンに分解され、<strong>Embedding</strong> でベクトルになり、<strong>Attention</strong> で文脈に応じて意味を更新し、<strong>FFN</strong> で蓄積された知識を引き出して、次の 1 トークンが選ばれる。それが何兆語ぶんかの<strong>事前学習</strong>で土台ができ、<strong>SFT</strong> でアシスタント的な応答スタイルを覚え、<strong>RLHF</strong> で人間の好みに寄り添うように仕上げられている。だからこそ、学習データにない組み合わせには<strong>ハルシネーション</strong>が起きる。だからこそ、具体的でコンテキスト豊富なプロンプトほどよい答えが返ってくる。</p>
+
+    <p>生成AIが「重要な意思決定」の材料に使われるようになった今、安全に使いこなすためには、<strong>「最低限の理解」がリテラシーとして求められる時代</strong>に入っている。仕組みを知ることは、ハルシネーションがなぜ起きるのか、なぜ具体的なプロンプトが必要なのかを腹落ちさせ、AIの限界と可能性を見極める目を与えてくれる。新しいモデルの発表記事を読むときも、「パラメータ数」「データ量」「学習段階」「推論時計算」のどこを伸ばしたのか、自分の頭で評価できるようになっているはずだ。</p>
 
     <div class="summary-cta">
       目まぐるしく変わる生成AIの情報に惑わされないためにも、<br>
@@ -87,12 +141,113 @@
     <p class="section-eyebrow">Appendix</p>
     <h2>付録</h2>
 
-    <h3>補論:推論モデル(o1, o3)の登場</h3>
-    <p>2024年9月にOpenAIが公開した <strong>o1-preview</strong> は、回答を生成する前に<strong>「思考の連鎖(Chain of Thought)」</strong>を内部で長く展開する「推論モデル」だ。これは、Daniel Kahnemanが『ファスト&スロー』で論じた「システム2(熟考型)思考」をAIに導入する試みと言える。</p>
+    <h3>補論:推論モデルの系譜</h3>
+    <p>2024 年 9 月に OpenAI が公開した <strong>o1-preview</strong> は、回答を生成する前に<strong>「思考の連鎖(Chain of Thought)」</strong>を内部で長く展開する「推論モデル」だ。Daniel Kahneman が『ファスト&スロー』で論じた「システム 2(熟考型)思考」を AI に導入する試みと言える。共通する設計思想は <strong>test-time compute scaling</strong>——すなわち、学習後に推論時の計算量(=考える時間)を増やすほど性能が伸びる、という新しいスケーリング軸だ。</p>
 
-    <p>o1は強化学習で「考え方」自体を訓練することで、数学のオリンピック問題、競技プログラミング、博士レベルの科学問題などで、それまでのモデルを大きく上回る性能を示した。その後、AnthropicのClaude、DeepSeek R1なども同様の推論能力を備え、業界標準となりつつある。</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <h4>OpenAI o1(2024 年 9 月)</h4>
+          <p>強化学習で「考え方」自体を訓練し、数学オリンピック・競技プログラミング・博士レベルの科学問題で従来モデルを大きく上回った。最初の本格的な推論モデル。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>OpenAI o3(2024 年 12 月発表 → 2025 年公開)</h4>
+          <p>「12 Days of OpenAI」イベント(2024 年 12 月 20 日)で発表。小型版の o3-mini が 2025 年 1 月 31 日に、フル o3 が 2025 年 4 月 16 日に一般公開された。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>DeepSeek-R1(2025 年 1 月 20 日)</h4>
+          <p>中国の DeepSeek が <strong>MIT ライセンス</strong>で公開したオープンウェイトの推論モデル。<strong>GRPO(Group Relative Policy Optimization)</strong> による強化学習で、ルールベース報酬を組み合わせて学習。o1 級の数学・コーディング性能をオープンに提供し、業界の力学を変えた。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>Anthropic Claude Extended Thinking(2025 年 2 月 / Claude 3.7 Sonnet)</h4>
+          <p>Claude 3.7 Sonnet で「ハイブリッド推論」として導入。応答前に段階的に思考し、難問でのみ計算を厚く配分するモード。後継の Opus 4.7 では <strong>adaptive thinking</strong> として自動化された。</p>
+        </div>
+      </div>
+    </div>
 
-    <p>ただし、Apple の研究者らが2024年10月に発表した論文では、<strong>同じ問題でも数字や名前を変えるだけで性能が落ちる</strong>ことが報告された。LLMが本当に「推論」しているのか、それとも巧妙なパターンマッチングなのかは、現在も活発に議論されている。</p>
+    <p>ただし、Apple の Mirzadeh らが 2024 年 10 月に発表した GSM-Symbolic 論文では、<strong>同じ問題でも数字を変えるだけで性能が落ちる</strong>ことが報告された。LLM が本当に「推論」しているのか、それとも巧妙なパターンマッチングなのかは、現在も活発に議論されている。</p>
+
+    <h3>クイック用語集</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-content">
+          <h4>トークン</h4>
+          <p>テキストを処理するための最小単位。単語より細かい「サブワード」単位で分割されることが多い。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>Embedding</h4>
+          <p>各トークンを数百〜数千次元のベクトルに変換した表現。意味の近いトークンはベクトル空間で近くに配置される。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>Attention</h4>
+          <p>各トークンが文中の他のトークンをどれだけ「参照」するかを計算する仕組み。文脈に応じて意味を動的に更新する。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>FFN(Feed-Forward Network)</h4>
+          <p>Attention の後段に置かれる全結合層。学習で蓄えた知識を引き出し、トークン表現をさらに加工する。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>Transformer</h4>
+          <p>Attention と FFN を積み重ねたアーキテクチャ。2017 年の論文「Attention Is All You Need」で提案。現在の生成AIのほぼ全てがこれを基盤にしている。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>事前学習(Pre-training)</h4>
+          <p>巨大なテキストコーパスで「次のトークン当て」をひたすら繰り返す段階。文法と世界知識の土台ができる。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>SFT(Supervised Fine-Tuning)</h4>
+          <p>「質問と理想回答」のペアでお手本を学習させ、ベースモデルをアシスタント形式に変える段階。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>RLHF</h4>
+          <p>Reinforcement Learning from Human Feedback。複数回答に人間が順位をつけ、報酬モデル経由で強化学習する。好みのアライメント。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>ハルシネーション</h4>
+          <p>もっともらしいが事実無根の出力。Intrinsic(入力と矛盾)と Extrinsic(世界と矛盾)に大別される。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>Chain-of-Thought(CoT)</h4>
+          <p>答えに至る途中の思考過程をモデルに書き出させるプロンプト技法。複雑な推論タスクで精度が大きく上がる。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>RAG(Retrieval-Augmented Generation)</h4>
+          <p>外部知識を検索して、コンテキストに差し込んでから生成させる方式。ハルシネーション緩和の主力手法。</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-content">
+          <h4>スケーリング則</h4>
+          <p>モデルサイズ・データ量・計算量を増やすほど性能が一定の法則で向上する経験則。Kaplan(2020)・Chinchilla(2022)が代表的。</p>
+        </div>
+      </div>
+    </div>
 
     <h3>生成AIの仕組みに興味を持った方へ おすすめ動画</h3>
     <p>日本語で生成AIの仕組みを学ぶなら、3Blue1BrownJapanのチャンネルが圧倒的におすすめ。映像と数式の橋渡しが秀逸。</p>
@@ -109,12 +264,18 @@
     <h3>主な参考文献</h3>
     <ul class="link-list">
       <li><a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">Vaswani et al. (2017) "Attention Is All You Need" — arXiv:1706.03762</a></li>
+      <li><a href="https://arxiv.org/abs/2001.08361" target="_blank" rel="noopener">Kaplan et al. (2020) "Scaling Laws for Neural Language Models" — arXiv:2001.08361</a></li>
+      <li><a href="https://arxiv.org/abs/2005.11401" target="_blank" rel="noopener">Lewis et al. (2020) "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks" — arXiv:2005.11401</a></li>
       <li><a href="https://arxiv.org/abs/2005.14165" target="_blank" rel="noopener">Brown et al. (2020) "Language Models are Few-Shot Learners" (GPT-3)</a></li>
-      <li><a href="https://arxiv.org/abs/2203.02155" target="_blank" rel="noopener">Ouyang et al. (2022) "Training language models to follow instructions with human feedback" (InstructGPT)</a></li>
-      <li><a href="https://arxiv.org/abs/2506.06941" target="_blank" rel="noopener">[2506.06941] The Illusion of Thinking: Strengths and Limitations of Reasoning Models</a></li>
-      <li><a href="https://arxiv.org/abs/2507.07313" target="_blank" rel="noopener">[2507.07313] Frontier LLMs Still Struggle with Simple Reasoning Tasks</a></li>
-      <li><a href="https://arxiv.org/abs/2508.01191" target="_blank" rel="noopener">[2508.01191] Is Chain-of-Thought Reasoning of LLMs a Mirage?</a></li>
+      <li><a href="https://arxiv.org/abs/2201.11903" target="_blank" rel="noopener">Wei et al. (2022) "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models" — arXiv:2201.11903</a></li>
+      <li><a href="https://arxiv.org/abs/2203.11171" target="_blank" rel="noopener">Wang et al. (2022) "Self-Consistency Improves Chain of Thought Reasoning in Language Models" — arXiv:2203.11171</a></li>
+      <li><a href="https://arxiv.org/abs/2202.03629" target="_blank" rel="noopener">Ji et al. (2023) "Survey of Hallucination in Natural Language Generation" — arXiv:2202.03629</a></li>
+      <li><a href="https://arxiv.org/abs/2203.02155" target="_blank" rel="noopener">Ouyang et al. (2022) "Training language models to follow instructions with human feedback" (InstructGPT) — arXiv:2203.02155</a></li>
+      <li><a href="https://arxiv.org/abs/2203.15556" target="_blank" rel="noopener">Hoffmann et al. (2022) "Training Compute-Optimal Large Language Models" (Chinchilla) — arXiv:2203.15556</a></li>
+      <li><a href="https://arxiv.org/abs/2410.05229" target="_blank" rel="noopener">Mirzadeh et al. (2024) "GSM-Symbolic: Understanding the Limitations of Mathematical Reasoning in Large Language Models" — Apple, arXiv:2410.05229</a></li>
+      <li><a href="https://arxiv.org/abs/2509.04664" target="_blank" rel="noopener">Kalai, Nachum, Vempala, Zhang (2025) "Why Language Models Hallucinate" — arXiv:2509.04664</a></li>
       <li><a href="https://www.nature.com/articles/s41586-024-07421-0" target="_blank" rel="noopener">Farquhar et al. (2024) "Detecting hallucinations in large language models using semantic entropy" — Nature</a></li>
+      <li><a href="https://github.com/vectara/hallucination-leaderboard" target="_blank" rel="noopener">Vectara Hallucination Leaderboard(HHEM-2.3 ベース、最新の比較)</a></li>
     </ul>
   </div>
 </section>

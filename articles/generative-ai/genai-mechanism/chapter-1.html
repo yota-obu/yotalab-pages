@@ -45,6 +45,9 @@
     <p>
       出発点となる論文「Attention Is All You Need」が発表されたのは 2017 年 6 月。Google Brain の研究者 8 名による論文だった。それから 10 年も経たないうちに、AI にできることは劇的に変わった。
     </p>
+    <p>
+      進化の歩みは、ざっくり 5 つの時代に分けられる。<strong>Transformer 以前(RNN/LSTM 期)</strong>は単語を一つずつ順番に処理する方式で、長い文脈を覚えるのが苦手だった。<strong>Transformer 以降の事前学習期</strong>(BERT・GPT-2・GPT-3)では、巨大なテキストを一気に読み込む「事前学習」が主流になり、モデルサイズが指数的に膨らんだ。<strong>指示チューニング期</strong>(ChatGPT)で、会話で使える「アシスタント」になり、<strong>マルチモーダル期</strong>(GPT-4V・GPT-4o)で目と耳を獲得し、<strong>推論期</strong>(o1・DeepSeek-R1)で「考えてから答える」モデルに進んだ。
+    </p>
 
     <div class="timeline" id="mainTimeline">
       <div class="timeline-item">
@@ -55,6 +58,20 @@
         </div>
       </div>
       <div class="timeline-item">
+        <div class="timeline-year">2018</div>
+        <div class="timeline-content">
+          <h4>BERT 公開</h4>
+          <p>Google の Devlin らが 10 月に発表。Transformer の Encoder を使い、文章を双方向に読んで「穴埋め」で学習する。検索や分類など「読む」タスクで一気に精度が上がった。</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2019</div>
+        <div class="timeline-content">
+          <h4>GPT-2 公開</h4>
+          <p>OpenAI が 2 月に発表、11 月にフルサイズ(15 億パラメータ)を公開。「次の単語を予測する」だけで自然な長文が書けることを示し、生成AIの方向性を決定づけた。</p>
+        </div>
+      </div>
+      <div class="timeline-item">
         <div class="timeline-year">2020</div>
         <div class="timeline-content">
           <h4>GPT-3 公開</h4>
@@ -62,17 +79,31 @@
         </div>
       </div>
       <div class="timeline-item">
+        <div class="timeline-year">2021</div>
+        <div class="timeline-content">
+          <h4>Codex / コード生成の幕開け</h4>
+          <p>OpenAI が GitHub Copilot の基盤となる Codex を公開。プログラミング言語を「自然言語の一種」として学習させる手法が広がる。</p>
+        </div>
+      </div>
+      <div class="timeline-item">
         <div class="timeline-year">2022</div>
         <div class="timeline-content">
           <h4>ChatGPT 公開</h4>
-          <p>11 月 30 日に OpenAI が ChatGPT を公開。InstructGPT(RLHF で調整した GPT-3)をベースとした対話モデル。約 2 か月で 1 億ユーザーを突破した。</p>
+          <p>11 月 30 日に OpenAI が ChatGPT を公開。GPT-3.5 を InstructGPT と同じ RLHF レシピで調整した対話モデル。UBS 推計で約 2 か月後の 2023 年 1 月に月間アクティブユーザー 1 億人に到達した。</p>
         </div>
       </div>
       <div class="timeline-item">
         <div class="timeline-year">2023</div>
         <div class="timeline-content">
-          <h4>マルチモーダル化</h4>
-          <p>GPT-4V や Claude 3 など、画像も理解できるモデルが続々登場。AI が「目」を持ち始めた。</p>
+          <h4>マルチモーダル化のはじまり</h4>
+          <p>GPT-4 と GPT-4V(Vision)、Claude 2 など、画像も理解できるモデルが続々登場。AI が「目」を持ち始めた。</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2024</div>
+        <div class="timeline-content">
+          <h4>GPT-4o · Claude 3.5 Sonnet</h4>
+          <p>5 月 13 日 OpenAI が GPT-4o(omni)を公開。テキスト・画像・音声を一つのモデルで処理し、音声応答は約 320 ミリ秒と人間並みに。6 月 20 日には Anthropic が Claude 3.5 Sonnet を公開し、コードを別ウィンドウで動かす Artifacts も追加された。</p>
         </div>
       </div>
       <div class="timeline-item">
@@ -85,15 +116,45 @@
       <div class="timeline-item">
         <div class="timeline-year">2025</div>
         <div class="timeline-content">
+          <h4>DeepSeek-R1 · オープン推論モデル</h4>
+          <p>1 月 20 日に中国の DeepSeek が R1 を MIT ライセンスで公開。総 6710 億パラメータ・推論時 370 億のみ稼働する MoE 構成で、o1 級の推論性能をオープンに提供。世界の AI 競争地図を塗り替えた。</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2025</div>
+        <div class="timeline-content">
           <h4>AI エージェントの普及</h4>
           <p>タスクを分解し、ツールを自律的に呼び出して複数ステップを実行できる AI エージェントが本格的に実用化されはじめる。</p>
         </div>
       </div>
     </div>
 
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-value">1750億</span>
+        <span class="stat-label">GPT-3 のパラメータ数(2020)。GPT-2 の約 117 倍。</span>
+        <span class="stat-source">OpenAI, 2020</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">3,640</span>
+        <span class="stat-label">GPT-3 の学習に投入された petaFLOP/s-日。10²⁰ 演算/日 × 約 10 年分相当。</span>
+        <span class="stat-source">Brown et al., 2020</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">2 か月</span>
+        <span class="stat-label">ChatGPT が月間 1 億ユーザーに到達した期間。TikTok は 9 か月、Instagram は 30 か月。</span>
+        <span class="stat-source">UBS / Reuters, Feb 2023</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">320ms</span>
+        <span class="stat-label">GPT-4o の音声応答レイテンシ。人間の会話応答(約 210ms)に近づいた。</span>
+        <span class="stat-source">OpenAI, May 2024</span>
+      </div>
+    </div>
+
     <div class="callout">
       <div class="callout-title">Note</div>
-      <p>「Attention Is All You Need」の正確な発表日は 2017 年 6 月 12 日。著者 8 名は全員 Google 所属で、論文では「equal contributors(同等の貢献者)」と記載され、著者順はランダムに決められた。論文タイトルはビートルズの「All You Need Is Love」が由来。</p>
+      <p>「Attention Is All You Need」の正確な発表日は 2017 年 6 月 12 日。著者 8 名は Google での研究として執筆され(うち Aidan N. Gomez はトロント大学からのインターン、Illia Polosukhin は受理時に Google を離脱済み)、論文では「equal contributors(同等の貢献者)」と記載され、著者順はランダムに決められた。論文タイトルはビートルズの「All You Need Is Love」が由来。</p>
       <cite>Source: Vaswani et al. (2017), arXiv:1706.03762</cite>
     </div>
   </div>
@@ -106,6 +167,13 @@
     <p class="lead">生成AIは、もはや「ちょっと便利なツール」ではなくなっている。</p>
     <p>以前は、報告書の叩き台を作ったり、メールの下書きを作ったり、ちょっとした質問に答えてもらったりする使い方が中心だった。<strong>間違えても影響は限定的</strong>だった。</p>
     <p>しかし今は違う。経営戦略の方向性の検討、重要な意思決定の判断材料、医療・法務・金融での活用、業務プロセスの自動化——<strong>間違えれば大きな影響が出る領域</strong>でも、当たり前に使われ始めている。</p>
+    <p>具体例を挙げると、法務の <strong>Harvey</strong> は契約レビュー・デューデリジェンス・調査を扱う AI で、AmLaw 100 の半数超に導入されている(2026 年 3 月時点で評価額 110 億ドル)。<strong>LexisNexis の Lexis+ AI</strong> は判例検索や引用チェックを生成AIで行うリーガルリサーチ製品。医療では <strong>OpenEvidence</strong> が NEJM・JAMA など査読付き文献に基づいて臨床判断を補助し、米国医師の 4 割超が日次で利用。金融では Bloomberg が 500 億パラメータの <strong>BloombergGPT</strong>(2023 年)を発表し、金融特化のセンチメント分析や固有表現抽出で汎用モデルを上回った。<strong>使う領域が「間違いが許される」から「間違いが大きな代償を生む」へと移った</strong>のが、ここ数年の決定的な変化だ。</p>
+
+    <div class="callout">
+      <div class="callout-title">Note · 実際に起きた事故</div>
+      <p>2024 年 2 月、カナダのブリティッシュコロンビア州民事裁定機関(Civil Resolution Tribunal)は、Air Canada のサイト上のチャットボットが死別運賃(bereavement fare)について誤った案内をした件で、航空会社に損害賠償を命じた(Moffatt v. Air Canada, 2024 BCCRT 149)。航空会社は「チャットボットは別の主体だ」と主張したが退けられ、<strong>「自社サイトに載せた情報は AI が生成したものでも自社の責任」</strong>と判断された。賠償額自体は約 812 カナダドルと小さいが、企業が AI の出力に法的責任を負うことを明確にした最初期の判例として、世界中で引用されている。</p>
+      <cite>Source: Moffatt v. Air Canada, 2024 BCCRT 149 (Feb 14, 2024) — https://www.canlii.org/</cite>
+    </div>
 
     <div class="compare">
       <div class="compare-card before">
@@ -198,6 +266,9 @@
     </div>
 
     <p>Attention・FFN・強化学習——これらを知れば、AI を「知っている側」になれるチャンスがある。本記事ではこの 3 つを丁寧に解説していく。</p>
+
+    <p>これは社内アンケートに限った話ではない。米 Pew Research Center の調査によれば、ChatGPT を「使ったことがある」と答えた米国成人は 2023 年夏の約 18% から 2025 年 6 月時点で 34% へと、約 2 年で倍増している。一方で「ChatGPT について多く聞いている」と答えた人は 34% にとどまり、<strong>使う人は増えても、仕組みまで理解している人はまだ少数派</strong>という構図が浮かび上がる。Reuters Institute の Digital News Report 2024 でも、ニュース取得に生成AIを使う人は米国で 10%・英国とデンマークでは 2% と、利用が「日常」になるにはまだ距離がある。</p>
+    <p>出典:Pew Research Center「34% of US adults have used ChatGPT」(2025/6/25)、Reuters Institute Digital News Report 2024。</p>
 
     <h3>仕組みの理解が、最新トレンドの把握につながる</h3>
     <p>絶えず進化する生成AIの世界だからこそ、基本の仕組みを紐解くことが、<strong>最新トレンドを乗りこなす大事な基盤になる</strong>。本シリーズでは、生成AI 理解の知識基盤となる体系的な理解をゴールとする。専門用語や数式は、できるだけ一般用語に置き換えて説明していく。</p>

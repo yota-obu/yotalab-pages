@@ -45,6 +45,26 @@
 
     <p>最も高い確率の「おばあさん」が選ばれる(※実際は確率分布から「サンプリング」する場合もある)。そして、選ばれたトークンを入力に追加して、次のトークンをまた予測する。これを<strong>愚直に繰り返すことで、長い文章が生まれる</strong>。</p>
 
+    <h3>「どう選ぶか」——サンプリングのつまみ</h3>
+    <p>確率分布が出たあと、「どのトークンを選ぶか」にも作法がある。もっとも単純なのが<strong>貪欲法(greedy decoding)</strong>——毎回いちばん確率の高いトークンを選ぶ方式だ。決定的で再現性が高い反面、文章は単調になりやすく、同じフレーズを何度も繰り返す<strong>「劣化(degeneration)」</strong>と呼ばれる現象に陥りがちなことが知られている(Holtzman ら 2019)。</p>
+    <p>そこで実用LLMでは、確率分布からランダムに引く<strong>サンプリング</strong>に、3つの「つまみ」をかけて出力を制御する。</p>
+
+    <div class="example">
+{
+  <span class="key">"temperature"</span>: 0.7,   <span class="comment">// 分布の鋭さ。低いほど決定的、高いほど多様</span>
+  <span class="key">"top_p"</span>:       0.9,   <span class="comment">// 累積確率p%までの「核(nucleus)」だけを候補に</span>
+  <span class="key">"top_k"</span>:        50    <span class="comment">// 上位k個だけを候補に(OpenAI APIは未対応)</span>
+}
+    </div>
+
+    <p><strong>temperature</strong> は確率分布の「とがり方」を変えるつまみで、0 に近いほど最大確率トークンに集中(=ほぼ貪欲法)、1 を超えると分布が平坦になり多様な単語が出やすくなる。<strong>top-p(nucleus sampling)</strong>は、確率の高い順に足していき累積が p になるまでの候補だけを残す方式。<strong>top-k</strong> は単純に上位 k 個だけを残す方式。なお OpenAI API では top-p と temperature は使えるが、top-k は公開されていない。</p>
+    <p>では「もっとも確からしい文」を探したいなら<strong>ビームサーチ</strong>が良さそうに思えるが、創作・対話系のLLMでは<strong>ほとんど使われない</strong>。確率最大化を貫くと、上述の劣化(同じ語の反復、退屈な定型文)が出やすいからだ——機械翻訳のように「正解が狭い」タスクでは有効だが、自由生成では top-p サンプリングのほうが人間らしい文章になる、と Holtzman らが報告している。</p>
+
+    <div class="callout">
+      <div class="callout-title">Note</div>
+      <p>同じプロンプトを送っても毎回違う答えが返ってくるのは、内部でサンプリング(確率的なくじ引き)が走っているから。temperature を 0、top-p を 1 に固定すれば貪欲法に近づき、ほぼ同じ出力が再現される(ただし GPU の浮動小数点演算の非決定性により、完全に同一にはならないことがある)。逆に「いつも同じ模範解答」しか欲しくない場面では、温度を下げるのが定石。<cite>Source: OpenAI API reference / Holtzman et al. 2019, "The Curious Case of Neural Text Degeneration" (arXiv:1904.09751)</cite></p>
+    </div>
+
     <h3>順次生成の様子を見てみよう</h3>
 
     <div class="generation-flow" id="genFlow">
@@ -59,7 +79,7 @@
 
     <div class="callout">
       <div class="callout-title">Note</div>
-      <p>厳密には「単語」ではなく「トークン」と呼ばれる単位で予測している。トークンは単語より細かい場合もあれば、複数の単語をまとめた単位の場合もある。OpenAIのGPTでは平均して、英語1単語あたり約1〜2トークン、英語の1トークンあたり約4文字に相当する。日本語などのCJK言語では、英語に比べて1文字あたりのトークン数が多くなりやすい(おおむね1文字あたり1〜2トークン)。</p>
+      <p>厳密には「単語」ではなく「トークン」と呼ばれる単位で予測している。トークンは単語より細かい場合もあれば、複数の単語をまとめた単位の場合もある。OpenAIのGPTでは平均して、英語1単語あたり約1〜2トークン、英語の1トークンあたり約4文字に相当する。日本語などの CJK 言語では、英語に比べて 1 文字あたりのトークン数が多くなりやすい(古いトークナイザーでは 1 文字あたり 1〜2 トークン、最近の o200k_base では 1 文字あたり 1 トークン未満になることも)。</p>
       <cite>Source: OpenAI tiktoken documentation, Hugging Face Tokenization docs</cite>
     </div>
   </div>
@@ -71,6 +91,11 @@
     <h2>トークン化——言葉を数字にする</h2>
     <p class="lead">コンピュータは「数字」しか理解できない。だから、文章をまず数字に変換する必要がある。これが<strong>トークン化(Tokenization)</strong>と呼ばれる第一ステップだ。</p>
     <p>現代のLLMの多くは、<strong>BPE(Byte Pair Encoding)</strong>という手法、もしくはその派生であるWordPiece、SentencePieceなどでトークン化を行う。BPEは、頻繁に登場する文字の組み合わせを徐々に「1つのトークン」としてまとめていく方法だ。</p>
+
+    <p>面白い事実として、BPE はもともと自然言語処理のための手法ではなかった。<strong>Philip Gage が 1994 年に <em>C Users Journal</em> 誌で発表したデータ圧縮アルゴリズム</strong>が起源で、「最も頻繁に出てくるバイトの組を、新しい 1 バイトに置き換える」という単純な反復によって LZW に匹敵する圧縮率を実現していた。これを NLP に持ち込んだのが Sennrich らの 2016 年論文「Neural Machine Translation of Rare Words with Subword Units」。バイトの代わりに文字や文字列を対象にすれば、未知語をサブワードに分解できる——という発想で、現代 LLM のほぼすべてのトークナイザーがこの系譜上にある。</p>
+
+    <h3>なぜ「単語丸ごと」ではなくサブワードなのか</h3>
+    <p>単語をそのままトークンにすると、語彙サイズが膨大になり、しかも見たことのない単語(新語、固有名詞、誤字)を扱えない。逆に文字単位にすると語彙は小さく済むが、シーケンスが長くなりすぎて計算コストが跳ね上がる。サブワード方式は<strong>「頻出語は丸ごと、珍しい語は分解」</strong>という折衷で、語彙サイズと系列長のバランスを取りつつ未知語にも強い、という三方一両得を実現している。</p>
 
     <h3>日本語と英語でトークン化を見てみる</h3>
 
@@ -112,10 +137,38 @@
       <div class="tokenizer-result">→ 3トークン (cl100k_base / GPT-4)</div>
     </div>
 
+    <h3>トークナイザーは世代とモデルで違う</h3>
+    <p>同じ「BPE 系」でも、モデルごとに語彙サイズも分割の仕方も異なる。代表的なものを並べると——</p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-value">50,257</span>
+        <div class="stat-label">GPT-2 (BPE)</div>
+        <div class="stat-source">256バイト + 50,000マージ + 特殊1</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">~100k</span>
+        <div class="stat-label">GPT-3.5 / GPT-4 (cl100k_base)</div>
+        <div class="stat-source">tiktoken</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">~200k</span>
+        <div class="stat-label">GPT-4o / o1 (o200k_base)</div>
+        <div class="stat-source">非英語の効率を改善</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">128k</span>
+        <div class="stat-label">Llama 3 (SentencePiece + tiktoken系)</div>
+        <div class="stat-source">Meta AI</div>
+      </div>
+    </div>
+
+    <p>Llama 系は <strong>SentencePiece</strong>(Kudo & Richardson 2018)という、空白も「ただの文字」として扱える仕組みをベースにしているため、空白の概念が曖昧な日本語などにも素直に適用できる。Claude も独自の BPE 系トークナイザーを使っており、Anthropic 公式の `count_tokens` API でしか正確なトークン数を測れない。</p>
+
     <div class="callout">
       <div class="callout-title">Note</div>
-      <p>GPT-2は語彙サイズ50,257(256バイトトークン + 50,000マージ + 特殊トークン1個)。GPT-4は約100,000語彙(cl100k_base)、GPT-4oは約200,000語彙(o200k_base)を使う。日本語などの非ラテン文字言語は、英語ベースで設計されたトークナイザーで処理すると、英語の同じ意味の文章より1.5〜2倍ほどトークン数が多くなる傾向がある。</p>
-      <cite>Source: OpenAI tiktoken / Hugging Face docs</cite>
+      <p>日本語などの非ラテン文字言語は、英語ベースで設計されたトークナイザーで処理すると、英語の同じ意味の文章よりトークン数が多くなる傾向がある。GPT-4o の o200k_base は、cl100k_base に比べて非英語のトークン圧縮率を大きく改善した(言語によっては 1.4〜2 倍以上の効率化)ことが OpenAI の公式発表で報告されている。<strong>API のコストは「トークン課金」</strong>なので、これは英語以外を扱うユーザーにとって実質的な値下げでもある。</p>
+      <cite>Source: OpenAI tiktoken (github.com/openai/tiktoken) / Sennrich, Haddow & Birch 2016 (arXiv:1508.07909) / Gage 1994, "A New Algorithm for Data Compression"</cite>
     </div>
   </div>
 </section>
@@ -163,7 +216,31 @@
       </div>
     </div>
 
-    <p>※ 上の図は説明のため2次元にしているが、実際のモデルでは数千次元のベクトルが使われる。<strong>GPT-3の場合、各トークンは12,288次元のベクトルで表現される。</strong></p>
+    <p>※ 上の図は説明のため2次元にしているが、実際のモデルでは数千次元のベクトルが使われる。代表的なモデルの埋め込み次元は——</p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-value">768〜1600</span>
+        <div class="stat-label">GPT-2 (small〜XL)</div>
+        <div class="stat-source">small=768, medium=1024, large=1280, XL=1600</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">12,288</span>
+        <div class="stat-label">GPT-3 (175B)</div>
+        <div class="stat-source">GPT-2 比でおよそ8倍</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">4,096</span>
+        <div class="stat-label">Llama 3 8B</div>
+        <div class="stat-source">層数32 / ヘッド32</div>
+      </div>
+    </div>
+
+    <h3>「静的」埋め込みと「文脈付き」埋め込み</h3>
+    <p>埋め込みには大きく 2 つの世代がある。第一世代は<strong>静的(static)埋め込み</strong>——Mikolov らの <strong>Word2Vec</strong>(2013)や Pennington らの <strong>GloVe</strong>(2014, Stanford)が代表で、「bank」という単語には文脈に関わらず常に同じベクトルが割り当てられる。第二世代が<strong>文脈付き(contextual)埋め込み</strong>。BERT や Transformer 系の隠れ状態は、同じ「bank」でも前後の文脈によって毎回違うベクトルを返す——「川の bank」と「銀行の bank」で表現が変わるわけだ。LLM の各層の出力は、この文脈付き表現を「もっと深く」していく工程と見ることもできる(詳細は次章)。</p>
+
+    <h3>「近さ」はどう測るか——コサイン類似度</h3>
+    <p>ベクトル空間で「意味が近い」を数値化する標準が<strong>コサイン類似度</strong>。2 つのベクトルがなす角度の cos を取り、−1(真逆)〜+1(同じ向き)で表す。長さではなく「向き」を見るので、頻出語と希少語のように出現回数(=ベクトルのスケール)が大きく違う単語どうしでも、意味の方向が一致していれば高いスコアになる——これが、ベクトル検索や RAG で使われる類似度の基本だ。</p>
 
     <h3>ベクトル化された単語は「計算」ができる</h3>
     <p>座標上の位置関係で意味を表現できるということは、<strong>意味を「計算」できる</strong>ということでもある。Mikolovらが2013年に発表したword2vecで広く知られるようになった、有名な例:</p>
@@ -177,7 +254,8 @@
     <div class="callout">
       <div class="callout-title">Note</div>
       <p>「king − man + woman = queen」は、word2vec/GloVeなどの単語埋め込みで観測される有名な性質。Mikolov et al. (2013) の論文 "Linguistic Regularities in Continuous Space Word Representations" で報告された。なお、厳密には入力された単語(king, man, woman)を結果から除外した上で最近傍を取らないと、計算結果が "king" 自身に最も近くなることが多い、という注意点もある。</p>
-      <cite>Source: Mikolov et al., 2013 / MIT Technology Review (2015)</cite>
+      <p>また、この類推がいつでも綺麗に成り立つわけではないことも知っておきたい。<strong>静的埋め込みでは、学習データの偏りがそのままベクトル空間の方向に焼き付く</strong>。Bolukbasi ら(2016)の論文「Man is to Computer Programmer as Woman is to Homemaker?」は、Google News で学習された Word2Vec で「man : computer programmer :: woman : homemaker」という強烈なジェンダーバイアスが現れることを示した——ベクトル演算の優雅さの裏で、データの偏見ごと学習しているわけだ。文脈付き埋め込みやより大きな LLM では類推性能はむしろ評価されにくくなり、「king − man + woman ≈ queen」は「特定の条件下で起こる現象」として捉えるのが現代の理解。</p>
+      <cite>Source: Mikolov et al. 2013 (arXiv:1301.3781) / Pennington et al. 2014 "GloVe" (Stanford NLP) / Bolukbasi et al. 2016 (arXiv:1607.06520)</cite>
     </div>
   </div>
 </section>

@@ -74,7 +74,59 @@
       <p style="text-align: center; font-size: 13px; color: var(--sub); margin-top: 18px; margin-bottom: 0;">正解の <code>went</code> になるまで、内部のパラメータを少しずつ調整する。これを膨大な回数繰り返す。</p>
     </div>
 
-    <p>GPT-3の場合、約3,000億トークン(本数千万冊分以上)の学習データを使って、175 Billion(1,750億)個のパラメータを調整した。</p>
+    <p>GPT-3の場合、約3,000億トークン(本数千万冊分以上)の学習データを使って、175 Billion(1,750億)個のパラメータを調整した。事前学習の目的関数は <strong>因果言語モデリング(Causal Language Modeling)</strong>——左から右へ、次の1トークンの確率を最大化する。BERTが採用した「文中のトークンをマスクして両側から穴埋めする」マスク言語モデリングとは別系統で、生成タスクに直結するのがこちらだ。</p>
+
+    <h3>学習データの中身——何を、どれくらい食べさせたか</h3>
+    <p>GPT-3 論文(Brown et al., 2020)に明記された、事前学習データの内訳は以下の通り。Common Crawl は生のままだと8倍以上の規模があるが、品質を理由に重み付けで <strong>60%</strong> に抑えられている。逆に書籍やWikipediaは、高品質な情報源として相対的にオーバーサンプリングされている。</p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-value">60%</span>
+        <span class="stat-label">Common Crawl<br>(filtered, 410B tokens)</span>
+        <div class="stat-source">// GPT-3 weights</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">22%</span>
+        <span class="stat-label">WebText2<br>(19B tokens)</span>
+        <div class="stat-source">// GPT-3 weights</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">8%</span>
+        <span class="stat-label">Books1<br>(12B tokens)</span>
+        <div class="stat-source">// GPT-3 weights</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">8%</span>
+        <span class="stat-label">Books2<br>(55B tokens)</span>
+        <div class="stat-source">// GPT-3 weights</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">3%</span>
+        <span class="stat-label">Wikipedia<br>(3B tokens)</span>
+        <div class="stat-source">// GPT-3 weights</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">15T</span>
+        <span class="stat-label">Llama 3 学習トークン<br>(GPT-3 の約 50 倍)</span>
+        <div class="stat-source">// Meta, 2024</div>
+      </div>
+    </div>
+
+    <p>その後の世代では、データ量は桁違いに増えた。Meta の <strong>Llama 3</strong> は約 <strong>15 兆(15T)トークン</strong> で事前学習されており、GPT-3 のおよそ50倍。コードを多く含む点(GitHub 由来)も特徴で、推論・コーディング能力の底上げに寄与している。Google の T5(Raffel et al., 2020)が公開した <strong>C4(Colossal Clean Crawled Corpus)</strong> も、現在の高品質Web系データの祖先にあたる。<cite>Source: Brown et al. (2020), arXiv:2005.14165 / Meta Llama 3 Model Card / Raffel et al. (2020), arXiv:1910.10683</cite></p>
+
+    <h3>スケーリング則——「大きくすれば賢くなる」を数式で示した</h3>
+    <p>OpenAI の Kaplan ら(2020)は、<strong>損失がパラメータ数 N、データ量 D、計算量 C それぞれに対して綺麗なべき乗則(power law)で下がる</strong>ことを示した。「とにかくモデルを大きくし、データを増やし、計算を投じれば、性能は予測可能に上がる」。GPT-3 の175B規模は、この法則を信じて踏み込んだ結果だった。</p>
+
+    <p>ところが2022年、DeepMind の Hoffmann ら(<strong>Chinchilla</strong> 論文)が修正版を提示する。<strong>計算予算が固定されているとき、パラメータとトークンは「等しく」スケールさせるべきで、目安はパラメータ1個につき約20トークン</strong>——という結論だ。GPT-3(175B / 300B トークン)は <strong>約1.7 トークン/パラメータ</strong>と「データ不足」だった。実際、70Bパラメータ・1.4Tトークンで訓練した Chinchilla は、280Bの Gopher や175BのGPT-3 を多くのベンチマークで上回った。<cite>Source: Kaplan et al. (2020), arXiv:2001.08361 / Hoffmann et al. (2022), arXiv:2203.15556</cite></p>
+
+    <h3>計算量という現実</h3>
+    <p>事前学習の規模は、最終的に投入された FLOPs(浮動小数点演算回数)で測られる。GPT-3 は <strong>約 3.14 × 10²³ FLOPs</strong>。GPT-4 は OpenAI が公式数値を公表していないが、業界推計で <strong>~2 × 10²⁵ FLOPs</strong> 程度(GPT-3 の約60倍)と見られている。Llama 3 70B の事前学習には、Meta公表で <strong>約 7.0M H100 GPU時間</strong> が投じられた。<cite>Source: Brown et al. (2020) / Meta Llama 3 Model Card</cite></p>
+
+    <div class="callout">
+      <div class="callout-title">Note</div>
+      <p>近年は <strong>「量より質」</strong> へと潮目が変わっている。Microsoft の <strong>「Textbooks Are All You Need」</strong>(Gunasekar et al., 2023)は、わずか1.3Bパラメータの phi-1 が、教科書品質の合成データだけで HumanEval 50.6% を叩き出すことを示した。HuggingFace の <strong>FineWeb-Edu</strong>(2024)も同じ方向で、教育的価値の高いWeb文書のみを LLM スコアリングで抽出した1.3Tトークンのコーパスにより、MMLU や ARC で大幅な改善を示している。データ規模はもう「正義」ではない。</p>
+      <cite>Source: Gunasekar et al. (2023), arXiv:2306.11644 / HuggingFace FineWeb (2024), arXiv:2406.17557</cite>
+    </div>
 
     <h3>事前学習が終わったAI = ベースモデル</h3>
     <p>この事前学習を終えた状態のAIを<strong>「ベースモデル」</strong>と呼ぶ。文法は完璧で、知識も豊富。文章を続ける能力は高い。しかし、できないことがある。</p>
@@ -107,7 +159,7 @@
     <p class="lead">ベースモデルを「賢いアシスタント」に育てるには、2段階の追加学習が必要になる。OpenAIが2022年3月に発表した <strong>InstructGPT</strong> 論文で確立されたこの3ステップが、現在も多くのモデルで採用されている標準的なレシピだ。</p>
 
     <h3>① SFT(Supervised Fine-Tuning)——人間のお手本で教える</h3>
-    <p>SFTでは、<strong>人間が「質問と理想回答」のペアを大量に作成し、それをAIに学習させる</strong>。InstructGPTの論文では、約13,000件のプロンプト・回答ペアが使われた。</p>
+    <p>SFTでは、<strong>人間が「質問と理想回答」のペアを大量に作成し、それをAIに学習させる</strong>。InstructGPTの論文では、約13,000件のプロンプト・回答ペアが使われた。これは <strong>指示チューニング(Instruction Tuning)</strong> とも呼ばれ、データは「指示文 + 期待される応答」のペアで構成される。事前学習と同じ次トークン予測の枠組みのまま、損失を「応答部分」だけに掛けることで、<strong>「指示に対して応答する」という会話のフォーマットそのもの</strong>を覚え込ませる。人間が書いた高品質なお手本が決定的に効くのは、ここでモデルが学ぶのが「事実」ではなく「振る舞いの型」だからだ。</p>
 
     <h4>データ例 ① Q&amp;A</h4>
     <div class="example">
@@ -156,29 +208,49 @@
       </div>
     </div>
 
+    <h3>報酬モデルの中身——LMの出力ヘッドを「点数」に差し替える</h3>
+    <p>報酬モデルは、ゼロから作るわけではない。<strong>SFT 済みのベースLMをコピーし、最後の「次トークン確率を出す出力ヘッド」をスカラー(1次元の点数)を出す回帰ヘッドに置き換えたもの</strong>だ。プロンプトと応答を連結して入力し、最終トークンの隠れ状態から「この応答の良さ」を表す1個の数値を出力する。</p>
+
+    <p>訓練は <strong>Bradley–Terry モデル</strong> に基づくペアワイズ損失で行う。「採用された応答 chosen」と「却下された応答 rejected」の点数差をシグモイドに通し、その対数尤度を最大化する——つまり「人間が好んだ方が、点数として高くなる」ように重みを更新する。InstructGPT では <strong>175B の方策に対して 6B の小さな報酬モデル</strong> を使い、約5万件の比較データで訓練している。<cite>Source: Ouyang et al. (2022), arXiv:2203.02155</cite></p>
+
+    <h3>PPO と KL ペナルティ——「壊れない」ようにチューニングする</h3>
+    <p>PPO(Schulman et al., 2017)は、報酬を最大化しつつ、方策(policy)が一度に大きく変わりすぎないように <strong>クリップ付き目的関数</strong> で更新を制限する強化学習アルゴリズム。RLHF ではこれに加えて、<strong>SFTモデルからの KLダイバージェンスにペナルティ</strong>を掛ける。報酬モデルを「ハック」して報酬は高いが意味不明な文字列に走ってしまう(reward hacking)のを防ぐためだ。<cite>Source: Schulman et al. (2017), arXiv:1707.06347</cite></p>
+
     <h3>RLHFの劇的な効果</h3>
     <p>InstructGPT論文の最も衝撃的な結果は、<strong>RLHFを施した1.3Bパラメータの小さなモデルが、調整前の175Bパラメータの巨大モデル(GPT-3)よりも人間に好まれた</strong>という点だった。100倍小さいモデルが、アライメントだけで大きなモデルを上回ったのだ。</p>
 
     <blockquote>アライメント(調整)のコストは、事前学習のコストと比較してわずか2%未満。175B InstructGPT は、175B GPT-3 と比較して、85% ± 3% の確率で好まれた。</blockquote>
 
-    <h3>RLHFの派生モデル</h3>
+    <h3>RLHFの派生——PPO はもう「唯一解」ではない</h3>
+    <p>RLHF は強力だが、報酬モデル+PPO の構成は実装が重く、不安定にもなりやすい。近年の主要モデルでは、より軽量で安定した代替手法が広く採用されている。</p>
 
     <div class="compare">
       <div class="compare-card after">
         <div class="compare-label">DPO</div>
-        <h4>Direct Preference Optimization</h4>
-        <p>報酬モデルを作らず、比較データから直接訓練する。RLHFよりシンプル&amp;低コスト。MetaのLlamaなどで採用されている。</p>
+        <h4>Direct Preference Optimization (2023)</h4>
+        <p>報酬モデルも強化学習も使わず、好み比較データから <strong>分類損失</strong> で直接ファインチューニングする。「LM そのものが暗黙の報酬モデルになる」という再パラメータ化が肝。実装が軽く安定で、Llama 系をはじめ多くのオープンモデルが採用。</p>
       </div>
       <div class="compare-card after">
         <div class="compare-label">RLAIF / Constitutional AI</div>
-        <h4>Reinforcement Learning from AI Feedback</h4>
-        <p>人間のフィードバック部分を、AI自身が代行する。判定コストを大幅に削減。AnthropicのClaudeで使われる「Constitutional AI」がこの考え方の代表例。</p>
+        <h4>AI フィードバックで学ぶ (2022)</h4>
+        <p>Anthropic が提案。「憲法」と呼ぶルール集に基づき、<strong>AI 自身が応答を批評・改訂</strong>し、AIの好みデータで報酬モデルを訓練する。人間ラベラーの負荷を大幅削減し、Claude 系の安全性チューニングの基盤となっている。</p>
+      </div>
+      <div class="compare-card after">
+        <div class="compare-label">GRPO</div>
+        <h4>Group Relative Policy Optimization (2025)</h4>
+        <p>DeepSeek-R1 で採用された推論モデル向けRL。PPO の <strong>価値関数ネットワークを廃し、グループ内の応答スコアの相対比較</strong> でベースラインを推定する。メモリと計算コストを削減しつつ、数学・コーディング推論で o1 級の性能を実現した。</p>
       </div>
     </div>
+    <p style="font-size: 13px; color: var(--sub); margin-top: 8px;"><cite>Source: Rafailov et al. (2023), arXiv:2305.18290 / Bai et al. (2022), arXiv:2212.08073 / DeepSeek-AI (2025), arXiv:2501.12948</cite></p>
+
+    <h3>アライメントの代償——副作用と限界</h3>
+    <p>RLHF にはタダ飯はない。InstructGPT 論文自身が、調整によって <strong>一部の学術ベンチマーク(QA・翻訳など)で性能が落ちる現象</strong>——いわゆる <strong>アライメント税(alignment tax)</strong>——を報告している。OpenAI は事前学習データを微調整時に混ぜ込むことで、この劣化をある程度抑えた。RLHF は「無料で賢くする魔法」ではなく、<strong>有用性・無害性と素の能力との間のトレードオフ</strong>として理解する必要がある。<cite>Source: Ouyang et al. (2022), arXiv:2203.02155 §4.3</cite></p>
+
+    <p>もうひとつの限界が <strong>ジェイルブレイク(jailbreak)</strong>。RLHF によるアライメントは「表層的(shallow)」だと指摘されており、Zou ら(2023)は <strong>勾配ベースで自動生成した敵対的サフィックス</strong> を末尾に付け足すだけで、ChatGPT・Claude・Bard・Llama-2-Chat などのアライメントを横断的に突破できることを示した。RLHF は安全性の「最低ライン」を作るが、攻撃者が積極的に探せば穴は見つかる。安全保障は単一手法ではなく、多層防御で考える必要がある。<cite>Source: Zou et al. (2023), arXiv:2307.15043</cite></p>
 
     <div class="callout">
       <div class="callout-title">Note</div>
-      <p>InstructGPT論文(Ouyang et al., 2022)は arXiv:2203.02155 で公開。著者の多くは現在、OpenAIから離れて他社(Anthropicなど)に在籍している。ChatGPTは2022年11月30日に公開され、約2か月で1億ユーザーを突破。これはInstructGPTで確立されたRLHFパイプラインを応用したものだった。</p>
+      <p>InstructGPT論文(Ouyang et al., 2022)は arXiv:2203.02155 で公開。著者の多くは現在、OpenAIから離れて他社(Anthropicなど)に在籍している。ChatGPT は 2022 年 11 月 30 日に公開され、約 2 か月で 1 億ユーザーを突破。InstructGPT と同じ RLHF レシピを GPT-3.5 に適用した兄弟モデル(sibling)であり、GPT-3 をベースにしているわけではない。</p>
       <cite>Source: Ouyang et al. (2022), arXiv:2203.02155 / OpenAI</cite>
     </div>
   </div>
