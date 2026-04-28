@@ -7,7 +7,8 @@
       "Bash(mv \"通常のカウントダウン.png\" countdown-light.png)",
       "Bash(mv \"ダークモードカウントダウン.png\" countdown-dark.png)",
       "Bash(mv \"時間設定画面.png\" setup.png)",
-      "Bash(mv \"ロック画面.png\" lockscreen.png)"
+      "Bash(mv \"ロック画面.png\" lockscreen.png)",
+      "Bash(python3 -c ' *)"
     ],
     "additionalDirectories": [
       "/Users/user/Documents/create_app/progressbar_timer/docs"

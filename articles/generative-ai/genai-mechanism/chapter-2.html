@@ -49,13 +49,23 @@
     <p>確率分布が出たあと、「どのトークンを選ぶか」にも作法がある。もっとも単純なのが<strong>貪欲法(greedy decoding)</strong>——毎回いちばん確率の高いトークンを選ぶ方式だ。決定的で再現性が高い反面、文章は単調になりやすく、同じフレーズを何度も繰り返す<strong>「劣化(degeneration)」</strong>と呼ばれる現象に陥りがちなことが知られている(Holtzman ら 2019)。</p>
     <p>そこで実用LLMでは、確率分布からランダムに引く<strong>サンプリング</strong>に、3つの「つまみ」をかけて出力を制御する。</p>
 
-    <div class="example">
-{
-  <span class="key">"temperature"</span>: 0.7,   <span class="comment">// 分布の鋭さ。低いほど決定的、高いほど多様</span>
-  <span class="key">"top_p"</span>:       0.9,   <span class="comment">// 累積確率p%までの「核(nucleus)」だけを候補に</span>
-  <span class="key">"top_k"</span>:        50    <span class="comment">// 上位k個だけを候補に(OpenAI APIは未対応)</span>
-}
-    </div>
+    <dl class="params">
+      <div class="param-row">
+        <dt class="param-name">temperature</dt>
+        <dd class="param-value">0.7</dd>
+        <dd class="param-desc">分布の鋭さ。低いほど決定的、高いほど多様</dd>
+      </div>
+      <div class="param-row">
+        <dt class="param-name">top-p</dt>
+        <dd class="param-value">0.9</dd>
+        <dd class="param-desc">累積確率 p% までの「核(nucleus)」だけを候補に</dd>
+      </div>
+      <div class="param-row">
+        <dt class="param-name">top-k</dt>
+        <dd class="param-value">50</dd>
+        <dd class="param-desc">上位 k 個だけを候補に(OpenAI API は未対応)</dd>
+      </div>
+    </dl>
 
     <p><strong>temperature</strong> は確率分布の「とがり方」を変えるつまみで、0 に近いほど最大確率トークンに集中(=ほぼ貪欲法)、1 を超えると分布が平坦になり多様な単語が出やすくなる。<strong>top-p(nucleus sampling)</strong>は、確率の高い順に足していき累積が p になるまでの候補だけを残す方式。<strong>top-k</strong> は単純に上位 k 個だけを残す方式。なお OpenAI API では top-p と temperature は使えるが、top-k は公開されていない。</p>
     <p>では「もっとも確からしい文」を探したいなら<strong>ビームサーチ</strong>が良さそうに思えるが、創作・対話系のLLMでは<strong>ほとんど使われない</strong>。確率最大化を貫くと、上述の劣化(同じ語の反復、退屈な定型文)が出やすいからだ——機械翻訳のように「正解が狭い」タスクでは有効だが、自由生成では top-p サンプリングのほうが人間らしい文章になる、と Holtzman らが報告している。</p>
@@ -179,16 +189,28 @@
     <h2>Embedding——数字に意味を持たせる</h2>
     <p class="lead">トークン化しただけでは、ただ文字が数字になっただけ。意味の関係性は表現できていない。そこで、各数字を<strong>「ベクトル」(複数の数値の組)に変換する</strong>。これがEmbeddingだ。</p>
 
-    <div class="example">
-猫 <span class="arrow">→</span> 892 <span class="arrow">→</span> <span class="highlight">(0.9, 0.8)</span>
-<span class="comment">トークン     数字ID         ベクトル(2次元の例)</span>
+    <div class="flow">
+      <div class="flow-stage">
+        <div class="flow-label">トークン</div>
+        <div class="flow-value">猫</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-stage">
+        <div class="flow-label">数字ID</div>
+        <div class="flow-value mono">892</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-stage">
+        <div class="flow-label">ベクトル(2次元の例)</div>
+        <div class="flow-value mono accent">(0.9, 0.8)</div>
+      </div>
     </div>
 
     <p>このベクトルが配置される空間では、<strong>意味が似ている言葉ほど近い座標に配置される</strong>。下の2次元の例で見てみよう。</p>
 
     <div class="vector-viz">
       <div class="vector-viz-header">
-        <div class="vector-viz-title">// EMBEDDING SPACE — 2次元の例</div>
+        <div class="vector-viz-title">EMBEDDING SPACE — 2次元の例</div>
       </div>
       <div class="vector-stage">
         <div class="vec-axis vec-axis-x"></div>
@@ -211,7 +233,7 @@
         </svg>
       </div>
       <div class="vector-caption">
-        <span class="step-num">// 観察</span>
+        <span class="step-num">観察</span>
         「猫」と「犬」は座標上でも近く、「冷蔵庫」は遠い。<strong>意味の近さが、空間上の距離として表現されている</strong>。
       </div>
     </div>
@@ -245,7 +267,15 @@
     <h3>ベクトル化された単語は「計算」ができる</h3>
     <p>座標上の位置関係で意味を表現できるということは、<strong>意味を「計算」できる</strong>ということでもある。Mikolovらが2013年に発表したword2vecで広く知られるようになった、有名な例:</p>
 
-    <blockquote>king − man + woman ≈ queen</blockquote>
+    <div class="equation">
+      <span class="eq-term">king</span>
+      <span class="eq-op">−</span>
+      <span class="eq-term">man</span>
+      <span class="eq-op">+</span>
+      <span class="eq-term">woman</span>
+      <span class="eq-op">≈</span>
+      <span class="eq-term eq-result">queen</span>
+    </div>
 
     <p>「王様」から「男性」の要素を引き、「女性」を足すと「女王」のベクトルに近い場所にたどり着く。「日本における寿司」と「ドイツにおける何か」を同じ関係性で結べばソーセージが出てくる、といった例もある。座標空間における<strong>「方向(差)」が、意味の関係を捉えている</strong>のだ。</p>
 

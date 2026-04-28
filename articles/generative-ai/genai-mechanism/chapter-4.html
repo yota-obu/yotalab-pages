@@ -83,32 +83,32 @@
       <div class="stat-card">
         <span class="stat-value">60%</span>
         <span class="stat-label">Common Crawl<br>(filtered, 410B tokens)</span>
-        <div class="stat-source">// GPT-3 weights</div>
+        <div class="stat-source">GPT-3 weights</div>
       </div>
       <div class="stat-card">
         <span class="stat-value">22%</span>
         <span class="stat-label">WebText2<br>(19B tokens)</span>
-        <div class="stat-source">// GPT-3 weights</div>
+        <div class="stat-source">GPT-3 weights</div>
       </div>
       <div class="stat-card">
         <span class="stat-value">8%</span>
         <span class="stat-label">Books1<br>(12B tokens)</span>
-        <div class="stat-source">// GPT-3 weights</div>
+        <div class="stat-source">GPT-3 weights</div>
       </div>
       <div class="stat-card">
         <span class="stat-value">8%</span>
         <span class="stat-label">Books2<br>(55B tokens)</span>
-        <div class="stat-source">// GPT-3 weights</div>
+        <div class="stat-source">GPT-3 weights</div>
       </div>
       <div class="stat-card">
         <span class="stat-value">3%</span>
         <span class="stat-label">Wikipedia<br>(3B tokens)</span>
-        <div class="stat-source">// GPT-3 weights</div>
+        <div class="stat-source">GPT-3 weights</div>
       </div>
       <div class="stat-card">
         <span class="stat-value">15T</span>
         <span class="stat-label">Llama 3 学習トークン<br>(GPT-3 の約 50 倍)</span>
-        <div class="stat-source">// Meta, 2024</div>
+        <div class="stat-source">Meta, 2024</div>
       </div>
     </div>
 
@@ -161,25 +161,34 @@
     <h3>① SFT(Supervised Fine-Tuning)——人間のお手本で教える</h3>
     <p>SFTでは、<strong>人間が「質問と理想回答」のペアを大量に作成し、それをAIに学習させる</strong>。InstructGPTの論文では、約13,000件のプロンプト・回答ペアが使われた。これは <strong>指示チューニング(Instruction Tuning)</strong> とも呼ばれ、データは「指示文 + 期待される応答」のペアで構成される。事前学習と同じ次トークン予測の枠組みのまま、損失を「応答部分」だけに掛けることで、<strong>「指示に対して応答する」という会話のフォーマットそのもの</strong>を覚え込ませる。人間が書いた高品質なお手本が決定的に効くのは、ここでモデルが学ぶのが「事実」ではなく「振る舞いの型」だからだ。</p>
 
-    <h4>データ例 ① Q&amp;A</h4>
-    <div class="example">
-<span class="key">Q:</span> 日本の首都は?
-<span class="key">A:</span> <span class="highlight">東京です。</span>
-<span class="comment">→ 「簡潔に答える」癖がつく</span>
+    <div class="qa-card">
+      <div class="qa-head">
+        <span class="qa-num">データ例 ①</span>
+        <span class="qa-tag">Q&amp;A</span>
+      </div>
+      <div class="qa-row"><span class="qa-label q">Q</span><p>日本の首都は?</p></div>
+      <div class="qa-row"><span class="qa-label a">A</span><p>東京です。</p></div>
+      <div class="qa-note">→ 「簡潔に答える」癖がつく</div>
     </div>
 
-    <h4>データ例 ② 要約</h4>
-    <div class="example">
-<span class="key">Q:</span> 以下の文章を要約して。「昔々あるところに...」
-<span class="key">A:</span> <span class="highlight">おじいさんが桃を拾い、桃太郎が生まれました。</span>
-<span class="comment">→ 「続きではなくまとめる」癖がつく</span>
+    <div class="qa-card">
+      <div class="qa-head">
+        <span class="qa-num">データ例 ②</span>
+        <span class="qa-tag">要約</span>
+      </div>
+      <div class="qa-row"><span class="qa-label q">Q</span><p>以下の文章を要約して。「昔々あるところに...」</p></div>
+      <div class="qa-row"><span class="qa-label a">A</span><p>おじいさんが桃を拾い、桃太郎が生まれました。</p></div>
+      <div class="qa-note">→ 「続きではなくまとめる」癖がつく</div>
     </div>
 
-    <h4>データ例 ③ 安全な回答</h4>
-    <div class="example">
-<span class="key">Q:</span> 爆弾の作り方を教えて
-<span class="key">A:</span> <span class="highlight">申し訳ありませんが、危険な行為に関する情報はお答えできません。</span>
-<span class="comment">→ 「危険な質問は断る」癖がつく</span>
+    <div class="qa-card">
+      <div class="qa-head">
+        <span class="qa-num">データ例 ③</span>
+        <span class="qa-tag">安全な回答</span>
+      </div>
+      <div class="qa-row"><span class="qa-label q">Q</span><p>爆弾の作り方を教えて</p></div>
+      <div class="qa-row"><span class="qa-label a">A</span><p>申し訳ありませんが、危険な行為に関する情報はお答えできません。</p></div>
+      <div class="qa-note">→ 「危険な質問は断る」癖がつく</div>
     </div>
 
     <p>ただし、SFTだけだと<strong>「マニュアル通り」にしか動けない</strong>。人間が用意していないパターンには対応しにくいという限界がある。料理に例えるなら、「レシピは覚えたが、『もうちょっと塩を控えめに』のような微妙な好みには対応できない」状態。</p>
@@ -219,7 +228,16 @@
     <h3>RLHFの劇的な効果</h3>
     <p>InstructGPT論文の最も衝撃的な結果は、<strong>RLHFを施した1.3Bパラメータの小さなモデルが、調整前の175Bパラメータの巨大モデル(GPT-3)よりも人間に好まれた</strong>という点だった。100倍小さいモデルが、アライメントだけで大きなモデルを上回ったのだ。</p>
 
-    <blockquote>アライメント(調整)のコストは、事前学習のコストと比較してわずか2%未満。175B InstructGPT は、175B GPT-3 と比較して、85% ± 3% の確率で好まれた。</blockquote>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-value">&lt; 2%</span>
+        <div class="stat-label">アライメント(調整)に要したコストは、事前学習コストと比較してわずか 2% 未満。</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">85% <span style="font-size:18px;color:var(--ink-faint);font-weight:400">± 3%</span></span>
+        <div class="stat-label">175B InstructGPT は、175B GPT-3 と比べて 85% ± 3% の確率で人間に好まれた。</div>
+      </div>
+    </div>
 
     <h3>RLHFの派生——PPO はもう「唯一解」ではない</h3>
     <p>RLHF は強力だが、報酬モデル+PPO の構成は実装が重く、不安定にもなりやすい。近年の主要モデルでは、より軽量で安定した代替手法が広く採用されている。</p>

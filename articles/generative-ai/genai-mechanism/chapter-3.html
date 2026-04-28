@@ -50,13 +50,13 @@
 
     <div class="attention-viz">
       <div class="attention-sentence" id="attSentence">
-        <div class="att-token" data-key="数学"><span>数学</span><span class="att-pct" data-pct=""></span></div>
-        <div class="att-token" data-key="の"><span>の</span><span class="att-pct" data-pct=""></span></div>
+        <div class="att-token" data-key="数学" data-attention="high"><span>数学</span><span class="att-pct">38%</span></div>
+        <div class="att-token" data-key="の" data-attention="low"><span>の</span><span class="att-pct">4%</span></div>
         <div class="att-token source"><span>問題</span><span class="att-pct">基準</span></div>
-        <div class="att-token" data-key="に"><span>に</span><span class="att-pct" data-pct=""></span></div>
-        <div class="att-token" data-key="時間"><span>時間</span><span class="att-pct" data-pct=""></span></div>
-        <div class="att-token" data-key="を"><span>を</span><span class="att-pct" data-pct=""></span></div>
-        <div class="att-token" data-key="かけた"><span>かけた</span><span class="att-pct" data-pct=""></span></div>
+        <div class="att-token" data-key="に" data-attention="low"><span>に</span><span class="att-pct">3%</span></div>
+        <div class="att-token" data-key="時間" data-attention="mid"><span>時間</span><span class="att-pct">22%</span></div>
+        <div class="att-token" data-key="を" data-attention="low"><span>を</span><span class="att-pct">3%</span></div>
+        <div class="att-token" data-key="かけた" data-attention="mid"><span>かけた</span><span class="att-pct">18%</span></div>
       </div>
       <p style="text-align: center; font-size: 13px; color: var(--sub); margin: 0;">↓ 「問題」が周囲のどの単語に注目するかが、Attentionで決まる(下のボタンで実際の動きを確認)</p>
     </div>
@@ -67,7 +67,7 @@
 
     <div class="vector-viz">
       <div class="vector-viz-header">
-        <div class="vector-viz-title">// SEMANTIC SPACE — 「問題」の意味の遷移</div>
+        <div class="vector-viz-title">SEMANTIC SPACE — 「問題」の意味の遷移</div>
         <div class="vector-viz-controls">
           <button class="viz-btn active" data-step="0">① 初期</button>
           <button class="viz-btn" data-step="1">② 数学で更新</button>
@@ -99,7 +99,7 @@
         <div id="trailContainer"></div>
       </div>
       <div class="vector-caption" id="problemCaption">
-        <span class="step-num">// STEP 01 / INITIAL</span>
+        <span class="step-num">STEP 01 / INITIAL</span>
         更新前の「問題」は、<strong>「トラブル」「懸念点」「いざこざ」</strong>などネガティブな意味の近くに配置されている。
       </div>
     </div>
@@ -111,7 +111,7 @@
 
     <div class="vector-viz">
       <div class="vector-viz-header">
-        <div class="vector-viz-title">// 「高い」の意味は文脈で変わる</div>
+        <div class="vector-viz-title">「高い」の意味は文脈で変わる</div>
         <div class="vector-viz-controls">
           <button class="viz-btn active" data-takai="0">初期</button>
           <button class="viz-btn" data-takai="1">時計に注目</button>
@@ -135,7 +135,7 @@
         <div class="vec-label highlight" id="takaiLabel" style="left: 50%; bottom: 50%;">「高い」</div>
       </div>
       <div class="vector-caption" id="takaiCaption">
-        <span class="step-num">// INITIAL</span>
+        <span class="step-num">INITIAL</span>
         初期位置 <strong>(0.5, 0.5)</strong>。文脈情報がないため、中立的な位置にある。
       </div>
     </div>
@@ -145,7 +145,7 @@
 
     <div class="vector-viz">
       <div class="vector-viz-header">
-        <div class="vector-viz-title">// 「彼」が「太郎」に近づく</div>
+        <div class="vector-viz-title">「彼」が「太郎」に近づく</div>
         <div class="vector-viz-controls">
           <button class="viz-btn active" data-kare="0">初期</button>
           <button class="viz-btn" data-kare="1">Attention後</button>
@@ -154,8 +154,8 @@
       <div class="vector-stage" id="kareStage">
         <div class="vec-axis vec-axis-x"></div>
         <div class="vec-axis vec-axis-y"></div>
-        <div class="vec-point" style="left: 75%; bottom: 75%; background: var(--accent);"></div>
-        <div class="vec-label" style="left: 75%; bottom: 75%;">太郎 (0.7, 0.7)</div>
+        <div class="vec-point target" style="left: 75%; bottom: 75%;"></div>
+        <div class="vec-label target" style="left: 75%; bottom: 75%;">太郎 (0.7, 0.7)</div>
         <div class="vec-point dim" style="left: 35%; bottom: 60%;"></div>
         <div class="vec-label dim" style="left: 35%; bottom: 60%;">花子</div>
         <div class="vec-point dim" style="left: 25%; bottom: 35%;"></div>
@@ -164,7 +164,7 @@
         <div class="vec-label highlight" id="kareLabel" style="left: 18%; bottom: 78%;">「彼」</div>
       </div>
       <div class="vector-caption" id="kareCaption">
-        <span class="step-num">// INITIAL</span>
+        <span class="step-num">INITIAL</span>
         「彼」は当初、誰を指すか確定していない位置 <strong>(0.1, 0.8)</strong> にある。
       </div>
     </div>
@@ -296,32 +296,32 @@
       <div class="stat-card">
         <span class="stat-value">175B</span>
         <span class="stat-label">パラメータ数<br>(1,750億)</span>
-        <div class="stat-source">// GPT-3</div>
+        <div class="stat-source">GPT-3</div>
       </div>
       <div class="stat-card">
         <span class="stat-value">96</span>
         <span class="stat-label">Transformer<br>レイヤー数</span>
-        <div class="stat-source">// GPT-3</div>
+        <div class="stat-source">GPT-3</div>
       </div>
       <div class="stat-card">
         <span class="stat-value">12,288</span>
         <span class="stat-label">埋め込み<br>次元数</span>
-        <div class="stat-source">// GPT-3</div>
+        <div class="stat-source">GPT-3</div>
       </div>
       <div class="stat-card">
         <span class="stat-value">96</span>
         <span class="stat-label">Attention<br>ヘッド数</span>
-        <div class="stat-source">// GPT-3</div>
+        <div class="stat-source">GPT-3</div>
       </div>
       <div class="stat-card">
         <span class="stat-value">~50K</span>
         <span class="stat-label">語彙サイズ<br>(トークン種類)</span>
-        <div class="stat-source">// GPT-3</div>
+        <div class="stat-source">GPT-3</div>
       </div>
       <div class="stat-card">
         <span class="stat-value">300B</span>
         <span class="stat-label">学習トークン数<br>(3,000億)</span>
-        <div class="stat-source">// GPT-3</div>
+        <div class="stat-source">GPT-3</div>
       </div>
     </div>
 
@@ -333,22 +333,22 @@
       <div class="stat-card">
         <span class="stat-value">1.5B</span>
         <span class="stat-label">48層 / 1,600次元<br>25ヘッド</span>
-        <div class="stat-source">// GPT-2 XL</div>
+        <div class="stat-source">GPT-2 XL</div>
       </div>
       <div class="stat-card">
         <span class="stat-value">175B</span>
         <span class="stat-label">96層 / 12,288次元<br>96ヘッド</span>
-        <div class="stat-source">// GPT-3</div>
+        <div class="stat-source">GPT-3</div>
       </div>
       <div class="stat-card">
         <span class="stat-value">70B</span>
         <span class="stat-label">80層 / 8,192次元<br>64クエリヘッド(GQA)</span>
-        <div class="stat-source">// Llama-3 70B</div>
+        <div class="stat-source">Llama-3 70B</div>
       </div>
       <div class="stat-card">
         <span class="stat-value">?</span>
         <span class="stat-label">公式仕様非公開<br>(MoE構成と推測)</span>
-        <div class="stat-source">// GPT-4</div>
+        <div class="stat-source">GPT-4</div>
       </div>
     </div>
 
