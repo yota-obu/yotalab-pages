@@ -209,8 +209,10 @@
       transform: translateY(-4px);
     }
     .mode-icon {
-      font-size: 44px; margin-bottom: 20px; display: block;
+      width: 46px; height: 46px; margin-bottom: 20px;
+      display: inline-flex; align-items: center; justify-content: center;
     }
+    .mode-icon svg { width: 42px; height: 42px; display: block; }
     .mode-card h3 {
       font-size: 24px; font-weight: 700; margin-bottom: 12px;
       letter-spacing: -0.3px;
@@ -258,8 +260,10 @@
       transform: translateY(-4px);
     }
     .feat .feat-icon {
-      font-size: 32px; margin-bottom: 16px; display: block;
+      width: 34px; height: 34px; margin-bottom: 16px;
+      display: inline-flex; align-items: center; justify-content: center;
     }
+    .feat .feat-icon svg { width: 30px; height: 30px; display: block; }
     .feat h3 {
       font-size: 18px; font-weight: 700; margin-bottom: 8px;
       letter-spacing: -0.2px;
@@ -415,22 +419,22 @@
       <p class="subtitle">離れた相手とも、その場の友達とも。4 つのモードで遊べます。</p>
       <div class="modes">
         <div class="mode-card">
-          <span class="mode-icon">&#127760;</span>
+          <span class="mode-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg></span>
           <h3>ランダムマッチ</h3>
           <p>オンラインで他のプレイヤーと自動マッチング。現在レートと最高レートを競いながら、気軽に真剣勝負を楽しめます。</p>
         </div>
         <div class="mode-card">
-          <span class="mode-icon">&#128172;</span>
+          <span class="mode-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H7l-4 3 1.5-5A8 8 0 1 1 21 12z"/></svg></span>
           <h3>フレンドマッチ</h3>
           <p>合言葉を共有して友達とオンライン対戦。離れていても同じルームに集まり、お気に入りのマイスティックで投げ合えます。</p>
         </div>
         <div class="mode-card">
-          <span class="mode-icon">&#129302;</span>
+          <span class="mode-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="7" width="14" height="11" rx="2"/><path d="M12 7V4"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M9 16h6"/></svg></span>
           <h3>CPU と対戦</h3>
           <p>3 段階の難易度から選べる CPU 戦。<strong>初級</strong>はおだやかに、<strong>中級</strong>はそこそこ正確、<strong>上級</strong>はノイズゼロの完璧投擲で挑んでくる強敵です。</p>
         </div>
         <div class="mode-card">
-          <span class="mode-icon">&#128101;</span>
+          <span class="mode-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-8 0v2"/><circle cx="12" cy="7" r="4"/><path d="M22 21v-2a3.5 3.5 0 0 0-3-3.5"/><path d="M2 21v-2a3.5 3.5 0 0 1 3-3.5"/></svg></span>
           <h3>ローカル対戦</h3>
           <p>1 台の iPhone を回して、2〜4 人で交代に投げるローカルマルチプレイ。集まったその場ですぐに始められます。</p>
         </div>
@@ -445,32 +449,32 @@
       <p class="subtitle">スワイプ操作と物理シミュレーションを、徹底的にチューニング。</p>
       <div class="features">
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
-          <span class="feat-icon">&#128293;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-4-3-6-5-9-.5 2-1.5 3.5-3 5-.5-2-2-3.5-4-4 1 3-2 5-2 8a7 7 0 0 0 7 7z"/></svg></span>
           <h3 style="color: var(--dark);">3D 物理</h3>
           <p style="color: var(--sub);">Jolt Physics エンジンで、棒の回転・ピンの倒れ方・連鎖まで全てリアルに再現。同じ投げ方でも結果が変わる本物の感触。</p>
         </div>
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
-          <span class="feat-icon">&#128070;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 21h14"/><path d="M8 18h8"/></svg></span>
           <h3 style="color: var(--dark);">スワイプで投擲</h3>
           <p style="color: var(--sub);">下から上へのスワイプの長さと速さで、初速・打ち出し角を直感的に決定。チュートリアルなしで誰でもすぐに投げられます。</p>
         </div>
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
-          <span class="feat-icon">&#127919;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span>
           <h3 style="color: var(--dark);">縦・横の使い分け</h3>
           <p style="color: var(--sub);">棒タップで横持ち / 縦持ちを切替。ジャベリン投げで遠くの単独ピンを狙撃するか、横持ちで密集に大ダメージを与えるか。</p>
         </div>
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
-          <span class="feat-icon">&#128202;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"/><path d="M4 19h16"/><rect x="7" y="11" width="3" height="5"/><rect x="12" y="7" width="3" height="9"/><rect x="17" y="13" width="3" height="3"/></svg></span>
           <h3 style="color: var(--dark);">リアルタイム計器</h3>
           <p style="color: var(--sub);">画面下部に ANGLE / DRIFT / POWER の 3 つのメーター。投擲中の挙動を可視化し、上達がそのまま指先に伝わります。</p>
         </div>
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
-          <span class="feat-icon">&#127922;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1"/><circle cx="15" cy="9" r="1"/><circle cx="9" cy="15" r="1"/><circle cx="15" cy="15" r="1"/></svg></span>
           <h3 style="color: var(--dark);">マイスティック</h3>
           <p style="color: var(--sub);">38 種類の棒スキンを収録。1 日 1 回の無料ガチャなどで集めて、お気に入りの一本を装備できます。</p>
         </div>
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
-          <span class="feat-icon">&#127942;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M5 5H3v2a4 4 0 0 0 4 4"/><path d="M19 5h2v2a4 4 0 0 1-4 4"/></svg></span>
           <h3 style="color: var(--dark);">レート / ランキング</h3>
           <p style="color: var(--sub);">ランダムマッチの結果はレートに反映。現在レートと最高レートで、上位プレイヤーを目指せます。</p>
         </div>

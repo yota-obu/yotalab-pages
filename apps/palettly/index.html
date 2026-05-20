@@ -260,8 +260,10 @@
       transform: translateY(-4px);
     }
     .feat .feat-icon {
-      font-size: 32px; margin-bottom: 16px; display: block;
+      width: 34px; height: 34px; margin-bottom: 16px;
+      display: inline-flex; align-items: center; justify-content: center;
     }
+    .feat .feat-icon svg { width: 30px; height: 30px; display: block; }
     .feat h3 {
       font-size: 18px; font-weight: 700; margin-bottom: 8px;
       letter-spacing: -0.2px;
@@ -444,27 +446,27 @@
       <p class="subtitle">作ったパレットを、あらゆる場所で活用できる機能。</p>
       <div class="features" style="color: var(--dark);">
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
-          <span class="feat-icon">&#128193;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
           <h3 style="color: var(--dark);">フォルダ整理</h3>
           <p style="color: var(--sub);">テーマやプロジェクト別にフォルダでパレットを分類。リネームや移動もスムーズ。数が増えても迷いません。</p>
         </div>
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
-          <span class="feat-icon">&#128444;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="m21 15-5-5L5 19"/></svg></span>
           <h3 style="color: var(--dark);">画像書き出し</h3>
           <p style="color: var(--sub);">写真にパレットを重ねた画像を複数レイアウトで生成。SNSシェアやムードボードにそのまま使えます。</p>
         </div>
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
-          <span class="feat-icon">&#128247;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5h2l2 3h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1l2-3h2"/><circle cx="12" cy="13" r="4"/></svg></span>
           <h3 style="color: var(--dark);">写真保存・共有</h3>
           <p style="color: var(--sub);">書き出した画像は写真アルバムへ保存、または ShareLink から他のアプリへ直接シェアできます。</p>
         </div>
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
-          <span class="feat-icon">&#9992;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4z"/></svg></span>
           <h3 style="color: var(--dark);">完全オフライン</h3>
           <p style="color: var(--sub);">ネットワーク通信ゼロ。すべての処理が端末内で完結するので、電波が届かない場所でも安心して使えます。</p>
         </div>
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
-          <span class="feat-icon">&#128274;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
           <h3 style="color: var(--dark);">プライバシー</h3>
           <p style="color: var(--sub);">個人情報の収集なし。写真もパレットもすべて端末内に保存され、外部に送信されることはありません。</p>
         </div>

@@ -162,9 +162,10 @@
       transform: translateY(-4px);
     }
     .mode-icon {
-      font-size: 48px; margin-bottom: 20px;
-      display: block;
+      width: 48px; height: 48px; margin-bottom: 20px;
+      display: inline-flex; align-items: center; justify-content: center;
     }
+    .mode-icon svg { width: 44px; height: 44px; display: block; }
     .mode-card h3 {
       font-size: 24px; font-weight: 700; margin-bottom: 12px;
       letter-spacing: -0.3px;
@@ -220,8 +221,10 @@
       transform: translateY(-4px);
     }
     .feat .feat-icon {
-      font-size: 36px; margin-bottom: 16px; display: block;
+      width: 36px; height: 36px; margin-bottom: 16px;
+      display: inline-flex; align-items: center; justify-content: center;
     }
+    .feat .feat-icon svg { width: 32px; height: 32px; display: block; }
     .feat h3 {
       font-size: 18px; font-weight: 700; margin-bottom: 8px;
       letter-spacing: -0.2px;
@@ -335,12 +338,12 @@
       <p class="subtitle">集中と瞬発力を、それぞれ違う角度から。</p>
       <div class="modes">
         <div class="mode-card">
-          <span class="mode-icon">&#9201;</span>
+          <span class="mode-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M9 2h6"/><path d="M12 13V8"/><path d="M12 13l3 2"/></svg></span>
           <h3>1 Minute Challenge</h3>
           <p>60秒以内に何ペア正解できるかにチャレンジ。タイマーが刻一刻と減る緊張感の中で、瞬間的な判断力と語彙力が試されます。ハイスコアを更新するたびに達成感がクセになる。</p>
         </div>
         <div class="mode-card">
-          <span class="mode-icon">&#9889;</span>
+          <span class="mode-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 10-13h-7z"/></svg></span>
           <h3>Time Attack</h3>
           <p>20ペアをどれだけ速く正解できるかを競うモード。ベストタイムが記録され、自分の成長が秒単位で実感できます。あなたの限界に挑戦しよう。</p>
         </div>
@@ -386,32 +389,32 @@
       <p class="subtitle">細部まで作り込まれた機能が、毎日の学習を支えます。</p>
       <div class="features">
         <div class="feat">
-          <span class="feat-icon">&#128218;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/></svg></span>
           <h3>復習システム</h3>
           <p>間違えた単語は自動でWrongリストに記録。正解するとMasteredに移行。習得状況がひと目でわかります。</p>
         </div>
         <div class="feat">
-          <span class="feat-icon">&#127942;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M5 5H3v2a4 4 0 0 0 4 4"/><path d="M19 5h2v2a4 4 0 0 1-4 4"/></svg></span>
           <h3>ハイスコア</h3>
           <p>各レベル x ゲームモードごとにベストスコアを記録。自己ベスト更新で「NEW RECORD!」バッジ。</p>
         </div>
         <div class="feat">
-          <span class="feat-icon">&#128243;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18h2"/></svg></span>
           <h3>心地よい操作感</h3>
           <p>触覚フィードバック、効果音、押下アニメーション。押すたびに気持ちいい。</p>
         </div>
         <div class="feat">
-          <span class="feat-icon">&#128209;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span>
           <h3>単語詳細</h3>
           <p>発音記号(IPA)、品詞、CEFRレベル、日本語訳、英語/日本語例文、正答率をすべて確認。</p>
         </div>
         <div class="feat">
-          <span class="feat-icon">&#128274;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
           <h3>プライバシー</h3>
           <p>個人情報の収集なし。すべてのデータは端末内にのみ保存。オフラインで完全動作。</p>
         </div>
         <div class="feat">
-          <span class="feat-icon">&#127760;</span>
+          <span class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg></span>
           <h3>オフライン対応</h3>
           <p>通信不要で全機能が使えます。電車、飛行機、地下でも、いつでもどこでも学習を。</p>
         </div>
