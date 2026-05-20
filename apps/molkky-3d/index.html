@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mölkky 3D - yotalab</title>
-  <meta name="description" content="指 1 本でモルックの爽快感。本格 3D 物理シミュレーションで再現したフィンランド発のスポーツゲーム。">
+  <title>Swach - yotalab</title>
+  <meta name="description" content="スワイプでモルックを楽しめる 3D 物理ゲーム。オンライン対戦、フレンドマッチ、ローカル対戦、CPU 戦に対応。">
   <style>
     :root {
       --bg: #fbfbfd;
@@ -331,15 +331,16 @@
 
   <!-- ▓▓ Hero ▓▓ -->
   <div class="hero">
-    <img class="hero-icon" src="assets/icon.png" alt="Mölkky 3D">
-    <h1>Mölkky 3D</h1>
-    <p class="en-name">3D Physics Mölkky</p>
-    <p class="catchcopy">指 1 本でモルックの爽快感を
+    <img class="hero-icon" src="assets/icon.png" alt="Swach">
+    <h1>Swach</h1>
+    <p class="en-name">Online 3D Physics Mölkky</p>
+    <p class="catchcopy">スワイプで、モルック対戦を。
     </p>
-    <p class="desc">フィンランド発祥のアウトドアスポーツ「モルック」を、3D 物理シミュレーションで再現。スワイプで投げて、ピンが豪快に倒れる爽快感を片手で味わえます。</p>
+    <p class="desc">フィンランド発祥のアウトドアスポーツ「モルック」を、3D 物理シミュレーションで手軽に。ランダムマッチ、合言葉で遊ぶフレンドマッチ、ローカル対戦、CPU 戦まで、好きな相手とスワイプで勝負できます。</p>
     <div class="hero-badges">
       <span class="badge">3D</span>
-      <span class="badge">マルチプレイ</span>
+      <span class="badge">オンライン対戦</span>
+      <span class="badge">フレンドマッチ</span>
       <span class="badge">CPU 戦</span>
       <span class="badge alt">iPhone</span>
       <span class="badge alt">iOS 14+</span>
@@ -354,13 +355,13 @@
   <div class="showcase-section">
     <div class="inner">
       <h2>遊び方を、ひと目で。</h2>
-      <p class="subtitle">スワイプの長さ・速さで弾道を操り、12 本のピンを倒す。</p>
+      <p class="subtitle">オンラインでも、1 台でも。スワイプの長さ・速さで弾道を操り、12 本のピンを倒す。</p>
       <div class="showcase-grid">
         <div class="showcase-item full">
           <img class="shot" src="assets/swipe-modes.png" alt="スワイプでモルック / vs CPU / 1台でみんなと対戦" loading="lazy">
           <div class="caption">
             <h3>swipe でモルック</h3>
-            <p>vs CPU でソロプレイも、1 台を回してみんなで対戦も。気分に合わせて選べる。</p>
+            <p>オンライン対戦、フレンドマッチ、ローカル対戦、CPU 戦。気分に合わせて選べる。</p>
           </div>
         </div>
         <div class="showcase-item">
@@ -411,17 +412,27 @@
   <div class="section-dark">
     <div class="inner">
       <h2>ひとりでも、みんなでも。</h2>
-      <p class="subtitle">気分に合わせて、ふたつの遊び方。</p>
+      <p class="subtitle">離れた相手とも、その場の友達とも。4 つのモードで遊べます。</p>
       <div class="modes">
         <div class="mode-card">
-          <span class="mode-icon">&#128101;</span>
-          <h3>みんなで対戦</h3>
-          <p>1 台の iPhone を回して、2〜4 人で交代に投げるローカルマルチプレイ。集まったその場で、すぐに始められます。プレイヤー名のカスタマイズも可能。</p>
+          <span class="mode-icon">&#127760;</span>
+          <h3>ランダムマッチ</h3>
+          <p>オンラインで他のプレイヤーと自動マッチング。現在レートと最高レートを競いながら、気軽に真剣勝負を楽しめます。</p>
+        </div>
+        <div class="mode-card">
+          <span class="mode-icon">&#128172;</span>
+          <h3>フレンドマッチ</h3>
+          <p>合言葉を共有して友達とオンライン対戦。離れていても同じルームに集まり、お気に入りのマイスティックで投げ合えます。</p>
         </div>
         <div class="mode-card">
           <span class="mode-icon">&#129302;</span>
           <h3>CPU と対戦</h3>
           <p>3 段階の難易度から選べる CPU 戦。<strong>初級</strong>はおだやかに、<strong>中級</strong>はそこそこ正確、<strong>上級</strong>はノイズゼロの完璧投擲で挑んでくる強敵です。</p>
+        </div>
+        <div class="mode-card">
+          <span class="mode-icon">&#128101;</span>
+          <h3>ローカル対戦</h3>
+          <p>1 台の iPhone を回して、2〜4 人で交代に投げるローカルマルチプレイ。集まったその場ですぐに始められます。</p>
         </div>
       </div>
     </div>
@@ -454,14 +465,14 @@
           <p style="color: var(--sub);">画面下部に ANGLE / DRIFT / POWER の 3 つのメーター。投擲中の挙動を可視化し、上達がそのまま指先に伝わります。</p>
         </div>
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
-          <span class="feat-icon">&#128261;</span>
-          <h3 style="color: var(--dark);">ローカル完結</h3>
-          <p style="color: var(--sub);">通信ゼロ・課金ゼロ。電波が届かない場所でも、いつでも誰とでも遊べます。アカウント登録も不要。</p>
+          <span class="feat-icon">&#127922;</span>
+          <h3 style="color: var(--dark);">マイスティック</h3>
+          <p style="color: var(--sub);">38 種類の棒スキンを収録。1 日 1 回の無料ガチャなどで集めて、お気に入りの一本を装備できます。</p>
         </div>
         <div class="feat" style="background:#fff; border-color: var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
-          <span class="feat-icon">&#127908;</span>
-          <h3 style="color: var(--dark);">日本語 / 英語</h3>
-          <p style="color: var(--sub);">アプリ内設定からいつでも切替。BGM / 効果音の ON/OFF も自由にカスタマイズできます。</p>
+          <span class="feat-icon">&#127942;</span>
+          <h3 style="color: var(--dark);">レート / ランキング</h3>
+          <p style="color: var(--sub);">ランダムマッチの結果はレートに反映。現在レートと最高レートで、上位プレイヤーを目指せます。</p>
         </div>
       </div>
     </div>
@@ -473,9 +484,10 @@
       <h2>こんな方におすすめ</h2>
       <ul class="recommend-list" style="color: #f5f5f7;">
         <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>モルックの試合の感触を手元で楽しみたい方</li>
-        <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>友達や家族と 1 台の iPhone で気軽に遊びたい方</li>
+        <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>オンラインで気軽にモルック対戦をしたい方</li>
+        <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>友達や家族と、離れていても同じ場所でも遊びたい方</li>
         <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>3D 物理ゲームが好きな方</li>
-        <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>スキマ時間にサッと遊べるカジュアルゲームを探している方</li>
+        <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08);"><span class="dot" style="background: #f5f5f7;"></span>スキン集めやランキングのあるカジュアルゲームを探している方</li>
         <li style="color: #a1a1a6; border-color: rgba(255,255,255,0.08); border-bottom: none;"><span class="dot" style="background: #f5f5f7;"></span>モルックを始める前に雰囲気を掴みたい方</li>
       </ul>
     </div>
