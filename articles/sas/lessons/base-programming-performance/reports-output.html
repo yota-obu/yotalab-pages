@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>レポートとアウトプット生成 — SAS 9.4 Base Programming — yotalab</title>
+<meta name="description" content="SAS 9.4 Base Programming の試験項目「レポートやアウトプットの生成」の詳細学習ページ。">
+<link rel="stylesheet" href="../../../article.css">
+<style>
+  .example{background:var(--bg);color:var(--ink);border:1px solid var(--hairline)}
+  .example .comment{color:var(--ink-fine)}
+  .detail-grid{display:grid;gap:18px;margin:28px 0}
+  .detail-card{background:var(--bg);border:1px solid var(--hairline);border-radius:18px;padding:24px}
+  .detail-card h3{margin-top:0}
+  .detail-card ul{padding-left:1.1em;margin:8px 0 0}
+  .detail-card li{font-size:15px;line-height:1.65;color:var(--ink-muted);margin:4px 0}
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav class="site-nav"><div class="nav-inner"><a href="../../../../" class="logo">yotalab</a><ul class="nav-links"><li><a href="../../../../apps/">Apps</a></li><li><a href="../../../" class="active">Articles</a></li><li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li></ul></div></nav>
+<header class="article-hero">
+  <p class="eyebrow">SAS Base Programming · 15-20%</p>
+  <h1>レポートとアウトプット生成</h1>
+  <p class="lead">一覧、度数、要約統計、カスタム format、ODS、EXPORT を使い、結果を人が読める形・外部ファイルへ渡せる形にする領域。</p>
+  <p class="series-tag"><a href="../base-programming-performance.html">試験対策ハブ</a> · 詳細項目</p>
+</header>
+
+<section class="tile tile-light">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Goal</p>
+    <h2>この項目で到達する状態</h2>
+    <p class="lead">データセットを作るだけで終わらせず、確認用の一覧、検証用の集計、提出用のファイル出力まで一通り書ける状態を作ります。</p>
+  </div>
+</section>
+
+<section class="tile tile-soft">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">01</p>
+    <h2>PROC PRINT で一覧レポートを作る</h2>
+    <p><code>PROC PRINT</code> は最も基本的な一覧出力です。試験では、表示列、合計、条件、ID、BY、ラベル表示を組み合わせられることが重要です。</p>
+    <div class="syntax-note">
+      <h3>構文解説: 一覧表の表示を制御する</h3>
+      <ul>
+        <li><code>proc sort ... by region customer_id;</code> は、BY レポートの前提として地域・顧客順に並べる。</li>
+        <li><code>title</code> と <code>footnote</code> はレポートの見出しと脚注を設定する。</li>
+        <li><code>proc print ... label split="*";</code> は、ラベルを列見出しに使い、<code>*</code> で見出しを改行する。</li>
+        <li><code>id</code>、<code>var</code>、<code>sum</code>、<code>where</code> で、識別列・表示列・合計・行条件を指定する。</li>
+      </ul>
+    </div>
+    <pre class="example">proc sort data=work.orders_clean out=work.orders_report;
+  by region customer_id;
+run;
+
+title "Orders by Region";
+footnote "Generated for certification practice";
+
+proc print data=work.orders_report label split="*";
+  by region;
+  id customer_id;
+  var order_date product amount;
+  sum amount;
+  where amount &gt; 0;
+  label order_date = "Order*Date"
+        amount = "Order*Amount";
+run;
+
+title;
+footnote;</pre>
+  </div>
+</section>
+
+<section class="tile tile-soft">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Print Details</p>
+    <h2>PROC PRINT は「表示の制御」を細かく指定する</h2>
+    <p>一覧表では、単に全行を出すのではなく、問題文に合わせて列順、識別列、合計、列見出し、グループ単位を制御します。</p>
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h3><code>VAR</code> と <code>ID</code></h3>
+        <ul>
+          <li><code>VAR</code> は表示する変数と順序を決める。</li>
+          <li><code>ID</code> は各行を識別する列を左側に置く。</li>
+        </ul>
+      </div>
+      <div class="detail-card">
+        <h3><code>SUM</code> と <code>BY</code></h3>
+        <ul>
+          <li><code>SUM</code> は数値列の合計を出す。</li>
+          <li><code>BY</code> レポートは事前ソートが必要。</li>
+        </ul>
+      </div>
+      <div class="detail-card">
+        <h3><code>LABEL</code> と <code>SPLIT=</code></h3>
+        <ul>
+          <li><code>LABEL</code> は列見出しとしてラベルを使う。</li>
+          <li><code>SPLIT=</code> は列見出しを指定文字で折り返す。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">02</p>
+    <h2>FREQ / MEANS / UNIVARIATE で検証する</h2>
+    <p>これらの PROC はレポート作成だけでなく、データ品質の確認にも使います。カテゴリの種類、欠損、外れ値、合計値をすばやく確認します。</p>
+    <div class="syntax-grid">
+      <div class="syntax-card"><h4>PROC FREQ</h4><p><code>proc freq data=work.orders_clean nlevels;<br>tables region*status / missing;<br>run;</code></p></div>
+      <div class="syntax-card"><h4>PROC MEANS</h4><p><code>proc means data=work.orders_clean n mean sum min max maxdec=2;<br>class region; var amount; run;</code></p></div>
+      <div class="syntax-card"><h4>PROC UNIVARIATE</h4><p><code>proc univariate data=work.orders_clean;<br>var amount; run;</code></p></div>
+      <div class="syntax-card"><h4>BY と CLASS</h4><p><code>BY</code> は事前ソートが必要。<code>CLASS</code> は分類変数で要約する。</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Frequency</p>
+    <h2>PROC FREQ はカテゴリ確認と検算の中心</h2>
+    <p><code>PROC FREQ</code> は一元表と二元表を作るだけでなく、カテゴリの種類、欠損、想定外の値を見つける検証用 PROC として使います。</p>
+    <div class="syntax-note">
+      <h3>構文解説: 度数表でカテゴリを検算する</h3>
+      <ul>
+        <li><code>nlevels</code> は、各変数に何種類の値があるかを表示する。</li>
+        <li><code>order=freq</code> は、度数の多い順に結果を並べる。</li>
+        <li><code>tables region status</code> は一元表、<code>region*status</code> は二元表を作る。</li>
+        <li><code>/ missing</code> は欠損値も度数表に含める。</li>
+      </ul>
+    </div>
+    <pre class="example">proc freq data=work.orders_clean nlevels order=freq;
+  tables region status region*status / missing;
+run;</pre>
+    <div class="detail-grid">
+      <div class="detail-card"><h3><code>NLEVELS</code></h3><ul><li>変数ごとの水準数を確認する。</li><li>表記ゆれや想定外カテゴリの発見に使う。</li></ul></div>
+      <div class="detail-card"><h3><code>ORDER=</code></h3><ul><li>度数表の表示順を制御する。</li><li>頻度順やデータ順など、問題文の指定に合わせる。</li></ul></div>
+      <div class="detail-card"><h3>二元表</h3><ul><li><code>region*status</code> のように、2 つのカテゴリの組み合わせを確認する。</li><li>抽出条件や分類変数の作成ミスを見つけやすい。</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-soft">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Summary</p>
+    <h2>PROC MEANS と UNIVARIATE は、集計と異常値確認で使い分ける</h2>
+    <p><code>PROC MEANS</code> は基本統計量やクラス別集計に強く、<code>PROC UNIVARIATE</code> は極値や欠損、分布の確認に向きます。レポート作成だけでなく、作ったデータセットの検算にも使います。</p>
+    <div class="syntax-note">
+      <h3>構文解説: 要約統計と極値確認</h3>
+      <ul>
+        <li><code>n</code>、<code>nmiss</code>、<code>mean</code>、<code>sum</code> などは出力する統計量を指定する。</li>
+        <li><code>class region status;</code> は地域・ステータス別に要約する。</li>
+        <li><code>var amount;</code> は統計量を計算する数値変数を指定する。</li>
+        <li><code>PROC UNIVARIATE</code> は、極値や分布を詳しく確認するときに使う。</li>
+      </ul>
+    </div>
+    <pre class="example">proc means data=work.orders_clean n nmiss mean median sum min max maxdec=2;
+  class region status;
+  var amount;
+run;
+
+proc univariate data=work.orders_clean;
+  var amount;
+run;</pre>
+    <div class="compare">
+      <div class="compare-card"><div class="compare-label">MEANS</div><h4>集計の確認</h4><p>件数、欠損、平均、合計、最小、最大を素早く見る。<code>CLASS</code> でカテゴリ別の要約を作る。</p></div>
+      <div class="compare-card after"><div class="compare-label">UNIVARIATE</div><h4>極値と分布</h4><p>極端な値や欠損を見つけたいときに使う。データ品質確認の最後に役立つ。</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-soft">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">03</p>
+    <h2>PROC FORMAT とラベルで出力を読みやすくする</h2>
+    <p><code>PROC FORMAT</code> は値の表示を変えます。保存値そのものは変えず、レポート上の見え方を変える点が重要です。</p>
+    <div class="syntax-note">
+      <h3>構文解説: 値を表示用グループに変える</h3>
+      <ul>
+        <li><code>proc format;</code> でユーザー定義 format を作る。</li>
+        <li><code>value amountgrp</code> は数値用の format 名を定義する。</li>
+        <li><code>low-&lt;3000</code> は 3000 未満、<code>3000-&lt;10000</code> は 3000 以上 10000 未満を表す。</li>
+        <li><code>format amount amountgrp.;</code> は、保存値を変えずに表示だけグループ名へ変える。</li>
+      </ul>
+    </div>
+    <pre class="example">proc format;
+  value amountgrp
+    low-&lt;3000 = "Low"
+    3000-&lt;10000 = "Middle"
+    10000-high = "High";
+run;
+
+proc print data=work.orders_clean label;
+  var customer_id order_date amount;
+  format amount amountgrp.;
+  label customer_id = "Customer ID"
+        order_date = "Order Date";
+run;</pre>
+    <div class="callout"><div class="callout-title">CNTLIN=</div><p>試験範囲には、データセットから format 定義を読み込む <code>CNTLIN=</code> も含まれます。大量のコードを手書きせず、定義表から format を作る仕組みです。</p></div>
+  </div>
+</section>
+
+<section class="tile tile-light">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">CNTLIN</p>
+    <h2>format 定義をデータセットから作る</h2>
+    <p><code>CNTLIN=</code> は、format 定義をデータとして持ち、<code>PROC FORMAT</code> に読み込ませる方法です。大量の範囲やラベルを手書きしないときに使います。</p>
+    <div class="syntax-note">
+      <h3>構文解説: CNTLIN 用データセットの列</h3>
+      <ul>
+        <li><code>fmtname</code> は作成する format 名、<code>type</code> は文字用か数値用かを指定する。</li>
+        <li><code>start</code> と <code>end</code> は範囲の下限・上限を表す。</li>
+        <li><code>label</code> は表示する文字列を指定する。</li>
+        <li><code>hlo</code> は LOW や HIGH などの特殊範囲を指定する。</li>
+        <li><code>proc format cntlin=...</code> で、その定義データセットから format を作る。</li>
+      </ul>
+    </div>
+    <pre class="example">data work.amount_format;
+  length fmtname $ 12 start 8 end 8 label $ 12 type $ 1 hlo $ 1;
+  fmtname = "amountgrp";
+  type = "N";
+
+  hlo = "L"; start = .; end = 2999; label = "Low"; output;
+  hlo = ""; start = 3000; end = 9999; label = "Middle"; output;
+  hlo = "H"; start = 10000; end = .; label = "High"; output;
+run;
+
+proc format cntlin=work.amount_format;
+run;</pre>
+    <div class="callout"><div class="callout-title">確認ポイント</div><p><code>FMTNAME</code>、<code>START</code>、<code>END</code>、<code>LABEL</code>、<code>TYPE</code> の役割を押さえます。文字 format なら <code>TYPE="C"</code>、数値 format なら <code>TYPE="N"</code> です。範囲の LOW / HIGH は <code>HLO</code> で表します。</p></div>
+  </div>
+</section>
+
+<section class="tile tile-light">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">04</p>
+    <h2>ODS と EXPORT でファイルへ出す</h2>
+    <p>ODS は SAS の出力先を制御します。HTML、PDF、RTF、Excel などの出力に使います。単純な外部データファイル作成には <code>PROC EXPORT</code> も使えます。</p>
+    <div class="syntax-note">
+      <h3>構文解説: レポート出力とデータ出力を分ける</h3>
+      <ul>
+        <li><code>ods html/pdf/rtf file=...</code> は、PROC の出力を指定ファイルへ送る。</li>
+        <li><code>style=</code> は ODS 出力の見た目を指定する。</li>
+        <li><code>ods ... close;</code> は、開いた出力先を閉じる。</li>
+        <li><code>proc export</code> は、SAS データセットを CSV などの生データファイルへ書き出す。</li>
+        <li><code>libname out xlsx</code> は Excel ワークブックを出力先ライブラリとして扱う。</li>
+      </ul>
+    </div>
+    <pre class="example">ods html file="/home/user/report.html" style=htmlblue;
+ods pdf file="/home/user/report.pdf" style=journal;
+ods rtf file="/home/user/report.rtf" style=journal;
+
+proc means data=work.orders_clean n mean sum maxdec=2;
+  class region;
+  var amount;
+run;
+
+ods rtf close;
+ods pdf close;
+ods html close;
+
+proc export data=work.orders_clean
+            outfile="/home/user/orders_clean.csv"
+            dbms=csv
+            replace;
+run;
+
+libname out xlsx "/home/user/orders.xlsx";
+data out.orders_clean;
+  set work.orders_clean;
+run;
+libname out clear;</pre>
+  </div>
+</section>
+
+<section class="tile tile-light">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Output Checks</p>
+    <h2>ODS と EXPORT は「何を出すか」で選ぶ</h2>
+    <p>ODS は PROC の結果を人が読むレポートとして出す仕組みです。<code>PROC EXPORT</code> と XLSX エンジンは、データセットを外部データとして渡すときに使います。</p>
+    <div class="detail-grid">
+      <div class="detail-card"><h3>ODS HTML / PDF / RTF</h3><ul><li>一覧表や集計結果など、PROC の出力をレポートとして保存する。</li><li>開いた出力先は、最後に対応する <code>close</code> で閉じる。</li></ul></div>
+      <div class="detail-card"><h3>PROC EXPORT</h3><ul><li>シンプルな生データファイルを作る。</li><li><code>DBMS=csv</code>、<code>DBMS=tab</code>、<code>DBMS=dlm</code> などを指定する。</li></ul></div>
+      <div class="detail-card"><h3>XLSX エンジン</h3><ul><li>Excel ワークブックをライブラリのように扱ってデータを書き出す。</li><li>複数シートへ出したい場合に、メンバ名をシート名として使える。</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-soft">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Practice</p>
+    <h2>この項目の演習</h2>
+    <div class="steps">
+      <div class="step"><div class="step-content"><h4>一覧表</h4><p><code>PROC PRINT</code> で列順、ID、合計、ラベル、条件を指定した一覧を作る。</p></div></div>
+      <div class="step"><div class="step-content"><h4>検証表</h4><p><code>PROC FREQ</code> と <code>PROC MEANS</code> で、カテゴリ件数、欠損、合計、平均を検算する。</p></div></div>
+      <div class="step"><div class="step-content"><h4>表示形式</h4><p><code>PROC FORMAT</code> で金額帯やステータス表示を作り、レポートに適用する。</p></div></div>
+      <div class="step"><div class="step-content"><h4>出力</h4><p>同じ結果を HTML、PDF、RTF、CSV、XLSX へ出力し、開閉ステートメントの位置を確認する。</p></div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer"><div class="footer-inner"><p>© 2026 yotalab</p><div class="footer-links"><a href="../../../../">Home</a><a href="../base-programming-performance.html">試験対策ハブ</a><a href="../../../">Articles</a></div></div></footer>
+<script>
+const progress = document.getElementById('progress');
+window.addEventListener('scroll', () => {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%';
+});
+</script>
+</body>
+</html>

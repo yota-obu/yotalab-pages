@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>データ構造へのアクセスと作成 — SAS 9.4 Base Programming — yotalab</title>
+<meta name="description" content="SAS 9.4 Base Programming の試験項目「データ構造へのアクセスと作成」の詳細学習ページ。">
+<link rel="stylesheet" href="../../../article.css">
+<style>
+  .example{background:var(--bg);color:var(--ink);border:1px solid var(--hairline)}
+  .example .comment{color:var(--ink-fine)}
+  .detail-grid{display:grid;gap:18px;margin:28px 0}
+  .detail-card{background:var(--bg);border:1px solid var(--hairline);border-radius:18px;padding:24px}
+  .detail-card h3{margin-top:0}
+  .detail-card ul{padding-left:1.1em;margin:8px 0 0}
+  .detail-card li{font-size:15px;line-height:1.65;color:var(--ink-muted);margin:4px 0}
+  .mini-nav{display:flex;gap:10px;flex-wrap:wrap;margin:28px 0}
+  .mini-nav a{border:1px solid var(--hairline);border-radius:980px;padding:8px 14px;font-size:14px;color:var(--action);background:var(--bg)}
+  .syntax-unit{margin:26px 0;border:1px solid var(--hairline);border-radius:20px;background:var(--bg);overflow:hidden}
+  .syntax-unit .syntax-note{margin:0;border:0;border-radius:0;padding:22px 24px}
+  .syntax-unit .example{margin:0 18px 18px}
+  .output-guide{display:grid;gap:14px;margin:0 18px 18px}
+  .output-section{padding:20px;border:1px solid var(--hairline);border-radius:16px;background:var(--tile-soft)}
+  .output-section.check{background:var(--bg)}
+  .output-guide h4{margin:0 0 12px;font-size:15px}
+  .output-guide .example{margin:0 0 18px;overflow-x:auto}
+  .output-table-wrap{overflow-x:auto}
+  .output-table{width:100%;min-width:620px;border-collapse:collapse;font-size:14px;line-height:1.55}
+  .output-table th,.output-table td{padding:12px 14px;border-bottom:1px solid var(--hairline);text-align:left;vertical-align:top}
+  .output-table th{font-size:13px;color:var(--ink-fine);background:var(--tile-soft)}
+  .output-table td:first-child{font-weight:600;white-space:nowrap}
+  .output-table tr:last-child td{border-bottom:0}
+  .question-list{display:grid;gap:14px;margin-top:16px}
+  .detail-card > h3:not(:first-child){margin-top:32px}
+  .question-item{border:1px solid var(--hairline);border-radius:14px;padding:16px 18px;background:var(--tile-soft)}
+  .question-item p{margin:0 0 12px;line-height:1.65}
+  .question-item pre{position:relative;margin:10px 0 14px}
+  .syntax-input{width:11ch;padding:5px 7px;border:2px solid var(--action);border-radius:7px;background:var(--bg);color:var(--ink);font:inherit;line-height:1;text-transform:lowercase}
+  .syntax-input.short{width:8ch}
+  .syntax-input.wide{width:16ch}
+  .syntax-input:focus{outline:3px solid color-mix(in srgb,var(--action) 22%,transparent);outline-offset:2px}
+  .syntax-input.is-correct{border-color:#218739;background:#f1fff4}
+  .correct-mark{position:absolute;top:10px;right:12px;color:#218739;font-weight:800;font-size:22px;line-height:1}
+  .choice-question{margin:0;border:0;padding:0}
+  .choice-question legend{margin-bottom:12px;line-height:1.65;font-weight:600}
+  .choices{display:grid;gap:8px}
+  .choices label{display:flex;gap:9px;align-items:flex-start;padding:10px 12px;border:1px solid var(--hairline);border-radius:10px;background:var(--bg);cursor:pointer;font-size:14px;line-height:1.5}
+  .choices input{margin-top:3px}
+  .test-result{min-height:1.5em;margin:8px 0 0!important;font-size:12px;font-weight:400;line-height:1.5}
+  .result-label{margin-right:6px;font-size:12px;font-weight:400}
+  .result-explanation{font-size:12px}
+  .test-result.correct{color:#218739}
+  .test-result.incorrect{color:#b42318}
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="../../../../" class="logo">yotalab</a>
+    <ul class="nav-links">
+      <li><a href="../../../../apps/">Apps</a></li>
+      <li><a href="../../../" class="active">Articles</a></li>
+      <li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="article-hero">
+  <p class="eyebrow">SAS Base Programming · 20-25%</p>
+  <h1>データ構造へのアクセスと作成</h1>
+  <p class="lead">ライブラリを割り当て、既存データを読み、外部ファイルを取り込み、結合し、日付や行列制御まで扱う領域。</p>
+  <p class="series-tag"><a href="../base-programming-performance.html">試験対策ハブ</a> · 詳細項目</p>
+</header>
+
+<section class="tile tile-light">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Goal</p>
+    <h2>この項目で到達する状態</h2>
+    <p class="lead">問題文にある入力元を見て、SAS データセットとして読み込み、必要な行・列・型に整えて、次の処理へ渡せる状態を作ります。</p>
+    <div class="mini-nav">
+      <a href="#library">ライブラリ</a>
+      <a href="#import">外部データ</a>
+      <a href="#combine">結合</a>
+      <a href="#date-filter">日付と行・列制御</a>
+      <a href="#practice">演習</a>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-soft" id="library">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">01</p>
+    <h2>一時・永久データセットとライブラリ</h2>
+    <p>SAS データセットは、セッション中だけ使う一時データセットと、ファイルとして残す永久データセットに分かれます。<code>work</code> ライブラリに作るものは一時、<code>cert.sales</code> のように自分で割り当てたライブラリに作るものは永久です。</p>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>ライブラリを割り当てる — LIBNAME</h3>
+        <p><strong>基本形:</strong> <code>libname ライブラリ名 "フォルダのパス";</code></p>
+        <p>指定したフォルダに、SAS プログラム内で使うライブラリ名を割り当てます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* フォルダに cert というライブラリ参照名を割り当てる */</span>
+libname cert "/home/user/cert";</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>一時データセットを作る — DATA</h3>
+        <p><strong>基本形:</strong> <code>data work.データセット名;</code></p>
+        <p><strong>省略形:</strong> <code>data データセット名;</code></p>
+        <p>ライブラリ名を省略した場合も、自動的に <code>work</code> ライブラリへ作成されます。どちらも一時データセットのため、SAS のセッションを終了すると削除されます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* WORK を明示する書き方 */</span>
+data work.sales_temp;
+  set cert.sales_raw;
+run;
+
+<span class="comment">/* ライブラリ名を省略しても WORK に作られる */</span>
+data sales_temp;
+  set cert.sales_raw;
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>永久データセットを作る — DATA</h3>
+        <p><strong>基本形:</strong> <code>data ライブラリ名.データセット名;</code></p>
+        <p>指定したライブラリ内に永久データセットを作成します。ライブラリが参照するフォルダにファイルとして残ります。</p>
+      </div>
+      <pre class="example"><span class="comment">/* cert ライブラリに永久データセットを作る */</span>
+data cert.sales_clean;
+  set work.sales_temp;
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>既存データセットを読み込む — SET</h3>
+        <p><strong>基本形:</strong> <code>set ライブラリ名.データセット名;</code></p>
+        <p>指定した既存の SAS データセットを読み込みます。読み込んだ行を DATA ステップで処理し、新しいデータセットへ出力します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 既存の sales_raw を読み込む */</span>
+data work.sales_temp;
+  set cert.sales_raw;
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>データセットの構造を確認する — PROC CONTENTS</h3>
+        <p><strong>基本形:</strong> <code>proc contents data=ライブラリ名.データセット名;</code></p>
+        <p>指定したデータセットの変数名、型、長さ、format などの構造を確認します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* データセットの構造を確認する */</span>
+proc contents data=cert.sales_clean;
+run;</pre>
+      <div class="output-guide">
+        <div class="output-section">
+          <h4>何が表示されるか</h4>
+          <pre class="example">データセット名  CERT.SALES_CLEAN
+オブザベーション数  250
+変数の数             4
+
+番号  変数名       タイプ  長さ  出力形式     ラベル
+1     customer_id  文字       8               顧客ID
+2     sale_date    数値       8  YYMMDD10.    売上日
+3     amount       数値       8  COMMA12.2    売上金額
+4     region       文字      12               地域</pre>
+        </div>
+        <div class="output-section check">
+          <h4>出力項目の意味と確認事項</h4>
+          <div class="output-table-wrap">
+            <table class="output-table">
+              <thead>
+                <tr><th>表示項目</th><th>意味</th><th>確認すること</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>データセット名</td><td>対象のライブラリ名とデータセット名</td><td>調べたいデータセットが選ばれているか</td></tr>
+                <tr><td>オブザベーション数</td><td>データの行数</td><td>行数が想定どおりか。違う場合は抽出条件や重複を確認する</td></tr>
+                <tr><td>変数の数</td><td>データの列数</td><td>必要な変数の不足や、不要な変数の混入がないか</td></tr>
+                <tr><td>タイプ</td><td>変数が文字型か数値型か</td><td>計算する値や SAS 日付などが想定した型になっているか</td></tr>
+                <tr><td>長さ</td><td>変数に保存できる長さ</td><td>文字型の長さが十分か。値が途中で切れる可能性がないか</td></tr>
+                <tr><td>出力形式</td><td>値を画面やレポートに表示する形式</td><td><code>YYMMDD10.</code> など、意図した表示形式が設定されているか</td></tr>
+                <tr><td>ラベル</td><td>変数名とは別に設定する表示用の説明</td><td>レポートに表示する説明が正しいか</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h3>確認テスト</h3>
+        <div class="question-list">
+          <div class="question-item">
+            <fieldset class="choice-question" data-correct="a" data-answer-text="ライブラリ名を省略すると WORK ライブラリに作成されます。">
+              <legend>問題 1. <code>data sales;</code> で作成されるデータセットはどれですか。</legend>
+              <div class="choices">
+                <label><input type="radio" name="question-1" value="a"> <span><code>work.sales</code> という一時データセット</span></label>
+                <label><input type="radio" name="question-1" value="b"> <span><code>cert.sales</code> という永久データセット</span></label>
+                <label><input type="radio" name="question-1" value="c"> <span>ライブラリ名がないためエラーになる</span></label>
+              </div>
+              <p class="test-result" aria-live="polite"></p>
+            </fieldset>
+          </div>
+          <div class="question-item">
+            <fieldset class="choice-question" data-correct="b" data-answer-text="PROC CONTENTS は構造を表示します。各行の実際の値は PROC PRINT などで確認します。">
+              <legend>問題 2. <code>PROC CONTENTS</code> の出力で確認できないものはどれですか。</legend>
+              <div class="choices">
+                <label><input type="radio" name="question-2" value="a"> <span>変数のタイプと長さ</span></label>
+                <label><input type="radio" name="question-2" value="b"> <span>各行に保存されている実際の値</span></label>
+                <label><input type="radio" name="question-2" value="c"> <span>オブザベーション数と変数の数</span></label>
+              </div>
+              <p class="test-result" aria-live="polite"></p>
+            </fieldset>
+          </div>
+          <div class="question-item">
+            <p><strong>問題 3.</strong> フォルダに <code>cert</code> というライブラリ名を割り当ててください。</p>
+            <pre class="example"><input class="syntax-input" type="text" data-answer="libname" aria-label="LIBNAMEを入力" autocomplete="off" autocapitalize="none" spellcheck="false"> cert "/home/user/cert";<span class="correct-mark" aria-live="polite"></span></pre>
+          </div>
+          <div class="question-item">
+            <p><strong>問題 4.</strong> <code>sales_temp</code> を一時データセットとして作成してください。</p>
+            <pre class="example">data <input class="syntax-input short" type="text" data-answer="work" aria-label="一時ライブラリ名を入力" autocomplete="off" autocapitalize="none" spellcheck="false">.sales_temp;
+  set cert.sales_raw;
+run;<span class="correct-mark" aria-live="polite"></span></pre>
+          </div>
+          <div class="question-item">
+            <p><strong>問題 5.</strong> 既存の <code>cert.sales_raw</code> を読み込んでください。</p>
+            <pre class="example">data work.sales_temp;
+  <input class="syntax-input short" type="text" data-answer="set" aria-label="データセットを読み込む構文を入力" autocomplete="off" autocapitalize="none" spellcheck="false"> cert.sales_raw;
+run;<span class="correct-mark" aria-live="polite"></span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light" id="import">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">02</p>
+    <h2>CSV・Excelファイルを読み込む</h2>
+    <p>外部ファイルをSASデータセットへ変換します。読み込みに成功しても型や長さが意図と異なることがあるため、作成後の確認までを一連の操作として覚えます。</p>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>CSVファイルを読み込む — PROC IMPORT</h3>
+        <p><strong>基本形:</strong> <code>proc import datafile="ファイルのパス" out=出力先 dbms=csv replace;</code></p>
+        <p><code>DATAFILE=</code> に入力ファイル、<code>OUT=</code> に作成するSASデータセットを指定します。<code>DBMS=CSV</code> はファイル形式、<code>REPLACE</code> は同名データセットの上書きを表します。</p>
+        <p><code>GUESSINGROWS=</code> は、各列のタイプと長さを推測するために確認する行数を指定します。<code>guessingrows=max;</code> は全行を確認する指定で、後半に長い文字列や異なる形式の値がある場合の文字切れや誤った型推測を防ぎやすくなります。ただし、大きなファイルでは読み込みに時間がかかります。</p>
+        <p><code>GUESSINGROWS</code> はCSVなどの区切りファイル向けで、XLSXエンジンには使いません。</p>
+      </div>
+      <pre class="example"><span class="comment">/* CSVをWORK.ORDERSとして読み込む */</span>
+proc import datafile="/home/user/source/orders.csv"
+            out=work.orders
+            dbms=csv
+            replace;
+  guessingrows=max;
+run;</pre>
+    </div>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>Excelブックをライブラリとして開く — XLSXエンジン</h3>
+        <p><strong>基本形:</strong> <code>libname ライブラリ名 xlsx "Excelファイルのパス";</code></p>
+        <p>Excelブックを一時的なライブラリとして割り当てます。シート名をデータセット名として <code>SET</code> で読み込み、使用後は <code>libname ライブラリ名 clear;</code> で割り当てを解除します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* Januaryシートを読み込む */</span>
+libname excel xlsx "/home/user/source/orders.xlsx";
+
+data work.orders_january;
+  set excel.January;
+run;
+
+<span class="comment">/* Excelブックのライブラリ割り当てを解除する */</span>
+libname excel clear;</pre>
+    </div>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>読み込み結果の先頭行を確認する — PROC PRINT</h3>
+        <p><strong>基本形:</strong> <code>proc print data=ライブラリ名.データセット名(obs=行数);</code></p>
+        <p><code>OBS=</code> を指定すると、先頭から表示する行数を制限できます。値の並び、欠損、文字切れ、日付の見え方を少量のデータで確認します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 先頭10行だけ表示する */</span>
+proc print data=work.orders(obs=10);
+run;</pre>
+      <div class="output-guide">
+        <div class="output-section">
+          <h4>出力例</h4>
+          <pre class="example">Obs  customer_id  order_date  amount  region
+  1  C001         2026-01-05   12500  East
+  2  C002         2026-01-06    8300  West
+  3  C003         2026-01-06       .  North
+  4  C004         2026-01-07   21000  East</pre>
+        </div>
+        <div class="output-section check">
+          <h4>出力項目の意味と確認事項</h4>
+          <div class="output-table-wrap">
+            <table class="output-table">
+              <thead><tr><th>表示項目</th><th>意味</th><th>確認すること</th></tr></thead>
+              <tbody>
+                <tr><td>Obs</td><td>表示上の行番号</td><td>指定した行数まで表示されているか</td></tr>
+                <tr><td>各変数の値</td><td>読み込まれた実際のデータ</td><td>欠損、文字切れ、桁ずれがないか</td></tr>
+                <tr><td>日付の表示</td><td>日付変数に適用された表示形式</td><td>文字列のまま、または数値の連番になっていないか</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h3>確認テスト</h3>
+        <div class="question-list">
+          <div class="question-item">
+            <fieldset class="choice-question" data-correct="b" data-answer-text="OUT=には作成するSASデータセットを指定します。">
+              <legend>問題 1. <code>PROC IMPORT</code> の <code>OUT=</code> で指定するものはどれですか。</legend>
+              <div class="choices">
+                <label><input type="radio" name="question-02-1" value="a"> <span>入力するCSVファイル</span></label>
+                <label><input type="radio" name="question-02-1" value="b"> <span>作成するSASデータセット</span></label>
+                <label><input type="radio" name="question-02-1" value="c"> <span>表示する行数</span></label>
+              </div>
+              <p class="test-result" aria-live="polite"></p>
+            </fieldset>
+          </div>
+          <div class="question-item">
+            <p><strong>問題 2.</strong> CSVを <code>work.orders</code> へ読み込む構文を完成させてください。既存の同名データセットは上書きを許可し、全行を確認して列のタイプと長さを推測してください。</p>
+            <pre class="example multi-blank">proc import <input class="syntax-input group-input" type="text" data-answer="datafile" aria-label="入力ファイルを指定するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">="/home/user/source/orders.csv"
+            <input class="syntax-input short group-input" type="text" data-answer="out" aria-label="出力データセットを指定するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">=work.orders
+            <input class="syntax-input short group-input" type="text" data-answer="dbms" aria-label="ファイル形式を指定するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">=csv
+            <input class="syntax-input" type="text" data-answer="replace" aria-label="上書きを許可するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">;
+  <input class="syntax-input wide group-input" type="text" data-answer="guessingrows" aria-label="型推測する行数を指定するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">=max;
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+          </div>
+          <div class="question-item">
+            <fieldset class="choice-question" data-correct="c" data-answer-text="GUESSINGROWS=MAXは全行を確認して列のタイプと長さを推測します。">
+              <legend>問題 3. <code>guessingrows=max;</code> の意味はどれですか。</legend>
+              <div class="choices">
+                <label><input type="radio" name="question-02-3" value="a"> <span>読み込む行を最大値の行だけに限定する</span></label>
+                <label><input type="radio" name="question-02-3" value="b"> <span>最も長い列だけを読み込む</span></label>
+                <label><input type="radio" name="question-02-3" value="c"> <span>全行を確認して列のタイプと長さを推測する</span></label>
+              </div>
+              <p class="test-result" aria-live="polite"></p>
+            </fieldset>
+          </div>
+          <div class="question-item">
+            <p><strong>問題 4.</strong> Excelブックをライブラリとして割り当てる構文を完成させてください。</p>
+            <pre class="example">libname excel <input class="syntax-input short" type="text" data-answer="xlsx" aria-label="Excelブックを扱うエンジン名" autocomplete="off" autocapitalize="none" spellcheck="false"> "/home/user/source/orders.xlsx";<span class="correct-mark" aria-live="polite"></span></pre>
+          </div>
+          <div class="question-item">
+            <p><strong>問題 5.</strong> Excelの <code>January</code> シートを読み込む構文を完成させてください。</p>
+            <pre class="example">data work.orders_january;
+  <input class="syntax-input short" type="text" data-answer="set" aria-label="シートを読み込む構文" autocomplete="off" autocapitalize="none" spellcheck="false"> excel.January;
+run;<span class="correct-mark" aria-live="polite"></span></pre>
+          </div>
+          <div class="question-item">
+            <p><strong>問題 6.</strong> <code>excel</code> のライブラリ割り当てを解除する構文を完成させてください。</p>
+            <pre class="example">libname excel <input class="syntax-input short" type="text" data-answer="clear" aria-label="ライブラリ割り当てを解除する構文" autocomplete="off" autocapitalize="none" spellcheck="false">;<span class="correct-mark" aria-live="polite"></span></pre>
+          </div>
+          <div class="question-item">
+            <p><strong>問題 7.</strong> <code>work.orders</code> の先頭10行を表示する構文を完成させてください。</p>
+            <pre class="example">proc print data=work.orders(<input class="syntax-input" type="text" data-answer="obs=10" aria-label="表示する行数を指定するオプション" autocomplete="off" autocapitalize="none" spellcheck="false">);
+run;<span class="correct-mark" aria-live="polite"></span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-soft" id="combine">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">03</p>
+    <h2>データセットを縦・横に結合する</h2>
+    <p>同じ列構造のデータを行方向に追加するときは <code>SET</code>、共通キーを使って列方向に結合するときは <code>MERGE ... BY</code> を使います。</p>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>複数のデータセットを縦に連結する — SET</h3>
+        <p><strong>基本形:</strong> <code>set データセット1 データセット2 ...;</code></p>
+        <p><code>SET</code> に複数のデータセットを並べると、記述した順番で行が追加されます。月別データなど、列構造が同じデータの統合に使います。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 3か月分の売上を縦に連結する */</span>
+data work.all_sales;
+  set cert.sales_jan cert.sales_feb cert.sales_mar;
+run;</pre>
+    </div>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>結合キーの順番に並べる — PROC SORT</h3>
+        <p><strong>基本形:</strong> <code>proc sort data=入力データ out=出力データ; by キー変数; run;</code></p>
+        <p><code>MERGE ... BY</code> を実行する前に、すべての入力データセットを同じBY変数の順番でソートします。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 2つのデータを同じキーで並べる */</span>
+proc sort data=cert.customers out=work.customers;
+  by customer_id;
+run;
+
+proc sort data=work.all_sales out=work.sales_sorted;
+  by customer_id;
+run;</pre>
+    </div>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>共通キーで横に結合する — MERGE / BY</h3>
+        <p><strong>基本形:</strong> <code>merge データセット1 データセット2; by キー変数;</code></p>
+        <p>同じBY変数の値を持つ行を1行にまとめ、列方向に結合します。入力データセットは事前にBY変数でソートされている必要があります。</p>
+      </div>
+      <pre class="example"><span class="comment">/* customer_idをキーに顧客情報を付ける */</span>
+data work.sales_with_customer;
+  merge work.sales_sorted work.customers;
+  by customer_id;
+run;</pre>
+    </div>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>結合元に応じて行を残す — IN=</h3>
+        <p><strong>基本形:</strong> <code>merge データセット1(in=フラグ1) データセット2(in=フラグ2);</code></p>
+        <p><code>IN=</code> は、そのBYグループが各入力データセットに存在したかを示す一時フラグを作ります。両方にある行だけ残す場合は、2つのフラグを <code>AND</code> で結びます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 両方に存在するcustomer_idだけ残す */</span>
+data work.matched_sales;
+  merge work.sales_sorted(in=in_sales)
+        work.customers(in=in_customer);
+  by customer_id;
+  if in_sales and in_customer;
+run;</pre>
+      <div class="output-guide">
+        <div class="output-section check">
+          <h4>条件の意味と残る行</h4>
+          <div class="output-table-wrap">
+            <table class="output-table">
+              <thead><tr><th>条件</th><th>意味</th><th>残る行</th></tr></thead>
+              <tbody>
+                <tr><td><code>if in_sales;</code></td><td>売上側を基準にする</td><td>売上に存在するすべてのキー</td></tr>
+                <tr><td><code>if in_customer;</code></td><td>顧客側を基準にする</td><td>顧客マスタに存在するすべてのキー</td></tr>
+                <tr><td><code>if in_sales and in_customer;</code></td><td>両方にある行だけにする</td><td>双方に存在するキー</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h3>確認テスト</h3>
+        <div class="question-list">
+          <div class="question-item">
+            <fieldset class="choice-question" data-correct="a" data-answer-text="SETに複数のデータセットを指定すると行方向に連結されます。">
+              <legend>問題 1. 月別データを縦に連結するときに使う構文はどれですか。</legend>
+              <div class="choices">
+                <label><input type="radio" name="question-03-1" value="a"> <span><code>SET</code></span></label>
+                <label><input type="radio" name="question-03-1" value="b"> <span><code>MERGE</code></span></label>
+                <label><input type="radio" name="question-03-1" value="c"> <span><code>FORMAT</code></span></label>
+              </div>
+              <p class="test-result" aria-live="polite"></p>
+            </fieldset>
+          </div>
+          <div class="question-item">
+            <p><strong>問題 2.</strong> 結合キーを指定する構文を完成させてください。</p>
+            <pre class="example">merge work.sales work.customers;
+<input class="syntax-input short" type="text" data-answer="by" aria-label="結合キーを指定する構文を入力" autocomplete="off" autocapitalize="none" spellcheck="false"> customer_id;
+run;<span class="correct-mark" aria-live="polite"></span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light" id="date-filter">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">04</p>
+    <h2>必要な行・列を選び、日付を扱う</h2>
+    <p>入力時に必要な行と列だけを読み込み、文字列の日付をSAS日付値へ変換します。値の保存方法と表示方法は別に考えます。</p>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>読み込む列を限定する — KEEP=</h3>
+        <p><strong>基本形:</strong> <code>set データセット名(keep=変数1 変数2 ...);</code></p>
+        <p><code>KEEP=</code> はデータセットオプションです。DATAステップへ読み込む前に、必要な列だけに限定します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 3列だけ読み込む */</span>
+data work.orders_selected;
+  set work.orders(keep=customer_id order_date_char amount);
+run;</pre>
+    </div>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>読み込む行を条件で限定する — WHERE</h3>
+        <p><strong>基本形:</strong> <code>where 条件式;</code></p>
+        <p><code>WHERE</code> は入力データセットにすでに存在する変数を使い、DATAステップへ読み込む行を限定します。DATAステップ内で新しく作った変数は条件に使えません。</p>
+      </div>
+      <pre class="example"><span class="comment">/* amountが0より大きい行だけ読み込む */</span>
+data work.positive_orders;
+  set work.orders;
+  where amount &gt; 0;
+run;</pre>
+    </div>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>文字列をSAS日付値へ変換する — INPUT</h3>
+        <p><strong>基本形:</strong> <code>新しい変数 = input(文字変数, informat.);</code></p>
+        <p><code>INPUT</code> 関数は、文字値を指定したinformatで読み取り、数値へ変換します。日付文字列には、その並びに合う日付informatを指定します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 2026-08-29という文字列をSAS日付値へ変換する */</span>
+data work.orders_dates;
+  set work.orders;
+  order_date = input(order_date_char, yymmdd10.);
+run;</pre>
+    </div>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>新しく作った値で行を限定する — IF</h3>
+        <p><strong>基本形:</strong> <code>if 条件式;</code></p>
+        <p>サブセット化IFステートメントは、DATAステップで処理した後に出力する行を限定します。<code>INPUT</code> で作った日付変数なども条件に使えます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 変換後の日付が2026年以降の行だけ残す */</span>
+data work.orders_2026;
+  set work.orders;
+  order_date = input(order_date_char, yymmdd10.);
+  if order_date &gt;= '01JAN2026'd;
+run;</pre>
+    </div>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>値の表示形式を設定する — FORMAT</h3>
+        <p><strong>基本形:</strong> <code>format 変数名 format.;</code></p>
+        <p><code>FORMAT</code> は保存されている値を変えず、表示方法だけを設定します。SAS日付値に <code>YYMMDD10.</code> を設定すると、年月日の形式で表示されます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* SAS日付値を2026-08-29の形で表示する */</span>
+format order_date yymmdd10.;</pre>
+    </div>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>出力から不要な列を除く — DROP</h3>
+        <p><strong>基本形:</strong> <code>drop 変数1 変数2 ...;</code></p>
+        <p><code>DROP</code> ステートメントは、DATAステップが出力するデータセットから指定した変数を除きます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 変換元の文字変数を出力しない */</span>
+data work.orders_2026;
+  set work.orders;
+  order_date = input(order_date_char, yymmdd10.);
+  format order_date yymmdd10.;
+  drop order_date_char;
+run;</pre>
+    </div>
+
+    <div class="output-guide">
+      <div class="output-section check">
+        <h4>構文の役割と使うタイミング</h4>
+        <div class="output-table-wrap">
+          <table class="output-table">
+            <thead><tr><th>構文</th><th>役割</th><th>使うタイミング</th></tr></thead>
+            <tbody>
+              <tr><td><code>KEEP=</code></td><td>読み込む列を限定する</td><td>入力前</td></tr>
+              <tr><td><code>WHERE</code></td><td>既存変数の条件で行を限定する</td><td>入力時</td></tr>
+              <tr><td><code>IF</code></td><td>処理後の条件で出力行を限定する</td><td>DATAステップ内</td></tr>
+              <tr><td><code>DROP</code></td><td>出力から列を除く</td><td>出力時</td></tr>
+              <tr><td><code>FORMAT</code></td><td>値の表示方法を設定する</td><td>表示時</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h3>確認テスト</h3>
+        <div class="question-list">
+          <div class="question-item">
+            <fieldset class="choice-question" data-correct="c" data-answer-text="DATAステップ内で新しく作った変数による抽出にはIFを使います。">
+              <legend>問題 1. <code>INPUT</code> で新しく作った <code>order_date</code> を条件に行を残す構文はどれですか。</legend>
+              <div class="choices">
+                <label><input type="radio" name="question-04-1" value="a"> <span><code>KEEP=</code></span></label>
+                <label><input type="radio" name="question-04-1" value="b"> <span><code>WHERE</code></span></label>
+                <label><input type="radio" name="question-04-1" value="c"> <span><code>IF</code></span></label>
+              </div>
+              <p class="test-result" aria-live="polite"></p>
+            </fieldset>
+          </div>
+          <div class="question-item">
+            <p><strong>問題 2.</strong> 文字列をSAS日付値へ変換する関数を入力してください。</p>
+            <pre class="example">order_date = <input class="syntax-input short" type="text" data-answer="input" aria-label="日付変換に使う関数を入力" autocomplete="off" autocapitalize="none" spellcheck="false">(order_date_char, yymmdd10.);<span class="correct-mark" aria-live="polite"></span></pre>
+          </div>
+          <div class="question-item">
+            <p><strong>問題 3.</strong> 出力から <code>order_date_char</code> を除く構文を完成させてください。</p>
+            <pre class="example"><input class="syntax-input short" type="text" data-answer="drop" aria-label="変数を出力から除く構文を入力" autocomplete="off" autocapitalize="none" spellcheck="false"> order_date_char;<span class="correct-mark" aria-live="polite"></span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-soft" id="practice">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Practice</p>
+    <h2>この項目の演習</h2>
+    <div class="steps">
+      <div class="step"><div class="step-content"><h4>CSV と Excel を読み込む</h4><p>読み込み後に <code>PROC CONTENTS</code> と <code>PROC PRINT(obs=10)</code> を実行し、型と日付表示を確認する。</p></div></div>
+      <div class="step"><div class="step-content"><h4>月別売上を連結する</h4><p>3 つの月別データを <code>SET</code> で縦結合し、件数を検算する。</p></div></div>
+      <div class="step"><div class="step-content"><h4>顧客マスタをマージする</h4><p>売上と顧客マスタを <code>customer_id</code> でソートし、<code>MERGE ... BY</code> で結合する。</p></div></div>
+      <div class="step"><div class="step-content"><h4>必要な行と列だけにする</h4><p>日付変換、金額条件、列制御を入れて、最終データセットを作る。</p></div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p>© 2026 yotalab</p>
+    <div class="footer-links">
+      <a href="../../../../">Home</a>
+      <a href="../base-programming-performance.html">試験対策ハブ</a>
+      <a href="../../../">Articles</a>
+    </div>
+  </div>
+</footer>
+<script>
+const progress = document.getElementById('progress');
+window.addEventListener('scroll', () => {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%';
+});
+
+document.querySelectorAll('.choice-question').forEach((question) => {
+  question.addEventListener('change', (event) => {
+    if (!event.target.matches('input[type="radio"]')) return;
+    const result = question.querySelector('.test-result');
+    const isCorrect = event.target.value === question.dataset.correct;
+    result.className = `test-result ${isCorrect ? 'correct' : 'incorrect'}`;
+    const label = document.createElement('span');
+    label.className = 'result-label';
+    label.textContent = isCorrect ? '○ 正解です。' : '× 不正解です。';
+    const explanation = document.createElement('span');
+    explanation.className = 'result-explanation';
+    explanation.textContent = question.dataset.answerText;
+    result.replaceChildren(label, explanation);
+  });
+});
+
+document.querySelectorAll('.syntax-input:not(.group-input)').forEach((input) => {
+  input.addEventListener('input', () => {
+    const isCorrect = input.value.trim().toLowerCase() === input.dataset.answer;
+    const mark = input.nextElementSibling;
+    input.classList.toggle('is-correct', isCorrect);
+    mark.textContent = isCorrect ? '○' : '';
+  });
+});
+
+document.querySelectorAll('.multi-blank').forEach((question) => {
+  const inputs = [...question.querySelectorAll('.group-input')];
+  const mark = question.querySelector('.group-correct-mark');
+  question.addEventListener('input', () => {
+    inputs.forEach((input) => {
+      const isCorrect = input.value.trim().toLowerCase() === input.dataset.answer;
+      input.classList.toggle('is-correct', isCorrect);
+    });
+    const allCorrect = inputs.every((input) => input.value.trim().toLowerCase() === input.dataset.answer);
+    mark.textContent = allCorrect ? '○' : '';
+  });
+});
+</script>
+</body>
+</html>

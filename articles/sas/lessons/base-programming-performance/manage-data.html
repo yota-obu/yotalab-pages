@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>データ管理 — SAS 9.4 Base Programming — yotalab</title>
+<meta name="description" content="SAS 9.4 Base Programming の試験項目「データ管理」の詳細学習ページ。">
+<link rel="stylesheet" href="../../../article.css">
+<style>
+  .example{background:var(--bg);color:var(--ink);border:1px solid var(--hairline)}
+  .example .comment{color:var(--ink-fine)}
+  .detail-grid{display:grid;gap:18px;margin:28px 0}
+  .detail-card{background:var(--bg);border:1px solid var(--hairline);border-radius:18px;padding:24px}
+  .detail-card h3{margin-top:0}
+  .detail-card ul{padding-left:1.1em;margin:8px 0 0}
+  .detail-card li{font-size:15px;line-height:1.65;color:var(--ink-muted);margin:4px 0}
+  .mini-nav{display:flex;gap:10px;flex-wrap:wrap;margin:28px 0}
+  .mini-nav a{border:1px solid var(--hairline);border-radius:980px;padding:8px 14px;font-size:14px;color:var(--action);background:var(--bg)}
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav class="site-nav"><div class="nav-inner"><a href="../../../../" class="logo">yotalab</a><ul class="nav-links"><li><a href="../../../../apps/">Apps</a></li><li><a href="../../../" class="active">Articles</a></li><li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li></ul></div></nav>
+<header class="article-hero">
+  <p class="eyebrow">SAS Base Programming · 35-40%</p>
+  <h1>データ管理</h1>
+  <p class="lead">出題比率が最も大きい領域。並べ替え、条件分岐、属性変更、累計、関数、型変換、DO ループ、転置、マクロ変数をまとめて固めます。</p>
+  <p class="series-tag"><a href="../base-programming-performance.html">試験対策ハブ</a> · 詳細項目</p>
+</header>
+
+<section class="tile tile-light">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Goal</p>
+    <h2>この項目で到達する状態</h2>
+    <p class="lead">入力済みデータを、分析やレポートに使える形へ変換できること。試験では、DATA ステップの基礎力がそのまま得点に直結します。</p>
+    <div class="mini-nav">
+      <a href="#sort">SORT</a>
+      <a href="#condition">条件分岐</a>
+      <a href="#attributes">属性変更</a>
+      <a href="#by-retain">BY と累計</a>
+      <a href="#functions">関数と型変換</a>
+      <a href="#transpose-macro">転置とマクロ</a>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-soft" id="sort">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">01</p>
+    <h2>PROC SORT と重複削除</h2>
+    <p><code>PROC SORT</code> は、BY 処理、マージ、レポートの前提になります。元データを残すなら <code>OUT=</code> を使います。</p>
+    <div class="syntax-note">
+      <h3>構文解説: 並べ替えとキー重複削除</h3>
+      <ul>
+        <li><code>data=</code> は入力データセット、<code>out=</code> はソート後に作るデータセットを指定する。</li>
+        <li><code>by customer_id order_date;</code> は、顧客 ID、日付の順で並べ替える。</li>
+        <li><code>nodupkey</code> は、BY 変数の値が重複する行を落とす。</li>
+      </ul>
+    </div>
+    <pre class="example">proc sort data=cert.orders out=work.orders_sorted;
+  by customer_id order_date;
+run;
+
+proc sort data=work.orders_sorted out=work.unique_customers nodupkey;
+  by customer_id;
+run;</pre>
+    <div class="callout"><div class="callout-title">注意</div><p><code>NODUPKEY</code> は BY 変数が同じ行の重複を落とします。行全体が完全一致する重複と混同しないようにします。</p></div>
+  </div>
+</section>
+
+<section class="tile tile-light" id="condition">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">02</p>
+    <h2>IF-THEN/ELSE と DO/END</h2>
+    <p>条件に応じた変数作成や再分類は頻出です。複数ステートメントを条件付きで実行する場合は <code>DO</code> と <code>END</code> でまとめます。</p>
+    <div class="syntax-note">
+      <h3>構文解説: 条件分岐の読み方</h3>
+      <ul>
+        <li><code>length</code> は文字変数の長さを、代入より前に決める。</li>
+        <li><code>if ... then</code> は条件に合う場合だけ代入する。</li>
+        <li><code>else if</code> は前の条件に合わなかった場合だけ次を判定する。</li>
+        <li><code>do; ... end;</code> は複数のステートメントを 1 つの条件にまとめる。</li>
+      </ul>
+    </div>
+    <pre class="example">data work.orders_flagged;
+  set work.orders_sorted;
+  length amount_band $ 8 status $ 12;
+
+  if amount &gt;= 10000 then amount_band = "High";
+  else if amount &gt;= 3000 then amount_band = "Middle";
+  else amount_band = "Low";
+
+  if missing(customer_id) then do;
+    status = "Review";
+    review_reason = "Missing ID";
+  end;
+  else status = "OK";
+run;</pre>
+  </div>
+</section>
+
+<section class="tile tile-soft" id="attributes">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">03</p>
+    <h2>代入文、LENGTH、LABEL、FORMAT</h2>
+    <p>文字変数の長さは、最初に現れた定義で決まります。代入より前に <code>LENGTH</code> を置く癖をつけると、値の切り詰めを防げます。</p>
+    <div class="syntax-note">
+      <h3>構文解説: 変数属性を先に整える</h3>
+      <ul>
+        <li><code>length region_group $ 12;</code> は文字変数の長さを 12 バイトにする。</li>
+        <li><code>rename=(old_region=region)</code> は読み込み時に変数名を変える。</li>
+        <li><code>label</code> は変数の説明、<code>format</code> は表示形式を指定する。</li>
+        <li><code>in (...)</code> は、値が指定リストに含まれるかを判定する。</li>
+      </ul>
+    </div>
+    <pre class="example">data work.orders_clean;
+  length region_group $ 12;
+  set work.orders_flagged(rename=(old_region=region));
+  label amount = "Order Amount"
+        order_date = "Order Date";
+  format amount comma12. order_date yymmdd10.;
+
+  if region in ("Tokyo", "Kanagawa", "Chiba", "Saitama") then region_group = "Kanto";
+  else region_group = "Other";
+run;</pre>
+    <div class="detail-grid">
+      <div class="detail-card"><h3>RENAME=</h3><ul><li>変数名そのものを変更する。</li><li>読み込み時・書き出し時のデータセットオプションとして使える。</li></ul></div>
+      <div class="detail-card"><h3>LABEL / FORMAT</h3><ul><li>表示上の説明と見た目を変える。</li><li>値そのものの型や保存値を変えるわけではない。</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-soft">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Missing Values</p>
+    <h2>欠損値を含む計算は、演算子と関数で結果が変わる</h2>
+    <p>数値計算では、欠損値の扱いがロジックエラーになりやすいです。<code>+</code> 演算子と <code>SUM</code> 関数、SUM ステートメントの違いを意識します。</p>
+    <div class="syntax-note">
+      <h3>構文解説: 横方向の合計と累計</h3>
+      <ul>
+        <li><code>total_operator = a + b;</code> は通常の足し算で、欠損の影響を受ける。</li>
+        <li><code>sum(a, b)</code> は非欠損値を合計する関数。</li>
+        <li><code>running_total + a;</code> は SUM ステートメントで、前行までの値を保持して累計する。</li>
+        <li><code>datalines;</code> は例示用の小さな入力データをコード内に置く。</li>
+      </ul>
+    </div>
+    <pre class="example">data work.missing_practice;
+  input a b;
+  total_operator = a + b;
+  total_function = sum(a, b);
+  running_total + a;
+datalines;
+10 5
+.  7
+3  .
+;
+run;</pre>
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h3>押さえる違い</h3>
+        <ul>
+          <li><code>a + b</code> は、どちらかが欠損なら結果も欠損になりやすい。</li>
+          <li><code>sum(a,b)</code> は、欠損を無視して非欠損値を合計する。</li>
+          <li><code>running_total + a;</code> は SUM ステートメントで、値を自動的に保持する。</li>
+        </ul>
+      </div>
+      <div class="detail-card">
+        <h3>試験での見抜き方</h3>
+        <ul>
+          <li>「累計」「小計」が出てきたら SUM ステートメントや <code>RETAIN</code> を疑う。</li>
+          <li>横方向の合計で欠損を無視したいなら <code>SUM</code> 関数を使う。</li>
+          <li>ログに欠損値生成の NOTE が出たら、計算式を確認する。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light" id="by-retain">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">04</p>
+    <h2>BY グループ、first. / last.、RETAIN、SUM ステートメント</h2>
+    <p>グループごとの小計や累計は、DATA ステップの核です。BY 変数でソートし、グループの先頭で初期化し、最後で出力します。</p>
+    <div class="syntax-note">
+      <h3>構文解説: グループ単位の 1 行サマリー</h3>
+      <ul>
+        <li><code>proc sort ... by customer_id order_date;</code> で顧客別・日付順に並べる。</li>
+        <li><code>by customer_id;</code> は DATA ステップ内でグループ境界を使う宣言。</li>
+        <li><code>first.customer_id</code> で顧客ごとの初期化を行う。</li>
+        <li><code>total_amount + amount;</code> は合計を保持しながら加算する。</li>
+        <li><code>last.customer_id</code> の行だけ <code>output</code> して、顧客ごとに 1 行へまとめる。</li>
+      </ul>
+    </div>
+    <pre class="example">proc sort data=work.orders_clean out=work.orders_by_customer;
+  by customer_id order_date;
+run;
+
+data work.customer_summary;
+  set work.orders_by_customer;
+  by customer_id;
+  if first.customer_id then do;
+    total_amount = 0;
+    order_count = 0;
+    first_order = order_date;
+  end;
+  total_amount + amount;
+  order_count + 1;
+  if last.customer_id then do;
+    last_order = order_date;
+    output;
+  end;
+  format first_order last_order yymmdd10. total_amount comma12.;
+  keep customer_id total_amount order_count first_order last_order;
+run;</pre>
+  </div>
+</section>
+
+<section class="tile tile-light">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">BY Groups</p>
+    <h2>first. / last. は「行」ではなく「グループ境界」を見る</h2>
+    <p><code>first.customer_id</code> と <code>last.customer_id</code> は、BY グループの始まりと終わりを示します。複数の BY 変数を使うと、どの単位で初期化するかが得点差になります。</p>
+    <div class="syntax-note">
+      <h3>構文解説: 複数 BY 変数の境界</h3>
+      <ul>
+        <li><code>by region customer_id order_date;</code> は、地域、顧客、日付の順に並べる。</li>
+        <li>DATA ステップ側の <code>by region customer_id;</code> は、地域内の顧客単位で境界を作る。</li>
+        <li><code>first.customer_id</code> で顧客ごとに初期化し、<code>last.customer_id</code> で顧客ごとの結果を出す。</li>
+      </ul>
+    </div>
+    <pre class="example">proc sort data=work.orders_clean out=work.orders_by_region_customer;
+  by region customer_id order_date;
+run;
+
+data work.region_customer_summary;
+  set work.orders_by_region_customer;
+  by region customer_id;
+  if first.customer_id then do;
+    customer_total = 0;
+    customer_count = 0;
+  end;
+  customer_total + amount;
+  customer_count + 1;
+  if last.customer_id then output;
+  keep region customer_id customer_total customer_count;
+run;</pre>
+    <div class="callout"><div class="callout-title">読む順番</div><p><code>by region customer_id;</code> の場合、顧客単位の集計なら <code>first.customer_id</code> で初期化します。地域全体の集計なら <code>first.region</code> を使うため、問題文の「単位」を先に確認します。</p></div>
+  </div>
+</section>
+
+<section class="tile tile-soft" id="functions">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">05</p>
+    <h2>文字・数値・日付関数と型変換</h2>
+    <p>関数は範囲が広いので、試験ガイドにある代表関数をタスク別に覚えます。型変換は <code>INPUT</code> と <code>PUT</code> を明示的に使います。</p>
+    <div class="params">
+      <div class="param-row"><span class="param-name">文字</span><span class="param-value">SCAN</span><span class="param-desc">区切り文字で文字列を分解する。名前、コード、住所などの抽出に使う。</span></div>
+      <div class="param-row"><span class="param-name">文字</span><span class="param-value">SUBSTR</span><span class="param-desc">固定位置から一部を取り出す。商品コードや年月文字列に使う。</span></div>
+      <div class="param-row"><span class="param-name">文字</span><span class="param-value">TRIM</span><span class="param-desc">後続ブランクを取り除く。文字列連結前の余分な空白対策に使う。</span></div>
+      <div class="param-row"><span class="param-name">文字</span><span class="param-value">UPCASE / LOWCASE</span><span class="param-desc">大小文字をそろえる。コード値やステータスの比較前に使う。</span></div>
+      <div class="param-row"><span class="param-name">数値</span><span class="param-value">SUM</span><span class="param-desc">欠損を無視して合計する。単純な <code>+</code> とは欠損時の挙動が違う。</span></div>
+      <div class="param-row"><span class="param-name">数値</span><span class="param-value">MEAN / ROUND / INT</span><span class="param-desc">平均、丸め、整数化。指定された表示や判定に合わせて使う。</span></div>
+      <div class="param-row"><span class="param-name">数値</span><span class="param-value">SMALLEST / LARGEST</span><span class="param-desc">複数値の中から小さい順・大きい順の値を取り出す。</span></div>
+      <div class="param-row"><span class="param-name">日付</span><span class="param-value">INTCK</span><span class="param-desc">2 つの日付の間にある期間境界数を返す。</span></div>
+      <div class="param-row"><span class="param-name">日付</span><span class="param-value">INTNX</span><span class="param-desc">指定した間隔だけ日付を進め、月初・月末などの位置を制御する。</span></div>
+      <div class="param-row"><span class="param-name">日付</span><span class="param-value">MDY / TODAY</span><span class="param-desc">日付値を作る。固定日付と実行日基準の計算を分ける。</span></div>
+      <div class="param-row"><span class="param-name">日付</span><span class="param-value">YEAR / QTR / MONTH / DAY</span><span class="param-desc">SAS 日付値から年、四半期、月、日を取り出す。</span></div>
+    </div>
+    <div class="syntax-note">
+      <h3>構文解説: 関数をタスクに対応させる</h3>
+      <ul>
+        <li><code>scan</code> と <code>substr</code> は、文字列から必要部分を取り出す。</li>
+        <li><code>put(order_date, yymmddn8.)</code> は日付値を文字列に変換し、後続の <code>substr</code> で年月を抜き出す。</li>
+        <li><code>round(amount, 100)</code> は 100 単位で丸める。</li>
+        <li><code>intck</code> は期間数、<code>intnx</code> は指定期間だけ進めた日付を求める。</li>
+      </ul>
+    </div>
+    <pre class="example">data work.function_practice;
+  set work.orders_clean;
+  product_prefix = scan(product_code, 1, "-");
+  year_month = substr(put(order_date, yymmddn8.), 1, 6);
+  amount_round = round(amount, 100);
+  months_from_order = intck("month", order_date, today());
+  next_month_start = intnx("month", order_date, 1, "b");
+  char_amount = put(amount, comma12.);
+  num_amount = input(char_amount, comma12.);
+run;</pre>
+  </div>
+</section>
+
+<section class="tile tile-soft">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Conversion</p>
+    <h2>型変換はログに頼らず、意図をコードに書く</h2>
+    <p>SAS は必要に応じて自動変換を行いますが、ログに NOTE が出て、想定外の欠損や比較ミスにつながることがあります。試験では明示変換を書けることが重要です。</p>
+    <div class="syntax-note">
+      <h3>構文解説: INPUT と PUT の向き</h3>
+      <ul>
+        <li><code>input(amount_char, comma12.)</code> は、文字の金額を数値に変換する。</li>
+        <li><code>put(order_date, yymmn6.)</code> は、数値の日付値を年月文字列に変換する。</li>
+        <li><code>format amount_num comma12.;</code> は、数値の保存値は変えず表示だけ整える。</li>
+      </ul>
+    </div>
+    <pre class="example">data work.converted;
+  set work.orders_clean;
+  amount_num = input(amount_char, comma12.);
+  order_month = put(order_date, yymmn6.);
+  format amount_num comma12.;
+run;</pre>
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h3><code>INPUT</code></h3>
+        <ul>
+          <li>文字値を、informat を使って数値へ変換する。</li>
+          <li>金額文字列、日付文字列、コード化された数値の変換で使う。</li>
+        </ul>
+      </div>
+      <div class="detail-card">
+        <h3><code>PUT</code></h3>
+        <ul>
+          <li>数値を、format を使って文字へ変換する。</li>
+          <li>日付を年月文字列にする、数値コードを表示用文字列にする場面で使う。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light" id="transpose-macro">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">06</p>
+    <h2>DO ループ、PROC TRANSPOSE、マクロ変数</h2>
+    <p>DO ループは繰り返し処理、<code>PROC TRANSPOSE</code> はデータの縦横変換、マクロ変数はプログラム保守に使います。</p>
+    <div class="syntax-note">
+      <h3>構文解説: 繰り返し、転置、マクロ変数</h3>
+      <ul>
+        <li><code>%let</code> はプログラム中で再利用する値をマクロ変数に入れる。</li>
+        <li><code>do month = 1 to 12;</code> は 1 から 12 まで繰り返す。</li>
+        <li><code>mdy(month, 1, &amp;target_year.)</code> は月・日・年から SAS 日付値を作る。</li>
+        <li><code>proc transpose</code> の <code>var</code> は転置する値、<code>id</code> は列名になる値、<code>by</code> はグループ単位を指定する。</li>
+      </ul>
+    </div>
+    <pre class="example">%let target_year = 2026;
+%let outlib = work;
+
+data &amp;outlib..monthly_targets;
+  do month = 1 to 12;
+    target_date = mdy(month, 1, &amp;target_year.);
+    output;
+  end;
+  format target_date yymmdd10.;
+run;
+
+proc transpose data=work.sales_long
+               out=work.sales_wide(prefix=month_)
+               name=source_variable;
+  by customer_id;
+  id month;
+  var amount;
+run;</pre>
+    <div class="callout"><div class="callout-title">BY を使う前提</div><p><code>PROC TRANSPOSE</code> で <code>BY</code> を使う場合、対象データは BY 変数でソート済み、または適切にインデックス化されている必要があります。</p></div>
+    <div class="callout"><div class="callout-title">マクロ変数のドット</div><p><code>&amp;outlib..monthly_targets</code> のようにドットが 2 つ見えるのは、1 つ目がマクロ変数名の終端、2 つ目がライブラリとメンバ名の区切りです。</p></div>
+  </div>
+</section>
+
+<footer class="site-footer"><div class="footer-inner"><p>© 2026 yotalab</p><div class="footer-links"><a href="../../../../">Home</a><a href="../base-programming-performance.html">試験対策ハブ</a><a href="../../../">Articles</a></div></div></footer>
+<script>
+const progress = document.getElementById('progress');
+window.addEventListener('scroll', () => {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%';
+});
+</script>
+</body>
+</html>

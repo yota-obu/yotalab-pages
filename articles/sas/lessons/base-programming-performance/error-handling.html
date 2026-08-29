@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>エラーハンドリング — SAS 9.4 Base Programming — yotalab</title>
+<meta name="description" content="SAS 9.4 Base Programming の試験項目「エラーハンドリング」の詳細学習ページ。">
+<link rel="stylesheet" href="../../../article.css">
+<style>
+  .example{background:var(--bg);color:var(--ink);border:1px solid var(--hairline)}
+  .example .comment{color:var(--ink-fine)}
+  .detail-grid{display:grid;gap:18px;margin:28px 0}
+  .detail-card{background:var(--bg);border:1px solid var(--hairline);border-radius:18px;padding:24px}
+  .detail-card h3{margin-top:0}
+  .detail-card ul{padding-left:1.1em;margin:8px 0 0}
+  .detail-card li{font-size:15px;line-height:1.65;color:var(--ink-muted);margin:4px 0}
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav class="site-nav"><div class="nav-inner"><a href="../../../../" class="logo">yotalab</a><ul class="nav-links"><li><a href="../../../../apps/">Apps</a></li><li><a href="../../../" class="active">Articles</a></li><li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li></ul></div></nav>
+<header class="article-hero">
+  <p class="eyebrow">SAS Base Programming · 15-20%</p>
+  <h1>エラーハンドリング</h1>
+  <p class="lead">構文エラーを直すだけでなく、実行はできたが結果が違うロジックエラーをログと検算で見抜く領域。</p>
+  <p class="series-tag"><a href="../base-programming-performance.html">試験対策ハブ</a> · 詳細項目</p>
+</header>
+
+<section class="tile tile-light">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Mindset</p>
+    <h2>ログは最後ではなく、処理の一部として読む</h2>
+    <p class="lead">SAS では、エラーが出なくても結果が間違っていることがあります。ERROR、WARNING、NOTE をすべて得点源として扱います。</p>
+    <div class="detail-grid">
+      <div class="detail-card"><h3>ERROR</h3><ul><li>構文として成立しない、ファイルがない、BY 変数が不正など。</li><li>最初の ERROR を優先して直す。</li></ul></div>
+      <div class="detail-card"><h3>WARNING</h3><ul><li>処理は続くが、結果が怪しい状態。</li><li>意図しない型変換、出力上書き、文字値の切り詰めなどに注意。</li></ul></div>
+      <div class="detail-card"><h3>NOTE</h3><ul><li>自動変換、未初期化変数、欠損値生成など重要なヒントを含む。</li><li>試験では NOTE を読めるかが差になります。</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Log Reading</p>
+    <h2>ログは上から順に、最初の原因を探す</h2>
+    <p>1 つの構文ミスが、後続の行に複数の ERROR を連鎖させることがあります。ログを読むときは、最後のメッセージではなく、最初に異常が出た位置を優先します。</p>
+    <div class="steps">
+      <div class="step"><div class="step-content"><h4>1. ERROR の最初を見る</h4><p>セミコロン欠落、引用符不一致、スペルミス、無効オプションなど、構文として実行できない原因を先に直す。</p></div></div>
+      <div class="step"><div class="step-content"><h4>2. WARNING を読む</h4><p>処理は続いても、上書き、切り詰め、形式不一致などで結果が崩れていないか確認する。</p></div></div>
+      <div class="step"><div class="step-content"><h4>3. NOTE を捨てない</h4><p>自動変換、未初期化変数、欠損値生成、入力行数や出力行数は、ロジックエラーの手がかりになる。</p></div></div>
+      <div class="step"><div class="step-content"><h4>4. 件数で検算する</h4><p>ログの obs 数、<code>PROC FREQ</code>、<code>PROC MEANS</code>、<code>PROC PRINT(obs=)</code> で、問題文の条件どおりに行が残っているか見る。</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-soft">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">PUTLOG</p>
+    <h2>ロジックエラーを PUTLOG で追跡する</h2>
+    <p><code>PUTLOG</code> は DATA ステップ中の値をログに出します。全件出すと読めないので、条件付きで絞るのが実務でも試験でも有効です。</p>
+    <div class="syntax-note">
+      <h3>構文解説: 特定ケースだけログに出す</h3>
+      <ul>
+        <li><code>by customer_id;</code> は顧客ごとのグループ境界を使うための宣言。</li>
+        <li><code>first.customer_id</code> で累計を初期化し、SUM ステートメントで加算する。</li>
+        <li><code>if customer_id = "C001" then do;</code> は、確認したい ID だけにログ出力を絞る。</li>
+        <li><code>putlog "DEBUG: " _n_= ...;</code> は、反復回数と変数名つきの値をログに出す。</li>
+      </ul>
+    </div>
+    <pre class="example">data work.debug_total;
+  set work.orders_by_customer;
+  by customer_id;
+  if first.customer_id then total_amount = 0;
+  total_amount + amount;
+
+  if customer_id = "C001" then do;
+    putlog "DEBUG: " _n_= customer_id= order_date= amount= total_amount=;
+  end;
+
+  if last.customer_id then output;
+run;</pre>
+    <div class="callout"><div class="callout-title">覚える形</div><p><code>putlog _all_;</code> は全変数を出せます。原因が見えないときの最終手段として便利ですが、ログが大きくなるため条件付きで使います。</p></div>
+    <div class="callout"><div class="callout-title">自動変数</div><p><code>_N_</code> は DATA ステップの反復回数、<code>_ERROR_</code> はその反復でエラーが発生したかを示す一時変数です。ログ確認や条件付きデバッグで役立ちます。</p></div>
+  </div>
+</section>
+
+<section class="tile tile-soft">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Debug Patterns</p>
+    <h2>PUTLOG は「いつ」「どの行で」壊れたかを絞る</h2>
+    <p>ロジックエラーは、全行を眺めても見つかりません。疑わしい条件、特定 ID、グループの先頭・末尾など、原因が出そうな場面だけログに出します。</p>
+    <div class="syntax-note">
+      <h3>構文解説: 境界と異常値を分けて見る</h3>
+      <ul>
+        <li><code>first.customer_id or last.customer_id</code> は、グループの先頭・末尾だけをログに出す条件。</li>
+        <li><code>first.customer_id=</code> のように末尾に <code>=</code> を付けると、変数名と値を一緒に出せる。</li>
+        <li><code>missing(amount)</code> は欠損値を見つける条件。</li>
+        <li>境界ログと異常値ログを分けると、累計ミスと入力値ミスを切り分けやすい。</li>
+      </ul>
+    </div>
+    <pre class="example">data work.debug_group;
+  set work.orders_by_customer;
+  by customer_id;
+  if first.customer_id then total_amount = 0;
+  total_amount + amount;
+
+  if first.customer_id or last.customer_id then
+    putlog "BOUNDARY: " _n_= customer_id= first.customer_id= last.customer_id= total_amount=;
+
+  if missing(amount) then
+    putlog "MISSING AMOUNT: " _n_= customer_id= order_date= amount=;
+
+  if last.customer_id then output;
+run;</pre>
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h3>境界を見る</h3>
+        <ul>
+          <li><code>first.</code> / <code>last.</code> が期待どおりの単位で立っているか確認する。</li>
+          <li>BY 変数を増やしたときは、初期化する単位を見直す。</li>
+        </ul>
+      </div>
+      <div class="detail-card">
+        <h3>異常値を見る</h3>
+        <ul>
+          <li>欠損、負の金額、想定外カテゴリなど、問題文の条件から外れる行だけ出す。</li>
+          <li>ログが大きくなりすぎないよう、条件付きで出力する。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Syntax</p>
+    <h2>構文エラーの典型パターン</h2>
+    <div class="compare">
+      <div class="compare-card"><div class="compare-label">よくある</div><h4>セミコロン欠落</h4><p>次の行まで 1 つのステートメントとして読まれ、後続に連鎖エラーが出る。</p></div>
+      <div class="compare-card after"><div class="compare-label">よくある</div><h4>引用符不一致</h4><p>文字列が閉じられず、以降のコードが文字列扱いになる。</p></div>
+      <div class="compare-card"><div class="compare-label">よくある</div><h4>キーワードのスペルミス</h4><p><code>formt</code>、<code>legnth</code> など。SAS は補正しない。</p></div>
+      <div class="compare-card after"><div class="compare-label">よくある</div><h4>無効なオプション</h4><p>PROC やステートメントごとに使えるオプションが違う。</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Common Notes</p>
+    <h2>NOTE を読めると、ロジックエラーに早く気づける</h2>
+    <p>NOTE は「失敗」ではありませんが、結果を疑うべきサインを含みます。特に型変換、未初期化変数、欠損値生成は頻出です。</p>
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h3>自動変換</h3>
+        <ul>
+          <li>文字と数値を比較・計算したときに起きる。</li>
+          <li><code>INPUT</code> / <code>PUT</code> で明示変換へ直す。</li>
+        </ul>
+      </div>
+      <div class="detail-card">
+        <h3>未初期化変数</h3>
+        <ul>
+          <li>変数名のスペルミスや、条件分岐で代入されない経路が原因になりやすい。</li>
+          <li><code>PROC CONTENTS</code> と <code>PUTLOG</code> で変数名と値を確認する。</li>
+        </ul>
+      </div>
+      <div class="detail-card">
+        <h3>欠損値生成</h3>
+        <ul>
+          <li>無効な入力値、日付読み込み失敗、欠損を含む演算で発生する。</li>
+          <li>入力データ、informat、計算式の順に確認する。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-soft">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Logic</p>
+    <h2>ロジックエラーの探し方</h2>
+    <p>ロジックエラーは、構文としては正しくても、結果が問題文と違う状態です。見つけるには、途中結果を小さく検算します。</p>
+    <div class="steps">
+      <div class="step"><div class="step-content"><h4>件数を確認</h4><p><code>PROC PRINT(obs=)</code>、ログの obs 数、<code>PROC FREQ</code> で意図せず行が増減していないか確認する。</p></div></div>
+      <div class="step"><div class="step-content"><h4>型と長さを確認</h4><p><code>PROC CONTENTS</code> で文字 / 数値、文字長、format を確認する。文字長不足は値の切り詰めにつながる。</p></div></div>
+      <div class="step"><div class="step-content"><h4>条件を確認</h4><p><code>WHERE</code> と <code>IF</code>、日付定数、大小比較、欠損値の扱いを確認する。</p></div></div>
+      <div class="step"><div class="step-content"><h4>グループ境界を確認</h4><p><code>first.</code> / <code>last.</code> が意図した単位で立っているか、BY 変数とソート順を確認する。</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Practice</p>
+    <h2>この項目の演習</h2>
+    <p>自分で壊したコードを作り、ログから直す練習をします。試験前にこの作業をすると、ログを読む速度がかなり上がります。</p>
+    <div class="syntax-note">
+      <h3>構文解説: わざと壊したコードの読み方</h3>
+      <ul>
+        <li><code>set cert.orders</code> の後にセミコロンがないため、次の <code>if</code> まで巻き込んで解釈される。</li>
+        <li><code>amount = "1000"</code> は、数値変数と文字リテラルの比較になり、自動変換の NOTE が出やすい。</li>
+        <li><code>first.customer_id</code> を使うには、事前ソートと DATA ステップ内の <code>by customer_id;</code> が必要。</li>
+      </ul>
+    </div>
+    <pre class="example"><span class="comment">/* 意図的な練習: どこを直すべきかログで確認する */</span>
+data work.bad;
+  set cert.orders
+  if amount = "1000" then flag = 1;
+  if first.customer_id then total = 0;
+  total + amount;
+run;</pre>
+    <div class="detail-grid">
+      <div class="detail-card"><h3>直す観点</h3><ul><li><code>set</code> 行のセミコロン。</li><li>数値変数と文字リテラルの比較。</li><li><code>first.customer_id</code> を使う前の <code>by customer_id;</code> とソート。</li></ul></div>
+      <div class="detail-card"><h3>採点観点</h3><ul><li>最初の ERROR を見つけられる。</li><li>WARNING / NOTE を結果品質のヒントとして読める。</li><li>修正後に件数と合計で検算できる。</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer"><div class="footer-inner"><p>© 2026 yotalab</p><div class="footer-links"><a href="../../../../">Home</a><a href="../base-programming-performance.html">試験対策ハブ</a><a href="../../../">Articles</a></div></div></footer>
+<script>
+const progress = document.getElementById('progress');
+window.addEventListener('scroll', () => {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%';
+});
+</script>
+</body>
+</html>
