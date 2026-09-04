@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>データ管理 — SAS 9.4 Base Programming — yotalab</title>
 <meta name="description" content="SAS 9.4 Base Programming の試験項目「データ管理」の詳細学習ページ。">
-<link rel="stylesheet" href="../../../article.css">
+<link rel="stylesheet" href="../../../article.css?v=20260904">
 <style>
   .example{background:var(--bg);color:var(--ink);border:1px solid var(--hairline)}
   .example .comment{color:var(--ink-fine)}
@@ -22,24 +22,27 @@
 <div class="progress-bar" id="progress"></div>
 <nav class="site-nav"><div class="nav-inner"><a href="../../../../" class="logo">yotalab</a><ul class="nav-links"><li><a href="../../../../apps/">Apps</a></li><li><a href="../../../" class="active">Articles</a></li><li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li></ul></div></nav>
 <header class="article-hero">
-  <p class="eyebrow">SAS Base Programming · 35-40%</p>
   <h1>データ管理</h1>
-  <p class="lead">出題比率が最も大きい領域。並べ替え、条件分岐、属性変更、累計、関数、型変換、DO ループ、転置、マクロ変数をまとめて固めます。</p>
-  <p class="series-tag"><a href="../base-programming-performance.html">試験対策ハブ</a> · 詳細項目</p>
+  <p class="lead">並べ替え、条件分岐、属性変更、累計、関数、DO ループ、転置、マクロ変数を使ってデータを整えます。</p>
+  <p class="series-tag"><a href="../base-programming-performance.html">← SAS Base Programming 学習トップへ</a></p>
 </header>
 
 <section class="tile tile-light">
   <div class="tile-inner section">
     <p class="section-eyebrow">Goal</p>
-    <h2>この項目で到達する状態</h2>
-    <p class="lead">入力済みデータを、分析やレポートに使える形へ変換できること。試験では、DATA ステップの基礎力がそのまま得点に直結します。</p>
+    <h2>データの整形から集計・転置まで</h2>
+    <p class="lead">並べ替え、条件分岐、変数属性、グループ集計、関数、繰り返し処理、転置、マクロ変数を扱います。</p>
     <div class="mini-nav">
       <a href="#sort">SORT</a>
       <a href="#condition">条件分岐</a>
+      <a href="#assignment">代入文</a>
       <a href="#attributes">属性変更</a>
+      <a href="#missing-values">欠損値</a>
       <a href="#by-retain">BY と累計</a>
-      <a href="#functions">関数と型変換</a>
-      <a href="#transpose-macro">転置とマクロ</a>
+      <a href="#functions">関数</a>
+      <a href="#macro-variables">マクロ変数</a>
+      <a href="#do-loops">DO ループ</a>
+      <a href="#transpose">縦横変換</a>
     </div>
   </div>
 </section>
@@ -49,128 +52,263 @@
     <p class="section-eyebrow">01</p>
     <h2>PROC SORT と重複削除</h2>
     <p><code>PROC SORT</code> は、BY 処理、マージ、レポートの前提になります。元データを残すなら <code>OUT=</code> を使います。</p>
-    <div class="syntax-note">
-      <h3>構文解説: 並べ替えとキー重複削除</h3>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+      <h3>昇順・降順に並べ替える — PROC SORT</h3>
+      <p><strong>基本形:</strong> <code>proc sort data=入力データ out=出力データ; by 変数; run;</code></p>
       <ul>
         <li><code>data=</code> は入力データセット、<code>out=</code> はソート後に作るデータセットを指定する。</li>
-        <li><code>by customer_id order_date;</code> は、顧客 ID、日付の順で並べ替える。</li>
-        <li><code>nodupkey</code> は、BY 変数の値が重複する行を落とす。</li>
+        <li>何も付けないBY変数は昇順、<code>DESCENDING</code>を直前に付けた変数は降順になる。</li>
+        <li>複数のBY変数は左から優先され、変数ごとに昇順・降順を指定できる。</li>
       </ul>
+      </div>
+      <pre class="example"><span class="comment">/* 商品名を降順、売上金額を昇順に並べ替える */</span>
+proc sort data=cert.orders out=work.orders_sorted;
+  by descending product sales;
+run;</pre>
     </div>
-    <pre class="example">proc sort data=cert.orders out=work.orders_sorted;
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>元のデータセットをそのまま並べ替える</h3>
+        <p><strong>基本形:</strong> <code>proc sort data=データセット名; by 変数; run;</code></p>
+        <p><code>OUT=</code>を省略すると、<code>DATA=</code>で指定したデータセットが並べ替え後の内容に置き換わります。元の並びを残したい場合は<code>OUT=</code>を指定します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* WORK.ORDERS自体を顧客ID、注文日順に並べ替える */</span>
+proc sort data=work.orders;
   by customer_id order_date;
-run;
-
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>重複を除く — NODUPKEY / NODUPRECS</h3>
+        <p><strong>BYキーの重複:</strong> <code>proc sort data=入力 out=出力 nodupkey; by キー変数;</code></p>
+        <p><strong>行全体の重複:</strong> <code>proc sort data=入力 out=出力 noduprecs; by _all_;</code></p>
+        <p><code>NODUPKEY</code>はBY変数が同じ行を1行にし、<code>NODUPRECS</code>は比較対象の値がすべて同じ重複行を除きます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 顧客IDごとに最初の1行だけを残す */</span>
 proc sort data=work.orders_sorted out=work.unique_customers nodupkey;
   by customer_id;
 run;</pre>
-    <div class="callout"><div class="callout-title">注意</div><p><code>NODUPKEY</code> は BY 変数が同じ行の重複を落とします。行全体が完全一致する重複と混同しないようにします。</p></div>
+    </div>
   </div>
 </section>
 
 <section class="tile tile-light" id="condition">
   <div class="tile-inner section">
     <p class="section-eyebrow">02</p>
-    <h2>IF-THEN/ELSE と DO/END</h2>
-    <p>条件に応じた変数作成や再分類は頻出です。複数ステートメントを条件付きで実行する場合は <code>DO</code> と <code>END</code> でまとめます。</p>
-    <div class="syntax-note">
-      <h3>構文解説: 条件分岐の読み方</h3>
-      <ul>
-        <li><code>length</code> は文字変数の長さを、代入より前に決める。</li>
-        <li><code>if ... then</code> は条件に合う場合だけ代入する。</li>
-        <li><code>else if</code> は前の条件に合わなかった場合だけ次を判定する。</li>
-        <li><code>do; ... end;</code> は複数のステートメントを 1 つの条件にまとめる。</li>
-      </ul>
-    </div>
-    <pre class="example">data work.orders_flagged;
+    <h2>条件によって処理を分ける</h2>
+    <p><code>IF / THEN / ELSE</code> は条件分岐、<code>DO / END</code> は1つの条件で複数の処理を実行するときに使います。</p>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>条件ごとに処理を選ぶ — IF / THEN / ELSE</h3>
+        <p><strong>基本形:</strong> <code>if 条件 then 処理; else if 条件 then 処理; else 処理;</code></p>
+        <p><code>IF</code> の条件が成立すると <code>THEN</code> の後を実行します。成立しなければ、後ろの <code>ELSE IF</code> または <code>ELSE</code> へ進みます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 売上金額に応じて割引率を決める */</span>
+data work.orders_discounted;
   set work.orders_sorted;
-  length amount_band $ 8 status $ 12;
-
-  if amount &gt;= 10000 then amount_band = "High";
-  else if amount &gt;= 3000 then amount_band = "Middle";
-  else amount_band = "Low";
+  if amount &gt;= 10000 then discount_rate = 0.10;
+  else if amount &gt;= 3000 then discount_rate = 0.05;
+  else discount_rate = 0;
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>条件成立時の複数処理をまとめる — DO / END</h3>
+        <p><strong>基本形:</strong> <code>if 条件 then do; 処理1; 処理2; end;</code></p>
+        <p><code>DO</code> から <code>END</code> までが1つの処理のまとまりになります。ここで使う <code>DO;</code> は範囲を繰り返すDOループではありません。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 顧客IDが欠損している行へ2つの値を設定する */</span>
+data work.orders_reviewed;
+  set work.orders_sorted;
 
   if missing(customer_id) then do;
     status = "Review";
     review_reason = "Missing ID";
   end;
-  else status = "OK";
+  else do;
+    status = "OK";
+    review_reason = "";
+  end;
 run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>境界値を含む範囲を判定する — 比較演算子</h3>
+        <p><strong>基本形:</strong> <code>下限 &lt;= 変数 and 変数 &lt;= 上限</code></p>
+        <p><code>&lt;</code>／<code>LT</code>は未満、<code>&lt;=</code>／<code>LE</code>は以下、<code>&gt;</code>／<code>GT</code>は超、<code>&gt;=</code>／<code>GE</code>は以上です。両端を含む範囲は<code>AND</code>で2条件を結びます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 売上金額を境界値込みの3区分へ分類する */</span>
+data work.sales_ranges;
+  set work.orders_sorted;
+  length sales_range $ 6;
+  if sales &lt; 100000 then sales_range = "Lower";
+  else if 100000 &lt;= sales and sales &lt;= 200000 then sales_range = "Middle";
+  else sales_range = "Upper";
+run;</pre>
+      <div class="callout"><div class="callout-title">欠損値がある場合</div><p>SASの数値欠損値は通常の数値より小さいため、最初に<code>if missing(sales) then ...;</code>を置かないと「100000未満」に含まれます。</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-soft" id="assignment">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">03</p>
+    <h2>代入文で変数を作成・更新する</h2>
+    <p>代入文は右辺を計算し、その結果を左辺の変数へ保存します。新しい変数の作成、既存変数の更新、式の計算、日付定数をそれぞれ確認します。</p>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>新しい変数を作る — 代入文</h3>
+        <p><strong>基本形:</strong> <code>新しい変数 = 値;</code></p>
+        <p>左辺の変数が入力データに存在しなければ、新しい変数として作成されます。文字値は引用符で囲みます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 税率という新しい数値変数を作る */</span>
+data work.orders_tax;
+  set work.orders_sorted;
+  tax_rate = 0.10;
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>既存変数の値を更新する — 代入文</h3>
+        <p><strong>基本形:</strong> <code>既存変数 = 新しい値;</code></p>
+        <p>左辺の変数がすでに存在する場合は、その行の値を新しい値で上書きします。元データセットは、同じ名前で出力しない限り変更されません。</p>
+      </div>
+      <pre class="example"><span class="comment">/* statusが空白の行だけUnknownへ置き換える */</span>
+data work.orders_status;
+  set work.orders_sorted;
+  if missing(status) then status = "Unknown";
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>式の結果を変数へ入れる — 代入文</h3>
+        <p><strong>基本形:</strong> <code>変数 = 数値や変数を使った式;</code></p>
+        <p>右辺では四則演算や関数を使用できます。掛け算と割り算は、足し算と引き算より先に計算されます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 売上金額から税込金額を計算する */</span>
+data work.orders_total;
+  set work.orders_sorted;
+  amount_with_tax = amount * 1.10;
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>固定の日付を代入する — 日付定数</h3>
+        <p><strong>基本形:</strong> <code>日付変数 = '日月年'd;</code></p>
+        <p>SAS日付定数は引用符の後ろに<code>d</code>を付けます。日付は内部では数値として保存されるため、見やすく表示するには日付formatを設定します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 2026年4月1日をSAS日付値として代入する */</span>
+data work.campaign;
+  start_date = '01APR2026'd;
+  format start_date yymmdd10.;
+run;</pre>
+    </div>
   </div>
 </section>
 
 <section class="tile tile-soft" id="attributes">
   <div class="tile-inner section">
-    <p class="section-eyebrow">03</p>
-    <h2>代入文、LENGTH、LABEL、FORMAT</h2>
-    <p>文字変数の長さは、最初に現れた定義で決まります。代入より前に <code>LENGTH</code> を置く癖をつけると、値の切り詰めを防げます。</p>
-    <div class="syntax-note">
-      <h3>構文解説: 変数属性を先に整える</h3>
-      <ul>
-        <li><code>length region_group $ 12;</code> は文字変数の長さを 12 バイトにする。</li>
-        <li><code>rename=(old_region=region)</code> は読み込み時に変数名を変える。</li>
-        <li><code>label</code> は変数の説明、<code>format</code> は表示形式を指定する。</li>
-        <li><code>in (...)</code> は、値が指定リストに含まれるかを判定する。</li>
-      </ul>
-    </div>
-    <pre class="example">data work.orders_clean;
+    <p class="section-eyebrow">04</p>
+    <h2>変数の属性と表示を整える</h2>
+    <p>変数の長さ、名前、ラベル、表示形式は役割が異なります。それぞれを分けて確認します。</p>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>文字変数の長さを決める — LENGTH</h3>
+        <p><strong>基本形:</strong> <code>length 変数名 $ 長さ;</code></p>
+        <p>文字変数へ保存できる長さを、最初の代入より前に指定します。短すぎると値が途中で切れる原因になります。</p>
+      </div>
+      <pre class="example"><span class="comment">/* region_groupを12バイトの文字変数として作る */</span>
+data work.regions;
   length region_group $ 12;
+  region_group = "Kanto";
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>変数名を変更する — RENAME=</h3>
+        <p><strong>基本形:</strong> <code>set データセット名(rename=(変更前=変更後));</code></p>
+        <p>データセットオプションとして、読み込み時または書き出し時に変数名そのものを変更します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 読み込み時にold_regionをregionへ変更する */</span>
+data work.orders_clean;
   set work.orders_flagged(rename=(old_region=region));
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>変数へ説明を付ける — LABEL</h3>
+        <p><strong>基本形:</strong> <code>label 変数名 = "表示する説明";</code></p>
+        <p>レポートなどに表示する説明を設定します。変数名や保存値は変わりません。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 金額と注文日に表示用の説明を付ける */</span>
+data work.orders_labeled;
+  set work.orders_clean;
   label amount = "Order Amount"
         order_date = "Order Date";
-  format amount comma12. order_date yymmdd10.;
-
-  if region in ("Tokyo", "Kanagawa", "Chiba", "Saitama") then region_group = "Kanto";
-  else region_group = "Other";
 run;</pre>
-    <div class="detail-grid">
-      <div class="detail-card"><h3>RENAME=</h3><ul><li>変数名そのものを変更する。</li><li>読み込み時・書き出し時のデータセットオプションとして使える。</li></ul></div>
-      <div class="detail-card"><h3>LABEL / FORMAT</h3><ul><li>表示上の説明と見た目を変える。</li><li>値そのものの型や保存値を変えるわけではない。</li></ul></div>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>値の見え方を設定する — FORMAT</h3>
+        <p><strong>基本形:</strong> <code>format 変数名 format.;</code></p>
+        <p>値の保存方法や型を変えず、画面やレポートでの表示方法だけを設定します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 金額へ桁区切り、注文日へ年月日の表示形式を付ける */</span>
+data work.orders_formatted;
+  set work.orders_clean;
+  format amount comma12. order_date yymmdd10.;
+run;</pre>
     </div>
   </div>
 </section>
 
-<section class="tile tile-soft">
+<section class="tile tile-soft" id="missing-values">
   <div class="tile-inner section">
     <p class="section-eyebrow">Missing Values</p>
     <h2>欠損値を含む計算は、演算子と関数で結果が変わる</h2>
     <p>数値計算では、欠損値の扱いがロジックエラーになりやすいです。<code>+</code> 演算子と <code>SUM</code> 関数、SUM ステートメントの違いを意識します。</p>
-    <div class="syntax-note">
-      <h3>構文解説: 横方向の合計と累計</h3>
-      <ul>
-        <li><code>total_operator = a + b;</code> は通常の足し算で、欠損の影響を受ける。</li>
-        <li><code>sum(a, b)</code> は非欠損値を合計する関数。</li>
-        <li><code>running_total + a;</code> は SUM ステートメントで、前行までの値を保持して累計する。</li>
-        <li><code>datalines;</code> は例示用の小さな入力データをコード内に置く。</li>
-      </ul>
-    </div>
-    <pre class="example">data work.missing_practice;
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>コード内に確認用データを入力する — DATALINES</h3>
+        <p><strong>基本形:</strong> <code>data データセット名; input 変数名 ...; datalines; 入力データ ; run;</code></p>
+        <p><code>DATALINES</code> は、小さな確認用データをSASコード内へ直接入力するときに使います。各行の値は <code>INPUT</code> に書いた変数の順で読み込まれ、データ部分は単独のセミコロンで終了します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 欠損値を含む3行の確認用データを作る */</span>
+data work.missing_practice;
   input a b;
-  total_operator = a + b;
-  total_function = sum(a, b);
-  running_total + a;
 datalines;
 10 5
 .  7
 3  .
 ;
 run;</pre>
-    <div class="detail-grid">
-      <div class="detail-card">
-        <h3>押さえる違い</h3>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>欠損を考慮して合計・累計する — SUM</h3>
+        <p><strong>SUM関数:</strong> <code>合計変数 = sum(変数1, 変数2, ...);</code></p>
+        <p><strong>SUMステートメント:</strong> <code>累計変数 + 加算する値;</code></p>
         <ul>
-          <li><code>a + b</code> は、どちらかが欠損なら結果も欠損になりやすい。</li>
-          <li><code>sum(a,b)</code> は、欠損を無視して非欠損値を合計する。</li>
-          <li><code>running_total + a;</code> は SUM ステートメントで、値を自動的に保持する。</li>
+          <li><code>total_operator = a + b;</code> は通常の足し算で、どちらかが欠損なら結果も欠損になる。</li>
+          <li><code>sum(a, b)</code> は欠損を無視して非欠損値を合計する。</li>
+          <li><code>running_total + a;</code> は前行までの値を保持して累計する。</li>
         </ul>
       </div>
-      <div class="detail-card">
-        <h3>試験での見抜き方</h3>
-        <ul>
-          <li>「累計」「小計」が出てきたら SUM ステートメントや <code>RETAIN</code> を疑う。</li>
-          <li>横方向の合計で欠損を無視したいなら <code>SUM</code> 関数を使う。</li>
-          <li>ログに欠損値生成の NOTE が出たら、計算式を確認する。</li>
-        </ul>
+      <pre class="example"><span class="comment">/* 先ほど作ったデータで3種類の加算方法を比較する */</span>
+data work.missing_result;
+  set work.missing_practice;
+  total_operator = a + b;
+  total_function = sum(a, b);
+  running_total + a;
+run;</pre>
+      <div class="output-example">
+        <h4>出力結果例</h4>
+        <pre class="example"><span class="comment">/* . は数値欠損値を表す */</span>
+a    b    total_operator    total_function    running_total
+10   5          15                15                10
+ .   7           .                 7                10
+ 3   .           .                 3                13</pre>
       </div>
     </div>
   </div>
@@ -178,40 +316,54 @@ run;</pre>
 
 <section class="tile tile-light" id="by-retain">
   <div class="tile-inner section">
-    <p class="section-eyebrow">04</p>
-    <h2>BY グループ、first. / last.、RETAIN、SUM ステートメント</h2>
-    <p>グループごとの小計や累計は、DATA ステップの核です。BY 変数でソートし、グループの先頭で初期化し、最後で出力します。</p>
-    <div class="syntax-note">
-      <h3>構文解説: グループ単位の 1 行サマリー</h3>
-      <ul>
-        <li><code>proc sort ... by customer_id order_date;</code> で顧客別・日付順に並べる。</li>
-        <li><code>by customer_id;</code> は DATA ステップ内でグループ境界を使う宣言。</li>
-        <li><code>first.customer_id</code> で顧客ごとの初期化を行う。</li>
-        <li><code>total_amount + amount;</code> は合計を保持しながら加算する。</li>
-        <li><code>last.customer_id</code> の行だけ <code>output</code> して、顧客ごとに 1 行へまとめる。</li>
-      </ul>
-    </div>
-    <pre class="example">proc sort data=work.orders_clean out=work.orders_by_customer;
+    <p class="section-eyebrow">05</p>
+    <h2>グループの境界と行をまたぐ値を扱う</h2>
+    <p><code>BY</code>、<code>FIRST. / LAST.</code>、<code>RETAIN</code> は役割が異なります。それぞれの動きを分けて確認します。</p>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>グループ処理の単位を指定する — BY</h3>
+        <p><strong>基本形:</strong> <code>set データセット名; by グループ変数;</code></p>
+        <p><code>BY</code> はDATAステップでグループの境界を使うための指定です。通常は、事前に同じ変数の順で並べ替えておく必要があります。<code>BY</code> を書くだけでは集計されません。</p>
+      </div>
+      <pre class="example"><span class="comment">/* BY処理の前に顧客ID、注文日の順で並べ替える */</span>
+proc sort data=work.orders_clean out=work.orders_by_customer;
   by customer_id order_date;
 run;
 
-data work.customer_summary;
+<span class="comment">/* 顧客IDをグループ処理の単位として指定する */</span>
+data work.orders_grouped;
   set work.orders_by_customer;
   by customer_id;
-  if first.customer_id then do;
-    total_amount = 0;
-    order_count = 0;
-    first_order = order_date;
-  end;
-  total_amount + amount;
-  order_count + 1;
-  if last.customer_id then do;
-    last_order = order_date;
-    output;
-  end;
-  format first_order last_order yymmdd10. total_amount comma12.;
-  keep customer_id total_amount order_count first_order last_order;
 run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>グループの先頭と末尾を判定する — FIRST. / LAST.</h3>
+        <p><strong>基本形:</strong> <code>first.グループ変数</code> ／ <code>last.グループ変数</code></p>
+        <p><code>FIRST.</code> と <code>LAST.</code> は、<code>BY</code> を指定したときにSASが作る一時的な自動変数です。先頭または末尾の行では1、それ以外では0になります。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 顧客ごとに先頭行と末尾行のフラグを付ける */</span>
+data work.orders_with_edges;
+  set work.orders_by_customer;
+  by customer_id;
+  is_first = first.customer_id;
+  is_last = last.customer_id;
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>前の行の値を保持する — RETAIN</h3>
+        <p><strong>基本形:</strong> <code>retain 変数名 初期値;</code></p>
+        <p>DATAステップ内の代入文で作る変数は、通常、次の行を処理するときに欠損値へ戻ります。<code>RETAIN</code> を指定すると、前の行で計算した値を次の行へ引き継げます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 行を読み込むたびに連番を1ずつ増やす */</span>
+data work.orders_numbered;
+  set work.orders_by_customer;
+  retain row_no 0;
+  row_no = row_no + 1;
+run;</pre>
+    </div>
+    <div class="callout"><div class="callout-title">SUMステートメントとの違い</div><p><code>running_total + amount;</code> は値を自動的に保持するため、<code>RETAIN</code> を別に書く必要はありません。通常の代入文で累計する場合は、<code>RETAIN</code> が必要です。</p></div>
   </div>
 </section>
 
@@ -220,155 +372,577 @@ run;</pre>
     <p class="section-eyebrow">BY Groups</p>
     <h2>first. / last. は「行」ではなく「グループ境界」を見る</h2>
     <p><code>first.customer_id</code> と <code>last.customer_id</code> は、BY グループの始まりと終わりを示します。複数の BY 変数を使うと、どの単位で初期化するかが得点差になります。</p>
-    <div class="syntax-note">
-      <h3>構文解説: 複数 BY 変数の境界</h3>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+      <h3>複数のBY変数でグループ境界を作る</h3>
+      <p><strong>基本形:</strong> <code>by 上位グループ 下位グループ;</code></p>
       <ul>
         <li><code>by region customer_id order_date;</code> は、地域、顧客、日付の順に並べる。</li>
         <li>DATA ステップ側の <code>by region customer_id;</code> は、地域内の顧客単位で境界を作る。</li>
         <li><code>first.customer_id</code> で顧客ごとに初期化し、<code>last.customer_id</code> で顧客ごとの結果を出す。</li>
       </ul>
-    </div>
-    <pre class="example">proc sort data=work.orders_clean out=work.orders_by_region_customer;
+      </div>
+      <pre class="example"><span class="comment">/* 地域、顧客ID、注文日の順で並べ替える */</span>
+proc sort data=work.orders_clean out=work.orders_by_region_customer;
   by region customer_id order_date;
 run;
 
+<span class="comment">/* 地域内の顧客ごとに売上と件数を集計する */</span>
 data work.region_customer_summary;
   set work.orders_by_region_customer;
   by region customer_id;
+  <span class="comment">/* 地域内で顧客が変わるたびに集計値を初期化する */</span>
   if first.customer_id then do;
     customer_total = 0;
     customer_count = 0;
   end;
+  <span class="comment">/* 顧客単位で売上と件数を累計する */</span>
   customer_total + amount;
   customer_count + 1;
   if last.customer_id then output;
   keep region customer_id customer_total customer_count;
 run;</pre>
+    </div>
     <div class="callout"><div class="callout-title">読む順番</div><p><code>by region customer_id;</code> の場合、顧客単位の集計なら <code>first.customer_id</code> で初期化します。地域全体の集計なら <code>first.region</code> を使うため、問題文の「単位」を先に確認します。</p></div>
   </div>
 </section>
 
 <section class="tile tile-soft" id="functions">
   <div class="tile-inner section">
-    <p class="section-eyebrow">05</p>
-    <h2>文字・数値・日付関数と型変換</h2>
-    <p>関数は範囲が広いので、試験ガイドにある代表関数をタスク別に覚えます。型変換は <code>INPUT</code> と <code>PUT</code> を明示的に使います。</p>
-    <div class="params">
-      <div class="param-row"><span class="param-name">文字</span><span class="param-value">SCAN</span><span class="param-desc">区切り文字で文字列を分解する。名前、コード、住所などの抽出に使う。</span></div>
-      <div class="param-row"><span class="param-name">文字</span><span class="param-value">SUBSTR</span><span class="param-desc">固定位置から一部を取り出す。商品コードや年月文字列に使う。</span></div>
-      <div class="param-row"><span class="param-name">文字</span><span class="param-value">TRIM</span><span class="param-desc">後続ブランクを取り除く。文字列連結前の余分な空白対策に使う。</span></div>
-      <div class="param-row"><span class="param-name">文字</span><span class="param-value">UPCASE / LOWCASE</span><span class="param-desc">大小文字をそろえる。コード値やステータスの比較前に使う。</span></div>
-      <div class="param-row"><span class="param-name">数値</span><span class="param-value">SUM</span><span class="param-desc">欠損を無視して合計する。単純な <code>+</code> とは欠損時の挙動が違う。</span></div>
-      <div class="param-row"><span class="param-name">数値</span><span class="param-value">MEAN / ROUND / INT</span><span class="param-desc">平均、丸め、整数化。指定された表示や判定に合わせて使う。</span></div>
-      <div class="param-row"><span class="param-name">数値</span><span class="param-value">SMALLEST / LARGEST</span><span class="param-desc">複数値の中から小さい順・大きい順の値を取り出す。</span></div>
-      <div class="param-row"><span class="param-name">日付</span><span class="param-value">INTCK</span><span class="param-desc">2 つの日付の間にある期間境界数を返す。</span></div>
-      <div class="param-row"><span class="param-name">日付</span><span class="param-value">INTNX</span><span class="param-desc">指定した間隔だけ日付を進め、月初・月末などの位置を制御する。</span></div>
-      <div class="param-row"><span class="param-name">日付</span><span class="param-value">MDY / TODAY</span><span class="param-desc">日付値を作る。固定日付と実行日基準の計算を分ける。</span></div>
-      <div class="param-row"><span class="param-name">日付</span><span class="param-value">YEAR / QTR / MONTH / DAY</span><span class="param-desc">SAS 日付値から年、四半期、月、日を取り出す。</span></div>
-    </div>
-    <div class="syntax-note">
-      <h3>構文解説: 関数をタスクに対応させる</h3>
-      <ul>
-        <li><code>scan</code> と <code>substr</code> は、文字列から必要部分を取り出す。</li>
-        <li><code>put(order_date, yymmddn8.)</code> は日付値を文字列に変換し、後続の <code>substr</code> で年月を抜き出す。</li>
-        <li><code>round(amount, 100)</code> は 100 単位で丸める。</li>
-        <li><code>intck</code> は期間数、<code>intnx</code> は指定期間だけ進めた日付を求める。</li>
-      </ul>
-    </div>
-    <pre class="example">data work.function_practice;
-  set work.orders_clean;
-  product_prefix = scan(product_code, 1, "-");
-  year_month = substr(put(order_date, yymmddn8.), 1, 6);
-  amount_round = round(amount, 100);
-  months_from_order = intck("month", order_date, today());
-  next_month_start = intnx("month", order_date, 1, "b");
-  char_amount = put(amount, comma12.);
-  num_amount = input(char_amount, comma12.);
-run;</pre>
-  </div>
-</section>
-
-<section class="tile tile-soft">
-  <div class="tile-inner section">
-    <p class="section-eyebrow">Conversion</p>
-    <h2>型変換はログに頼らず、意図をコードに書く</h2>
-    <p>SAS は必要に応じて自動変換を行いますが、ログに NOTE が出て、想定外の欠損や比較ミスにつながることがあります。試験では明示変換を書けることが重要です。</p>
-    <div class="syntax-note">
-      <h3>構文解説: INPUT と PUT の向き</h3>
-      <ul>
-        <li><code>input(amount_char, comma12.)</code> は、文字の金額を数値に変換する。</li>
-        <li><code>put(order_date, yymmn6.)</code> は、数値の日付値を年月文字列に変換する。</li>
-        <li><code>format amount_num comma12.;</code> は、数値の保存値は変えず表示だけ整える。</li>
-      </ul>
-    </div>
-    <pre class="example">data work.converted;
-  set work.orders_clean;
-  amount_num = input(amount_char, comma12.);
-  order_month = put(order_date, yymmn6.);
-  format amount_num comma12.;
-run;</pre>
-    <div class="detail-grid">
-      <div class="detail-card">
-        <h3><code>INPUT</code></h3>
-        <ul>
-          <li>文字値を、informat を使って数値へ変換する。</li>
-          <li>金額文字列、日付文字列、コード化された数値の変換で使う。</li>
-        </ul>
-      </div>
-      <div class="detail-card">
-        <h3><code>PUT</code></h3>
-        <ul>
-          <li>数値を、format を使って文字へ変換する。</li>
-          <li>日付を年月文字列にする、数値コードを表示用文字列にする場面で使う。</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="tile tile-light" id="transpose-macro">
-  <div class="tile-inner section">
     <p class="section-eyebrow">06</p>
-    <h2>DO ループ、PROC TRANSPOSE、マクロ変数</h2>
-    <p>DO ループは繰り返し処理、<code>PROC TRANSPOSE</code> はデータの縦横変換、マクロ変数はプログラム保守に使います。</p>
-    <div class="syntax-note">
-      <h3>構文解説: 繰り返し、転置、マクロ変数</h3>
-      <ul>
-        <li><code>%let</code> はプログラム中で再利用する値をマクロ変数に入れる。</li>
-        <li><code>do month = 1 to 12;</code> は 1 から 12 まで繰り返す。</li>
-        <li><code>mdy(month, 1, &amp;target_year.)</code> は月・日・年から SAS 日付値を作る。</li>
-        <li><code>proc transpose</code> の <code>var</code> は転置する値、<code>id</code> は列名になる値、<code>by</code> はグループ単位を指定する。</li>
-      </ul>
+    <h2>文字・数値・日付を関数で加工する</h2>
+    <p>関数の種類ごとに、入力値がどのような結果へ変わるかを確認します。</p>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>文字列を取り出し・整形する — 文字関数</h3>
+        <p><strong>基本形:</strong> <code>新しい文字変数 = 文字関数(文字列, 引数);</code></p>
+        <ul>
+          <li><code>SCAN</code> は、区切り文字で分けた文字列から指定位置の語を取り出す。</li>
+          <li><code>SUBSTR</code> は、開始位置と長さを指定して文字列の一部を取り出す。</li>
+          <li><code>FIND</code> は検索文字列が始まる位置を返し、代入文の左側に書いた<code>SUBSTR</code>は指定部分を置き換える。</li>
+          <li><code>TRIM</code> は末尾の空白を除き、<code>COMPRESS</code> は指定した不要文字を取り除く。</li>
+          <li><code>TRANWRD</code> は文字列内の語を置き換え、<code>UPCASE</code>／<code>LOWCASE</code> は大文字・小文字をそろえる。</li>
+        </ul>
+      </div>
+      <pre class="example"><span class="comment">/* 商品コード、年月、ステータスの文字列を整える */</span>
+data work.character_functions;
+  product_prefix = scan("ABC-2026-01", 1, "-");
+  year = substr("20260830", 1, 4);
+  sample_digits = substr("0123456789", 3, 4);
+  product_trimmed = trim("Desk   ");
+  york_position = find(upcase("New York"), "YORK");
+  revised_code = "ABC123";
+  substr(revised_code, 1, 3) = "XYZ";
+  status_upper = upcase("active");
+  status_lower = lowcase("ACTIVE");
+  phone_digits = compress("(03) 1234-5678", "()- ");
+  new_status = tranwrd("Order-Pending", "Pending", "Complete");
+run;</pre>
+      <div class="output-example">
+        <h4>出力結果例</h4>
+        <pre class="example"><span class="comment">/* 1行のデータが作成される */</span>
+product_prefix    year    sample_digits    product_trimmed    york_position    revised_code
+ABC               2026    2345             Desk                   5            XYZ123
+
+status_upper    status_lower    phone_digits    new_status
+ACTIVE          active          0312345678      Order-Complete</pre>
+      </div>
     </div>
-    <pre class="example">%let target_year = 2026;
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>合計・平均・丸めを求める — 数値関数</h3>
+        <p><strong>基本形:</strong> <code>新しい数値変数 = 数値関数(数値, 引数);</code></p>
+        <ul>
+          <li><code>SUM</code>／<code>MEAN</code> は、欠損値を除いて合計・平均を求める。</li>
+          <li><code>ROUND</code> は指定単位で丸め、<code>INT</code> は小数部分を切り捨てて整数部分を返す。</li>
+          <li><code>SMALLEST</code>／<code>LARGEST</code> は、小さい順・大きい順で指定順位の値を返す。</li>
+          <li><code>RAND</code> は乱数を生成する。再現可能にする場合は、先に<code>CALL STREAMINIT</code>でシードを指定する。</li>
+        </ul>
+      </div>
+      <pre class="example"><span class="comment">/* 欠損を含む3つの値を集計し、値を丸める */</span>
+data work.numeric_functions;
+  a = 10;
+  b = .;
+  c = 25;
+  total = sum(a, b, c);
+  average = mean(a, b, c);
+  rounded = round(12356, 100);
+  integer = int(12.8);
+  second_smallest = smallest(2, a, c, 40);
+  second_largest = largest(2, a, c, 40);
+  call streaminit(12345);
+  random_value = rand("uniform");
+run;</pre>
+      <div class="output-example">
+        <h4>出力結果例</h4>
+        <pre class="example"><span class="comment">/* SUMとMEANは欠損値bを除いて計算する */</span>
+total    average    rounded    integer    second_smallest    second_largest    random_value
+  35       17.5       12400       12             25               25          0以上1未満</pre>
+      </div>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>複数変数をまとめて指定する — 変数リスト / OF</h3>
+        <p><strong>基本形:</strong> <code>関数(of 変数リスト)</code></p>
+        <ul>
+          <li><code>revenue:</code> は、名前が<code>revenue</code>で始まるすべての変数を表す。</li>
+          <li><code>q1-q4</code> は、末尾の連番が1から4までの変数を表す。</li>
+          <li><code>start--end</code> は、データセット上で両変数の間にあるすべての変数を表す。</li>
+        </ul>
+      </div>
+      <pre class="example"><span class="comment">/* 接頭辞、連番、データセット上の位置で変数をまとめる */</span>
+data work.variable_list_totals;
+  revenue2024 = 1.2;
+  revenue2025 = 1.6;
+  revenue2026 = 2.0;
+  q1 = 10; q2 = 20; q3 = 30; q4 = 40;
+  start = 5; middle = 6; end = 7;
+
+  revenue_total = sum(of revenue:);
+  quarter_total = sum(of q1-q4);
+  position_total = sum(of start--end);
+run;</pre>
+      <div class="output-example">
+        <h4>出力結果例</h4>
+        <pre class="example"><span class="comment">/* 3種類の変数リストで、それぞれ指定された変数が合計される */</span>
+revenue_total    quarter_total    position_total
+     4.8              100               18</pre>
+      </div>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>日付と時刻を作る — MDY / TODAY / DATE / TIME</h3>
+        <p><strong>基本形:</strong> <code>日付変数 = mdy(月, 日, 年);</code></p>
+        <ul>
+          <li><code>MDY</code> は月・日・年からSAS日付値を作る。</li>
+          <li><code>TODAY()</code>と<code>DATE()</code>は、どちらも実行日のSAS日付値を返す。</li>
+          <li><code>TIME()</code>は午前0時から現在時刻までの秒数を返す。</li>
+        </ul>
+      </div>
+      <pre class="example"><span class="comment">/* 固定日付、実行日、実行時刻を作る */</span>
+data work.date_created;
+  base_date = mdy(8, 30, 2026);
+  today_value = today();
+  date_value = date();
+  time_value = time();
+  format base_date today_value date_value date9. time_value time8.;
+run;</pre>
+      <div class="output-example">
+        <h4>出力結果例</h4>
+        <pre class="example"><span class="comment">/* 実行日と実行時刻の値は実行した時点で変わる */</span>
+base_date    today_value    date_value    time_value
+30AUG2026    実行日         実行日        実行時刻</pre>
+      </div>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>日付から年・四半期・月・日を取り出す</h3>
+        <p><strong>基本形:</strong> <code>新しい変数 = year(日付値);</code></p>
+        <p><code>YEAR</code>、<code>QTR</code>、<code>MONTH</code>、<code>DAY</code>は、SAS日付値から指定した要素を数値で返します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 2026年8月30日を年・四半期・月・日に分ける */</span>
+data work.date_parts;
+  base_date = '30AUG2026'd;
+  year_value = year(base_date);
+  quarter_value = qtr(base_date);
+  month_value = month(base_date);
+  day_value = day(base_date);
+  format base_date date9.;
+run;</pre>
+      <div class="output-example">
+        <h4>出力結果例</h4>
+        <pre class="example"><span class="comment">/* QTRは1から4の数値を返す */</span>
+base_date    year_value    quarter_value    month_value    day_value
+30AUG2026       2026             3               8             30</pre>
+      </div>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>日付の間隔と移動先を求める — INTCK / INTNX / DATDIF / YRDIF</h3>
+        <p><strong>期間境界数:</strong> <code>intck("間隔", 開始日, 終了日)</code></p>
+        <p><strong>日付の移動:</strong> <code>intnx("間隔", 基準日, 移動数, "位置")</code></p>
+        <ul>
+          <li><code>INTCK</code>は月や年などの境界を何回またいだかを返し、<code>INTNX</code>は指定期間だけ進めた日付を返す。</li>
+          <li><code>DATDIF</code>は2日付間の日数、<code>YRDIF</code>は年数を指定した基準で計算する。</li>
+        </ul>
+      </div>
+      <pre class="example"><span class="comment">/* 2つの日付の間隔と翌月初日を求める */</span>
+data work.date_intervals;
+  start_date = '01JAN2026'd;
+  end_date = '01JAN2027'd;
+  months = intck("month", start_date, end_date);
+  next_month = intnx("month", start_date, 1, "b");
+  days = datdif(start_date, end_date, "act/act");
+  years = yrdif(start_date, end_date, "act/act");
+  format start_date end_date next_month date9.;
+run;</pre>
+      <div class="output-example">
+        <h4>出力結果例</h4>
+        <pre class="example"><span class="comment">/* 2026年は平年なので日数は365 */</span>
+months    next_month    days    years
+  12      01FEB2026     365       1</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light" id="macro-variables">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">07</p>
+    <h2>マクロ変数で値を再利用する</h2>
+    <p>年やライブラリ名など、プログラム内で繰り返し使う文字列を1か所で管理します。</p>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>再利用する値を定義する — %LET</h3>
+        <p><strong>基本形:</strong> <code>%let マクロ変数名 = 値;</code></p>
+        <p>マクロ変数へ保存した値は、<code>&amp;マクロ変数名.</code> と書いてプログラム内で参照します。同じ年やライブラリ名を何度も使う場合に便利です。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 再利用する年と出力ライブラリをマクロ変数に入れる */</span>
+%let target_year = 2026;
 %let outlib = work;
 
+<span class="comment">/* 参照時は名前の前に&amp;を付ける */</span>
+data &amp;outlib..target_year;
+  year = &amp;target_year.;
+run;</pre>
+    </div>
+    <div class="callout"><div class="callout-title">マクロ変数のドット</div><p><code>&amp;outlib..target_year</code> のようにドットが2つ見えるのは、1つ目がマクロ変数名の終端、2つ目がライブラリ名とデータセット名の区切りだからです。</p></div>
+  </div>
+</section>
+
+<section class="tile tile-soft" id="do-loops">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">08</p>
+    <h2>DO ループで処理を繰り返す</h2>
+    <p>回数で繰り返すDO、先頭で条件判定するDO WHILE、末尾で条件判定するDO UNTIL、ネストしたDOを分けて確認します。</p>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>同じ処理を繰り返す — DO ループ</h3>
+        <p><strong>基本形:</strong> <code>do 変数 = 開始値 to 終了値; 処理; end;</code></p>
+        <p><code>DO</code> から <code>END</code> までの処理を、指定した範囲で繰り返します。DATAステップ内で複数行を作る場合は、ループ内に <code>OUTPUT</code> を書きます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 1月から5月まで2か月ずつ進め、月初日を作る */</span>
 data &amp;outlib..monthly_targets;
-  do month = 1 to 12;
+  do month = 1 to 5 by 2;
     target_date = mdy(month, 1, &amp;target_year.);
     output;
   end;
   format target_date yymmdd10.;
-run;
+run;</pre>
+      <div class="output-example">
+        <h4>出力結果例</h4>
+        <pre class="example"><span class="comment">/* OUTPUTが3回実行されるため3行になる */</span>
+month    target_date
+  1       2026-01-01
+  3       2026-03-01
+  5       2026-05-01</pre>
+      </div>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>条件が成立している間繰り返す — DO WHILE</h3>
+        <p><strong>基本形:</strong> <code>do while(条件); 処理; end;</code></p>
+        <p>ループの先頭で条件を判定します。最初から条件が成立しない場合は、ループ内の処理を一度も実行しません。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 残高が1500未満の間、毎月2%ずつ増やす */</span>
+data work.savings_while;
+  balance = 1000;
+  month = 0;
+  do while(balance &lt; 1500);
+    balance = balance * 1.02;
+    month = month + 1;
+  end;
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>条件が成立するまで繰り返す — DO UNTIL</h3>
+        <p><strong>基本形:</strong> <code>do until(条件); 処理; end;</code></p>
+        <p>ループの末尾で条件を判定するため、ループ内の処理は少なくとも一度実行されます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 残高が1500以上になるまで、毎月2%ずつ増やす */</span>
+data work.savings_until;
+  balance = 1000;
+  month = 0;
+  do until(balance &gt;= 1500);
+    balance = balance * 1.02;
+    month = month + 1;
+  end;
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>ループの中でさらに繰り返す — ネストDO</h3>
+        <p><strong>基本形:</strong> <code>do 外側変数=...; do 内側変数=...; 処理; end; end;</code></p>
+        <p>外側の1回ごとに内側のループが最後まで実行されます。2年×12か月なら24回処理されます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 2026年と2027年について12か月分の行を作る */</span>
+data work.year_month;
+  do year = 2026 to 2027;
+    do month = 1 to 12;
+      output;
+    end;
+  end;
+run;</pre>
+      <div class="output-example">
+        <h4>出力結果例</h4>
+        <pre class="example"><span class="comment">/* 2年×12か月で24行になる */</span>
+オブザベーション数    24</pre>
+      </div>
+    </div>
+  </div>
+</section>
 
+<section class="tile tile-light" id="transpose">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">09</p>
+    <h2>PROC TRANSPOSE でデータを縦横変換する</h2>
+    <p>どの変数を値として転置し、どの値を新しい列名に使うかを指定します。</p>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>縦持ちデータを横持ちへ変える — PROC TRANSPOSE</h3>
+        <p><strong>基本形:</strong> <code>proc transpose data=入力 out=出力; by グループ変数; id 列名にする変数; var 値を入れる変数; run;</code></p>
+        <ul>
+          <li><code>BY</code> は1行にまとめるグループ、<code>ID</code> は新しい列名に使う値を指定する。</li>
+          <li><code>VAR</code> は、新しく作られた列へ格納する値を指定する。</li>
+          <li><code>PREFIX=</code>は転置後の列名の先頭、<code>NAME=</code>は元のVAR変数名を保存する列名を指定する。</li>
+        </ul>
+      </div>
+      <pre class="example"><span class="comment">/* 顧客別の月別売上を縦持ちから横持ちへ変える */</span>
 proc transpose data=work.sales_long
-               out=work.sales_wide(prefix=month_)
+               out=work.sales_wide
+               prefix=month_
                name=source_variable;
   by customer_id;
   id month;
   var amount;
 run;</pre>
+      <div class="output-example">
+        <h4>入力と出力の例</h4>
+        <pre class="example"><span class="comment">/* 入力：同じ顧客が月ごとに複数行ある */</span>
+customer_id    month    amount
+C001             1       100
+C001             2       150
+
+<span class="comment">/* 出力：月が列になり、元のVAR変数名はsource_variableへ入る */</span>
+customer_id    source_variable    month_1    month_2
+C001           amount                100        150</pre>
+      </div>
+    </div>
     <div class="callout"><div class="callout-title">BY を使う前提</div><p><code>PROC TRANSPOSE</code> で <code>BY</code> を使う場合、対象データは BY 変数でソート済み、または適切にインデックス化されている必要があります。</p></div>
-    <div class="callout"><div class="callout-title">マクロ変数のドット</div><p><code>&amp;outlib..monthly_targets</code> のようにドットが 2 つ見えるのは、1 つ目がマクロ変数名の終端、2 つ目がライブラリとメンバ名の区切りです。</p></div>
   </div>
 </section>
 
-<footer class="site-footer"><div class="footer-inner"><p>© 2026 yotalab</p><div class="footer-links"><a href="../../../../">Home</a><a href="../base-programming-performance.html">試験対策ハブ</a><a href="../../../">Articles</a></div></div></footer>
+<section class="tile tile-soft" id="comprehensive-test">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Comprehensive Test</p>
+    <h2>データ管理の総合確認テスト</h2>
+    <p>空欄を埋めて、属性設定、関数、繰り返し処理、集計、転置までの処理を完成させてください。</p>
+    <div class="question-list"><div class="question-item">
+      <pre class="example multi-blank"><span class="comment">/* OUT=を省略し、元のデータセット自体を並べ替える */</span>
+proc <input class="syntax-input short group-input" type="text" data-answer="sort" aria-label="元のデータセットを並べ替えるプロシジャ名" autocomplete="off" autocapitalize="none" spellcheck="false"> data=work.orders;
+  <input class="syntax-input short group-input" type="text" data-answer="by" aria-label="並べ替えキーを指定するステートメント" autocomplete="off" autocapitalize="none" spellcheck="false"> customer_id order_date;
+run;
+
+<span class="comment">/* 別データセットへ並べ替えて顧客IDの重複を除く */</span>
+<input class="syntax-input wide group-input" type="text" data-answer="proc sort" aria-label="並べ替えるプロシジャ" autocomplete="off" autocapitalize="none" spellcheck="false"> data=work.orders out=work.orders_sorted <input class="syntax-input group-input" type="text" data-answer="nodupkey" aria-label="BYキーの重複を除くオプション" autocomplete="off" autocapitalize="none" spellcheck="false">;
+  <input class="syntax-input short group-input" type="text" data-answer="by" aria-label="並べ替え変数を指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> customer_id order_date;
+run;
+
+<span class="comment">/* 全変数が同じ重複行を除く */</span>
+proc sort data=work.orders out=work.orders_distinct <input class="syntax-input group-input" type="text" data-answer="noduprecs" aria-label="行全体の重複を除くオプション" autocomplete="off" autocapitalize="none" spellcheck="false">;
+  by <input class="syntax-input short group-input" type="text" data-answer="_all_" aria-label="すべての変数を並べ替えキーにするキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">;
+run;
+
+<span class="comment">/* 変数属性を設定し、金額帯ごとに複数の値を作る */</span>
+data work.orders_clean;
+  <input class="syntax-input group-input" type="text" data-answer="length" aria-label="文字変数の長さを指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> amount_band $ 8;
+  set work.orders_sorted(<input class="syntax-input group-input" type="text" data-answer="rename" aria-label="読み込み時に変数名を変更するオプション" autocomplete="off" autocapitalize="none" spellcheck="false">=(old_amount=amount));
+  <input class="syntax-input short group-input" type="text" data-answer="label" aria-label="変数へ説明を付ける構文" autocomplete="off" autocapitalize="none" spellcheck="false"> amount="Order Amount";
+  <input class="syntax-input short group-input" type="text" data-answer="format" aria-label="表示形式を指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> amount comma12.;
+  <input class="syntax-input short group-input" type="text" data-answer="if" aria-label="条件分岐を始める構文" autocomplete="off" autocapitalize="none" spellcheck="false"> amount &gt;= 10000 <input class="syntax-input short group-input" type="text" data-answer="then" aria-label="条件成立時の処理を指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> <input class="syntax-input short group-input" type="text" data-answer="do" aria-label="複数処理をまとめる構文" autocomplete="off" autocapitalize="none" spellcheck="false">;
+    amount_band="High";
+    review_required=0;
+  <input class="syntax-input short group-input" type="text" data-answer="end" aria-label="複数処理のまとまりを終了する構文" autocomplete="off" autocapitalize="none" spellcheck="false">;
+  <input class="syntax-input short group-input" type="text" data-answer="else" aria-label="条件不成立時の処理を指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> <input class="syntax-input short group-input" type="text" data-answer="do" aria-label="条件不成立時の複数処理をまとめる構文" autocomplete="off" autocapitalize="none" spellcheck="false">;
+    amount_band="Other";
+    review_required=1;
+  <input class="syntax-input short group-input" type="text" data-answer="end" aria-label="条件不成立時の処理のまとまりを終了する構文" autocomplete="off" autocapitalize="none" spellcheck="false">;
+run;
+
+<span class="comment">/* 前の行の連番を保持して1ずつ増やす */</span>
+data work.orders_numbered;
+  set work.orders_clean;
+  <input class="syntax-input group-input" type="text" data-answer="retain" aria-label="前の行の値を保持する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> row_no 0;
+  row_no = row_no + 1;
+run;
+
+<span class="comment">/* 顧客ごとに合計し、1行だけ出力する */</span>
+data work.customer_summary;
+  set work.orders_numbered;
+  <input class="syntax-input short group-input" type="text" data-answer="by" aria-label="グループ変数を指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> customer_id;
+  if <input class="syntax-input wide group-input" type="text" data-answer="first.customer_id" aria-label="グループの先頭を表す自動変数" autocomplete="off" autocapitalize="none" spellcheck="false"> then total_amount=0;
+  total_amount <input class="syntax-input short group-input" type="text" data-answer="+" aria-label="SUMステートメントの加算記号" autocomplete="off" autocapitalize="none" spellcheck="false"> amount;
+  if <input class="syntax-input wide group-input" type="text" data-answer="last.customer_id" aria-label="グループの末尾を表す自動変数" autocomplete="off" autocapitalize="none" spellcheck="false"> then <input class="syntax-input group-input" type="text" data-answer="output" aria-label="行を出力する構文" autocomplete="off" autocapitalize="none" spellcheck="false">;
+  keep customer_id total_amount;
+run;
+
+<span class="comment">/* 顧客別の縦持ちデータを横持ちへ転置する */</span>
+<input class="syntax-input wide group-input" type="text" data-answer="proc transpose" aria-label="データを転置するプロシジャ" autocomplete="off" autocapitalize="none" spellcheck="false"> data=work.sales_long out=work.sales_wide;
+  <input class="syntax-input short group-input" type="text" data-answer="by" aria-label="転置のグループを指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> customer_id;
+  <input class="syntax-input short group-input" type="text" data-answer="id" aria-label="列名に使う変数を指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> month;
+  <input class="syntax-input short group-input" type="text" data-answer="var" aria-label="転置する値を指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> amount;
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+    </div>
+    <div class="question-item">
+      <pre class="example multi-blank"><span class="comment">/* コード内に文字列と数値の確認用データを作る */</span>
+data work.function_source;
+  <input class="syntax-input short group-input" type="text" data-answer="input" aria-label="入力する変数を指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> product_code $ amount;
+<input class="syntax-input group-input" type="text" data-answer="datalines" aria-label="コード内へデータを入力する構文" autocomplete="off" autocapitalize="none" spellcheck="false">;
+ABC-01 12356
+;
+run;
+
+<span class="comment">/* 文字列を取り出し、金額を100単位で丸める */</span>
+data work.function_result;
+  set work.function_source;
+  prefix = <input class="syntax-input short group-input" type="text" data-answer="scan" aria-label="区切り文字で文字列を取り出す関数" autocomplete="off" autocapitalize="none" spellcheck="false">(product_code, 1, "-");
+  middle_digits = <input class="syntax-input group-input" type="text" data-answer="substr" aria-label="開始位置と長さで文字列を取り出す関数" autocomplete="off" autocapitalize="none" spellcheck="false">("0123456789", 3, 4);
+  hyphen_position = <input class="syntax-input short group-input" type="text" data-answer="find" aria-label="文字列を検索して開始位置を返す関数" autocomplete="off" autocapitalize="none" spellcheck="false">(product_code, "-");
+  <input class="syntax-input group-input" type="text" data-answer="substr" aria-label="文字列の一部を置き換える関数" autocomplete="off" autocapitalize="none" spellcheck="false">(product_code, 1, 3) = "XYZ";
+  amount_round = <input class="syntax-input short group-input" type="text" data-answer="round" aria-label="数値を丸める関数" autocomplete="off" autocapitalize="none" spellcheck="false">(amount, 100);
+run;
+
+<span class="comment">/* マクロ変数の年を使い、1月から3月までの日付を作る */</span>
+<input class="syntax-input short group-input" type="text" data-answer="%let" aria-label="マクロ変数を定義する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> target_year = 2026;
+data work.monthly_targets;
+  <input class="syntax-input short group-input" type="text" data-answer="do" aria-label="繰り返しを開始する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> month = 1 <input class="syntax-input short group-input" type="text" data-answer="to" aria-label="繰り返しの終了値を指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> 5 <input class="syntax-input short group-input" type="text" data-answer="by" aria-label="DOループの増分を指定するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false"> 2;
+    target_date = <input class="syntax-input short group-input" type="text" data-answer="mdy" aria-label="月日年から日付値を作る関数" autocomplete="off" autocapitalize="none" spellcheck="false">(month, 1, &amp;target_year<input class="syntax-input tiny group-input" type="text" data-answer="." aria-label="マクロ変数名の終端を示すドット" autocomplete="off" autocapitalize="none" spellcheck="false">);
+    <input class="syntax-input group-input" type="text" data-answer="output" aria-label="現在の行を出力する構文" autocomplete="off" autocapitalize="none" spellcheck="false">;
+  <input class="syntax-input short group-input" type="text" data-answer="end" aria-label="DOループを終了する構文" autocomplete="off" autocapitalize="none" spellcheck="false">;
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+    </div>
+    <div class="question-item">
+      <pre class="example multi-blank"><span class="comment">/* 商品名を降順、売上を昇順に並べ替える */</span>
+proc sort data=work.shoes out=work.shoes_sorted;
+  by <input class="syntax-input group-input" type="text" data-answer="descending" aria-label="降順を指定するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false"> product sales;
+run;
+
+<span class="comment">/* 両端を含む範囲を判定する */</span>
+data work.shoes_classified;
+  set work.shoes_sorted;
+  if 100000 &lt;= sales <input class="syntax-input short group-input" type="text" data-answer="and" aria-label="2条件を結ぶ演算子" autocomplete="off" autocapitalize="none" spellcheck="false"> sales &lt;= 200000 then sales_range="Middle";
+  product_compact = <input class="syntax-input group-input" type="text" data-answer="compress" aria-label="不要文字を除く関数" autocomplete="off" autocapitalize="none" spellcheck="false">(product, " -");
+  call streaminit(12345);
+  random_value = <input class="syntax-input short group-input" type="text" data-answer="rand" aria-label="乱数を生成する関数" autocomplete="off" autocapitalize="none" spellcheck="false">("uniform");
+run;
+
+<span class="comment">/* Revenueで始まる変数をすべて合計する */</span>
+data work.revenue_total;
+  set work.revenue_by_year;
+  total = <input class="syntax-input short group-input" type="text" data-answer="sum" aria-label="合計を求める関数" autocomplete="off" autocapitalize="none" spellcheck="false">(of <input class="syntax-input group-input" type="text" data-answer="revenue:" aria-label="接頭辞による変数リスト" autocomplete="off" autocapitalize="none" spellcheck="false">);
+  quarter_total = sum(of <input class="syntax-input short group-input" type="text" data-answer="q1-q4" aria-label="連番による変数リスト" autocomplete="off" autocapitalize="none" spellcheck="false">);
+  position_total = sum(of <input class="syntax-input group-input" type="text" data-answer="start--end" aria-label="データセット上の位置による変数リスト" autocomplete="off" autocapitalize="none" spellcheck="false">);
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+    </div>
+    <div class="question-item">
+      <pre class="example multi-blank"><span class="comment">/* 日付間の年数を計算する */</span>
+data work.loop_test;
+start_date = '01JAN2026'd;
+end_date = '01JAN2027'd;
+years = <input class="syntax-input short group-input" type="text" data-answer="yrdif" aria-label="日付間の年数を計算する関数" autocomplete="off" autocapitalize="none" spellcheck="false">(start_date, end_date, "act/act");
+
+<span class="comment">/* 条件が成立する間だけ繰り返す */</span>
+balance = 1000;
+<input class="syntax-input short group-input" type="text" data-answer="do" aria-label="DOループを開始するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false"> <input class="syntax-input short group-input" type="text" data-answer="while" aria-label="先頭で条件を判定するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">(balance &lt; 1500);
+  balance = balance * 1.02;
+end;
+
+<span class="comment">/* 2年×12か月のネストしたループを作る */</span>
+do year = 2026 to 2027;
+  do month = 1 to 12;
+    <input class="syntax-input group-input" type="text" data-answer="output" aria-label="現在の行を出力するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">;
+  end;
+end;
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+    </div>
+    <div class="question-item">
+      <pre class="example multi-blank"><span class="comment">/* 元のVAR変数名をmeasure列へ保存して転置する */</span>
+<input class="syntax-input wide group-input" type="text" data-answer="proc transpose" aria-label="転置するプロシジャ" autocomplete="off" autocapitalize="none" spellcheck="false"> data=work.sales_long
+               out=work.sales_wide
+               <input class="syntax-input group-input" type="text" data-answer="prefix" aria-label="転置後の列名の接頭辞を指定するオプション" autocomplete="off" autocapitalize="none" spellcheck="false">=month_
+               <input class="syntax-input short group-input" type="text" data-answer="name" aria-label="元の変数名を保存する列名を指定するオプション" autocomplete="off" autocapitalize="none" spellcheck="false">=measure;
+  by customer_id;
+  id month;
+  var amount;
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+    </div>
+    <div class="question-item">
+      <pre class="example multi-blank"><span class="comment">/* 文字関数と数値関数を使い分ける */</span>
+data work.function_check;
+  text = "Order Pending   ";
+  text_trimmed = <input class="syntax-input short group-input" type="text" data-answer="trim" aria-label="末尾の空白を除く関数" autocomplete="off" autocapitalize="none" spellcheck="false">(text);
+  text_replaced = <input class="syntax-input group-input" type="text" data-answer="tranwrd" aria-label="文字列内の語を置き換える関数" autocomplete="off" autocapitalize="none" spellcheck="false">(text, "Pending", "Complete");
+  text_upper = <input class="syntax-input group-input" type="text" data-answer="upcase" aria-label="文字列を大文字にする関数" autocomplete="off" autocapitalize="none" spellcheck="false">(text);
+  text_lower = <input class="syntax-input group-input" type="text" data-answer="lowcase" aria-label="文字列を小文字にする関数" autocomplete="off" autocapitalize="none" spellcheck="false">(text);
+  average = <input class="syntax-input short group-input" type="text" data-answer="mean" aria-label="平均を求める関数" autocomplete="off" autocapitalize="none" spellcheck="false">(10, ., 30);
+  second_small = <input class="syntax-input group-input" type="text" data-answer="smallest" aria-label="小さい順で指定順位の値を返す関数" autocomplete="off" autocapitalize="none" spellcheck="false">(2, 10, 20, 30);
+  second_large = <input class="syntax-input group-input" type="text" data-answer="largest" aria-label="大きい順で指定順位の値を返す関数" autocomplete="off" autocapitalize="none" spellcheck="false">(2, 10, 20, 30);
+  integer_part = <input class="syntax-input short group-input" type="text" data-answer="int" aria-label="小数部分を切り捨てる関数" autocomplete="off" autocapitalize="none" spellcheck="false">(12.8);
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+    </div>
+    <div class="question-item">
+      <pre class="example multi-blank"><span class="comment">/* 日付・時刻関数と条件付きDOを使う */</span>
+data work.date_function_check;
+  start_date = '01JAN2026'd;
+  end_date = '01JAN2027'd;
+  today_1 = <input class="syntax-input short group-input" type="text" data-answer="today" aria-label="実行日の日付値を返す関数" autocomplete="off" autocapitalize="none" spellcheck="false">();
+  today_2 = <input class="syntax-input short group-input" type="text" data-answer="date" aria-label="実行日の日付値を返す別の関数" autocomplete="off" autocapitalize="none" spellcheck="false">();
+  current_time = <input class="syntax-input short group-input" type="text" data-answer="time" aria-label="現在時刻の時刻値を返す関数" autocomplete="off" autocapitalize="none" spellcheck="false">();
+  year_value = <input class="syntax-input short group-input" type="text" data-answer="year" aria-label="日付から年を取り出す関数" autocomplete="off" autocapitalize="none" spellcheck="false">(start_date);
+  quarter_value = <input class="syntax-input short group-input" type="text" data-answer="qtr" aria-label="日付から四半期を取り出す関数" autocomplete="off" autocapitalize="none" spellcheck="false">(start_date);
+  month_value = <input class="syntax-input short group-input" type="text" data-answer="month" aria-label="日付から月を取り出す関数" autocomplete="off" autocapitalize="none" spellcheck="false">(start_date);
+  day_value = <input class="syntax-input short group-input" type="text" data-answer="day" aria-label="日付から日を取り出す関数" autocomplete="off" autocapitalize="none" spellcheck="false">(start_date);
+  month_boundaries = <input class="syntax-input short group-input" type="text" data-answer="intck" aria-label="期間の境界数を数える関数" autocomplete="off" autocapitalize="none" spellcheck="false">("month", start_date, end_date);
+  next_month = <input class="syntax-input short group-input" type="text" data-answer="intnx" aria-label="指定期間だけ日付を移動する関数" autocomplete="off" autocapitalize="none" spellcheck="false">("month", start_date, 1, "b");
+  days_between = <input class="syntax-input short group-input" type="text" data-answer="datdif" aria-label="日付間の日数を求める関数" autocomplete="off" autocapitalize="none" spellcheck="false">(start_date, end_date, "act/act");
+
+  balance = 1000;
+  do <input class="syntax-input short group-input" type="text" data-answer="until" aria-label="末尾で条件判定するDOループ" autocomplete="off" autocapitalize="none" spellcheck="false">(balance &gt;= 1500);
+    balance = balance * 1.02;
+  end;
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+    </div></div>
+    <div class="answer-controls">
+      <button class="answer-toggle" id="comprehensive-answer-toggle" type="button" aria-controls="comprehensive-test" aria-pressed="false">答えを見る</button>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer"><div class="footer-inner"><p>© 2026 yotalab</p><div class="footer-links"><a href="../../../../">Home</a><a href="../base-programming-performance.html">SAS Base Programming 学習トップ</a><a href="../../../">Articles</a></div></div></footer>
 <script>
 const progress = document.getElementById('progress');
 window.addEventListener('scroll', () => {
   const max = document.documentElement.scrollHeight - window.innerHeight;
   progress.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%';
+});
+document.querySelectorAll('.multi-blank').forEach((question)=>{const inputs=[...question.querySelectorAll('.group-input')];const mark=question.querySelector('.group-correct-mark');question.addEventListener('input',()=>{inputs.forEach((input)=>input.classList.toggle('is-correct',input.value.trim().toLowerCase()===input.dataset.answer));mark.textContent=inputs.every((input)=>input.value.trim().toLowerCase()===input.dataset.answer)?'○':'';});});
+const answerToggle = document.getElementById('comprehensive-answer-toggle');
+const comprehensiveInputs = [...document.querySelectorAll('#comprehensive-test .group-input')];
+answerToggle.addEventListener('click', () => {
+  const showingAnswers = answerToggle.getAttribute('aria-pressed') === 'true';
+  comprehensiveInputs.forEach((input) => {
+    if (!showingAnswers) {
+      input.dataset.previousValue = input.value;
+      input.value = input.dataset.answer;
+    } else {
+      input.value = input.dataset.previousValue || '';
+      delete input.dataset.previousValue;
+    }
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  answerToggle.setAttribute('aria-pressed', String(!showingAnswers));
+  answerToggle.textContent = showingAnswers ? '答えを見る' : '答えを隠す';
 });
 </script>
 </body>

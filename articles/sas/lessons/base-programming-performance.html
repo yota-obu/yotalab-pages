@@ -5,14 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SAS 9.4 Base Programming 試験対策 — yotalab</title>
 <meta name="description" content="SAS 9.4 Base Programming Performance-Based Exam の試験範囲、重要構文、項目別学習ロードマップ、演習をまとめた学習ページ。">
-<link rel="stylesheet" href="../../article.css">
+<link rel="stylesheet" href="../../article.css?v=20260904">
 <style>
   .exam-map{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:32px 0}
   .exam-map-card{border:1px solid var(--hairline);border-radius:18px;padding:22px;background:var(--bg)}
   a.exam-map-card{transition:transform .2s,border-color .2s}
   a.exam-map-card:hover{transform:translateY(-2px);border-color:rgba(0,102,204,0.24);text-decoration:none}
-  .exam-map-card strong{display:block;font-size:28px;line-height:1;color:var(--action);margin-bottom:10px;font-feature-settings:"tnum"}
-  .exam-map-card span{display:block;font-size:14px;color:var(--ink-muted);line-height:1.45}
+  .exam-map-card span{display:block;font-size:15px;font-weight:600;color:var(--ink);line-height:1.45}
   @media (max-width:760px){.exam-map{grid-template-columns:1fr 1fr}}
   @media (max-width:480px){.exam-map{grid-template-columns:1fr}}
 
@@ -95,7 +94,7 @@
 </nav>
 
 <header class="article-hero">
-  <p class="eyebrow">SAS Learning · Exam Prep</p>
+  <p class="eyebrow">SAS Learning · Base Programming</p>
   <h1>SAS 9.4 Base Programming Performance-Based Exam 対策</h1>
   <p class="lead">試験範囲を「読む」だけで終わらせず、DATA ステップ、PROC、ログ確認、レポート出力を実際に書ける状態へ持っていくための学習ページ。</p>
   <p class="series-tag"><a href="../">SAS 学習</a> · Base Programming Specialist · A00-231</p>
@@ -109,13 +108,13 @@
       SAS 9.4 Base Programming は、データを読み、加工し、エラーを直し、基本レポートを出す力を測る試験です。
     </p>
     <p>
-      SAS 公式の資格ページでは、この認定で示すスキルとして「データファイルの読み書き」「Base SAS プロシジャによる詳細・要約レポート」「データの操作と変換」「構文エラーとロジックエラーの特定・修正」が挙げられています。試験 ID は <strong>A00-231</strong>、試験時間は <strong>135 分</strong>、問題数は <strong>40-45 問</strong>、合格スコアは <strong>725 / 1000</strong>、対象は <strong>SAS 9.4 M5</strong> です。
+      SAS 公式の資格ページでは、この認定で示すスキルとして「データファイルの読み書き」「Base SAS プロシジャによる詳細・要約レポート」「データの操作と変換」「構文エラーとロジックエラーの特定・修正」が挙げられています。2026年9月に日本向け公式ページで確認した試験仕様は、試験 ID <strong>A00-231</strong>、試験時間 <strong>105 分</strong>、問題数 <strong>50-55 問</strong>、合格スコア <strong>725 / 1000</strong>、対象 <strong>SAS 9.4 M5</strong> です。仕様は変更される場合があるため、申込前に公式ページを再確認してください。
     </p>
     <div class="exam-map">
-      <a class="exam-map-card" href="base-programming-performance/access-create-data.html"><strong>20-25%</strong><span>データ構造へのアクセスと作成</span></a>
-      <a class="exam-map-card" href="base-programming-performance/manage-data.html"><strong>35-40%</strong><span>データ管理</span></a>
-      <a class="exam-map-card" href="base-programming-performance/error-handling.html"><strong>15-20%</strong><span>エラーハンドリング</span></a>
-      <a class="exam-map-card" href="base-programming-performance/reports-output.html"><strong>15-20%</strong><span>レポートとアウトプット生成</span></a>
+      <a class="exam-map-card" href="base-programming-performance/access-create-data.html"><span>データ構造へのアクセスと作成</span></a>
+      <a class="exam-map-card" href="base-programming-performance/manage-data.html"><span>データ管理</span></a>
+      <a class="exam-map-card" href="base-programming-performance/error-handling.html"><span>エラーハンドリング</span></a>
+      <a class="exam-map-card" href="base-programming-performance/reports-output.html"><span>レポートとアウトプット生成</span></a>
     </div>
     <div class="callout">
       <div class="callout-title">学習方針</div>
@@ -164,7 +163,7 @@
           <li><code>PROC PRINT</code> の <code>VAR</code>、<code>SUM</code>、<code>WHERE</code>、<code>ID</code>、<code>BY</code>、<code>LABEL</code>、<code>SPLIT=</code> を使う。</li>
           <li><code>PROC FREQ</code>、<code>PROC MEANS</code>、<code>PROC UNIVARIATE</code> で度数、要約統計、欠損・外れ値を確認する。</li>
           <li><code>PROC FORMAT</code>、<code>LABEL</code>、<code>SPLIT=</code>、タイトル、フットノートで出力を読みやすくする。</li>
-          <li><code>ODS HTML/PDF/RTF</code>、Excel で表示できる ODS 出力、<code>PROC EXPORT</code>、XLSX エンジンで結果を書き出す。</li>
+          <li><code>ODS HTML/PDF/RTF/EXCEL/POWERPOINT/CSV</code>、<code>PROC EXPORT</code>、XLSX エンジンで結果を書き出す。</li>
         </ul>
       </div>
     </div>
@@ -215,7 +214,7 @@
 
 <section class="tile tile-soft">
   <div class="tile-inner section">
-    <p class="section-eyebrow">Practice</p>
+    <p class="section-eyebrow">解答の流れ</p>
     <h2>演習: 1 問を 15 分で解く型を作る</h2>
     <p class="lead">Performance-Based では、コードを組み立て、ログを読み、出力を確認する流れが重要です。</p>
     <div class="steps">
@@ -245,7 +244,7 @@
       </div>
     </div>
     <div class="syntax-note">
-      <h3>構文解説: 読み込みから検算までの流れ</h3>
+      <h3>読み込みから検算までの流れ</h3>
       <ul>
         <li><code>libname</code> で入力データの保存場所に参照名を付ける。</li>
         <li><code>PROC CONTENTS</code> と <code>PROC PRINT(obs=)</code> で、加工前に型・長さ・先頭行を確認する。</li>
@@ -317,12 +316,11 @@ run;</pre>
   <div class="tile-inner section">
     <p class="section-eyebrow">Item-Based Learning</p>
     <h2>項目ごとの学習ロードマップ</h2>
-    <p class="lead">時間割ではなく、試験ガイドの項目をそのまま学習単位にします。各項目で「覚える構文」「できる状態」「確認問題」をセットにしてください。</p>
+    <p class="lead">試験ガイドの項目を学習単位にし、解説・例コード・確認テストを順に進めます。</p>
 
     <div class="study-modules">
       <div class="study-module">
         <div class="study-module-head">
-          <p>20-25% · Access and Create Data Structures</p>
           <h3><a href="base-programming-performance/access-create-data.html">データ構造へのアクセスと作成</a></h3>
         </div>
         <div class="study-module-body">
@@ -381,7 +379,6 @@ run;</pre>
 
       <div class="study-module">
         <div class="study-module-head">
-          <p>35-40% · Manage Data</p>
           <h3><a href="base-programming-performance/manage-data.html">データ管理</a></h3>
         </div>
         <div class="study-module-body">
@@ -460,7 +457,6 @@ run;</pre>
 
       <div class="study-module">
         <div class="study-module-head">
-          <p>15-20% · Error Handling</p>
           <h3><a href="base-programming-performance/error-handling.html">エラーハンドリング</a></h3>
         </div>
         <div class="study-module-body">
@@ -489,7 +485,6 @@ run;</pre>
 
       <div class="study-module">
         <div class="study-module-head">
-          <p>15-20% · Generate Reports and Output</p>
           <h3><a href="base-programming-performance/reports-output.html">レポートとアウトプット生成</a></h3>
         </div>
         <div class="study-module-body">
@@ -518,7 +513,7 @@ run;</pre>
             <div>
               <p><code>PROC FORMAT</code>、<code>LABEL</code>、タイトル、フットノートで読みやすくし、<code>ODS</code> や <code>PROC EXPORT</code> で外部ファイルへ出力します。</p>
               <ul>
-                <li>練習: HTML、PDF、RTF、XLSX、CSV の出力を 1 回ずつ作る。</li>
+                <li>練習: HTML、PDF、RTF、XLSX、PPTX、CSV の出力を 1 回ずつ作る。</li>
                 <li>確認: ODS の開閉忘れ、<code>STYLE=</code>、<code>DBMS=csv/tab/dlm</code> を確認できる。</li>
               </ul>
             </div>
@@ -531,7 +526,7 @@ run;</pre>
 
 <section class="tile tile-soft">
   <div class="tile-inner section">
-    <p class="section-eyebrow">Practice Sets</p>
+    <p class="section-eyebrow">演習セット</p>
     <h2>項目別の演習セット</h2>
     <p>各項目の最後に、次のような小さな成果物を作ってください。大きな模試に入る前に、この粒度で手が止まらない状態を作ります。</p>
     <div class="practice-set">
@@ -611,7 +606,7 @@ run;</pre>
       <div class="check-row"><b>集計</b><span><code>PROC SORT</code>、<code>BY</code>、<code>first.</code>、<code>last.</code>、SUM ステートメントで、グループごとの 1 行サマリーを作れる。</span></div>
       <div class="check-row"><b>変換</b><span>文字・数値・日付関数、<code>INPUT</code> / <code>PUT</code>、DO ループ、<code>PROC TRANSPOSE</code>、マクロ変数を小問で使える。</span></div>
       <div class="check-row"><b>検証</b><span><code>PROC PRINT(obs=)</code>、<code>PROC FREQ</code>、<code>PROC MEANS</code>、ログの NOTE / WARNING / ERROR で、結果の妥当性を確認できる。</span></div>
-      <div class="check-row"><b>出力</b><span><code>PROC PRINT</code>、<code>PROC FORMAT</code>、ODS HTML/PDF/RTF、<code>PROC EXPORT</code>、XLSX エンジンで、人が読む出力と外部ファイルを作れる。</span></div>
+      <div class="check-row"><b>出力</b><span><code>PROC PRINT</code>、<code>PROC FORMAT</code>、ODS HTML/PDF/RTF/EXCEL/POWERPOINT/CSV、<code>PROC EXPORT</code>、XLSX エンジンで、人が読む出力と外部ファイルを作れる。</span></div>
     </div>
   </div>
 </section>
@@ -620,11 +615,12 @@ run;</pre>
   <div class="tile-inner section">
     <p class="section-eyebrow">Sources</p>
     <h2>参照した公式情報</h2>
-    <p>このページは、ローカルに保存した試験コンテンツガイドと、SAS 公式の資格・学習リソースをもとに構成しています。試験仕様は変わる可能性があるため、受験前に必ず公式ページを確認してください。</p>
+    <p>このページは、ローカルに保存した2020年版の日本語ガイドに加え、2024年更新の現行公式ガイドにある23の主要項目・72の小項目と公式サンプル問題を再照合しています。試験仕様は変わる可能性があるため、受験前に必ず公式ページを確認してください。</p>
     <ul class="source-list">
       <li><a href="../docs/specialist-base-programming.pdf">ローカル PDF: specialist-base-programming.pdf</a></li>
-      <li><a href="https://www.sas.com/en_us/certification/credentials/foundation-tools/base-programming-specialist.html" target="_blank" rel="noopener">SAS Certified Specialist: Base Programming Using SAS 9.4</a></li>
+      <li><a href="https://www.sas.com/ja_jp/certification/credentials/foundation-tools/base-programming-specialist.html" target="_blank" rel="noopener">SAS Certified Specialist: Base Programming Using SAS 9.4</a></li>
       <li><a href="https://www.sas.com/content/dam/SAS/documents/technical/certification/content-guide/specialist-base-programming.pdf" target="_blank" rel="noopener">SAS 公式 Exam Content Guide PDF</a></li>
+      <li><a href="https://www.sas.com/content/dam/SAS/documents/technical/training/en/sample-questions-base-programming-specialist.pdf" target="_blank" rel="noopener">SAS 公式 Sample Questions PDF</a></li>
       <li><a href="https://learn.sas.com/course/view.php?id=7021" target="_blank" rel="noopener">SAS Certified Specialist: Base Programming Using SAS 9.4 Certification Pathway</a></li>
       <li><a href="https://support.sas.com/en/books/certification-guides.html" target="_blank" rel="noopener">SAS Certification Guides</a></li>
     </ul>

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>エラーハンドリング — SAS 9.4 Base Programming — yotalab</title>
 <meta name="description" content="SAS 9.4 Base Programming の試験項目「エラーハンドリング」の詳細学習ページ。">
-<link rel="stylesheet" href="../../../article.css">
+<link rel="stylesheet" href="../../../article.css?v=20260904">
 <style>
   .example{background:var(--bg);color:var(--ink);border:1px solid var(--hairline)}
   .example .comment{color:var(--ink-fine)}
@@ -20,21 +20,20 @@
 <div class="progress-bar" id="progress"></div>
 <nav class="site-nav"><div class="nav-inner"><a href="../../../../" class="logo">yotalab</a><ul class="nav-links"><li><a href="../../../../apps/">Apps</a></li><li><a href="../../../" class="active">Articles</a></li><li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li></ul></div></nav>
 <header class="article-hero">
-  <p class="eyebrow">SAS Base Programming · 15-20%</p>
   <h1>エラーハンドリング</h1>
   <p class="lead">構文エラーを直すだけでなく、実行はできたが結果が違うロジックエラーをログと検算で見抜く領域。</p>
-  <p class="series-tag"><a href="../base-programming-performance.html">試験対策ハブ</a> · 詳細項目</p>
+  <p class="series-tag"><a href="../base-programming-performance.html">← SAS Base Programming 学習トップへ</a></p>
 </header>
 
 <section class="tile tile-light">
   <div class="tile-inner section">
-    <p class="section-eyebrow">Mindset</p>
-    <h2>ログは最後ではなく、処理の一部として読む</h2>
-    <p class="lead">SAS では、エラーが出なくても結果が間違っていることがあります。ERROR、WARNING、NOTE をすべて得点源として扱います。</p>
+    <p class="section-eyebrow">Goal</p>
+    <h2>ログから原因特定・修正・検算まで</h2>
+    <p class="lead">ERROR、WARNING、NOTEの読み分け、PUTLOGによる追跡、典型的な構文・ロジックエラーの修正を扱います。</p>
     <div class="detail-grid">
       <div class="detail-card"><h3>ERROR</h3><ul><li>構文として成立しない、ファイルがない、BY 変数が不正など。</li><li>最初の ERROR を優先して直す。</li></ul></div>
       <div class="detail-card"><h3>WARNING</h3><ul><li>処理は続くが、結果が怪しい状態。</li><li>意図しない型変換、出力上書き、文字値の切り詰めなどに注意。</li></ul></div>
-      <div class="detail-card"><h3>NOTE</h3><ul><li>自動変換、未初期化変数、欠損値生成など重要なヒントを含む。</li><li>試験では NOTE を読めるかが差になります。</li></ul></div>
+      <div class="detail-card"><h3>NOTE</h3><ul><li>自動変換、未初期化変数、欠損値生成など重要なヒントを含む。</li><li>処理が完了していても、想定外の変換や件数がないか確認する。</li></ul></div>
     </div>
   </div>
 </section>
@@ -50,6 +49,21 @@
       <div class="step"><div class="step-content"><h4>3. NOTE を捨てない</h4><p>自動変換、未初期化変数、欠損値生成、入力行数や出力行数は、ロジックエラーの手がかりになる。</p></div></div>
       <div class="step"><div class="step-content"><h4>4. 件数で検算する</h4><p>ログの obs 数、<code>PROC FREQ</code>、<code>PROC MEANS</code>、<code>PROC PRINT(obs=)</code> で、問題文の条件どおりに行が残っているか見る。</p></div></div>
     </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>ログの行番号と下線から原因箇所を探す</h3>
+        <p>ログには実行したコード、問題箇所を示す下線、エラーメッセージが表示されます。後続のERRORは最初の構文ミスから連鎖するため、最初の下線付近を修正してから再実行します。エラー番号や候補語は状況により異なります。</p>
+      </div>
+      <pre class="example"><span class="comment">/* セミコロンがないため、次のELSEまで同じ文として読まれる */</span>
+75  if amount &gt;= 10000 then status = "High"
+76  else status = "Other";
+    ----
+    ERROR: IF-THEN/ELSEステートメントの構文を確認してください。
+
+<span class="comment">/* 修正後：THEN側の代入文をセミコロンで終了する */</span>
+if amount &gt;= 10000 then status = "High";
+else status = "Other";</pre>
+    </div>
   </div>
 </section>
 
@@ -57,30 +71,143 @@
   <div class="tile-inner section">
     <p class="section-eyebrow">PUTLOG</p>
     <h2>ロジックエラーを PUTLOG で追跡する</h2>
-    <p><code>PUTLOG</code> は DATA ステップ中の値をログに出します。全件出すと読めないので、条件付きで絞るのが実務でも試験でも有効です。</p>
-    <div class="syntax-note">
-      <h3>構文解説: 特定ケースだけログに出す</h3>
+    <p><code>PUTLOG</code> は DATA ステップ中の値をログに出します。全件出すと読みにくいため、条件付きで確認対象を絞ります。</p>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+      <h3>特定の行だけをログへ出す — PUTLOG</h3>
+      <p><strong>基本形:</strong> <code>if 条件 then putlog "メッセージ" 変数名=;</code></p>
       <ul>
         <li><code>by customer_id;</code> は顧客ごとのグループ境界を使うための宣言。</li>
         <li><code>first.customer_id</code> で累計を初期化し、SUM ステートメントで加算する。</li>
         <li><code>if customer_id = "C001" then do;</code> は、確認したい ID だけにログ出力を絞る。</li>
         <li><code>putlog "DEBUG: " _n_= ...;</code> は、反復回数と変数名つきの値をログに出す。</li>
       </ul>
-    </div>
-    <pre class="example">data work.debug_total;
+      </div>
+      <pre class="example"><span class="comment">/* C001の処理中だけ変数の値をログへ出す */</span>
+data work.debug_total;
   set work.orders_by_customer;
   by customer_id;
+  <span class="comment">/* 顧客グループの先頭で累計を初期化する */</span>
   if first.customer_id then total_amount = 0;
   total_amount + amount;
 
+  <span class="comment">/* 調査対象の顧客だけ、途中の値を変数名付きで出す */</span>
   if customer_id = "C001" then do;
     putlog "DEBUG: " _n_= customer_id= order_date= amount= total_amount=;
   end;
 
+  <span class="comment">/* 顧客グループの最終行だけ結果へ出力する */</span>
   if last.customer_id then output;
 run;</pre>
+    </div>
     <div class="callout"><div class="callout-title">覚える形</div><p><code>putlog _all_;</code> は全変数を出せます。原因が見えないときの最終手段として便利ですが、ログが大きくなるため条件付きで使います。</p></div>
     <div class="callout"><div class="callout-title">自動変数</div><p><code>_N_</code> は DATA ステップの反復回数、<code>_ERROR_</code> はその反復でエラーが発生したかを示す一時変数です。ログ確認や条件付きデバッグで役立ちます。</p></div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>値を指定した形式でログへ出す — PUTLOGとformat</h3>
+        <p><strong>変数名付き:</strong> <code>putlog 変数名= format.;</code></p>
+        <p><strong>値だけ:</strong> <code>putlog 変数名 format.;</code></p>
+        <p>日付の内部値を読みやすくするなど、ログだけに一時的な表示形式を指定できます。データセットに保存されたformatは変更しません。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 注文日をDATE9.、金額をCOMMA12.2でログへ出す */</span>
+data work.debug_format;
+  set work.orders;
+  putlog order_date= date9. amount= comma12.2;
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>その時点の全変数をログへ出す — PUTLOG _ALL_</h3>
+        <p><strong>基本形:</strong> <code>putlog _all_;</code></p>
+        <p>プログラムデータベクトルにあるすべての変数名と値を出します。ログが大きくなるため、行番号やエラー状態で絞って使います。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 5回目のDATAステップ反復だけ全変数を確認する */</span>
+data work.debug_all;
+  set work.orders;
+  if _n_ = 5 then putlog _all_;
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>反復回数とエラー状態を確認する — _N_ / _ERROR_</h3>
+        <p><code>_N_</code>はDATAステップの反復回数、<code>_ERROR_</code>は現在の反復でデータエラーが起きると1になる自動変数です。通常は出力データセットへ保存されません。</p>
+      </div>
+      <pre class="example"><span class="comment">/* データエラーが発生した行だけ反復回数と全変数を出す */</span>
+data work.checked_input;
+  set work.imported;
+  amount = input(amount_char, comma12.);
+  if _error_ = 1 then putlog "DATA ERROR: " _n_= _all_;
+run;</pre>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light" id="output-logic">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Output Logic</p>
+    <h2>複数データセットへのOUTPUTを追跡する</h2>
+    <p>DATAステップに明示的な<code>OUTPUT</code>が1つでもあると、ステップ末尾の暗黙出力は行われません。各<code>OUTPUT</code>が何回実行され、どの出力先へ書くかを数えます。</p>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>出力先を指定する — OUTPUT データセット名</h3>
+        <p><strong>基本形:</strong> <code>if 条件 then output 出力データセット;</code></p>
+        <p>出力先を指定した<code>OUTPUT</code>は現在の行をそのデータセットだけへ書きます。出力先を省略した<code>output;</code>は、DATAステートメントに並べたすべてのデータセットへ書きます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 金額に応じて各行を1つのデータセットだけへ出力する */</span>
+data work.low_sales work.high_sales work.missing_sales;
+  set work.orders;
+  if missing(sales) then output work.missing_sales;
+  else if sales &lt; 200000 then output work.low_sales;
+  else output work.high_sales;
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>重複出力を見抜く — OUTPUTの実行回数</h3>
+        <p>1行の処理中に複数の<code>OUTPUT</code>が実行されれば、その行は複数回書かれます。条件付き出力の後ろに無条件の<code>output;</code>があるコードは特に注意します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* category=Aの行はONEへ2回、TWOへ1回出力される */</span>
+data work.one work.two;
+  set work.input;
+  if category = "A" then output work.one;
+  output;
+run;</pre>
+      <div class="output-example">
+        <h4>1行あたりの出力回数</h4>
+        <pre class="example"><span class="comment">/* 無条件のOUTPUTは両方の出力先へ書く */</span>
+category    WORK.ONE    WORK.TWO
+A           2回         1回
+A以外       1回         1回</pre>
+      </div>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>複数の構文・構造・ロジックエラーをまとめて直す</h3>
+        <p>複数出力先へ振り分けるコードでは、出力先をすべてDATAステートメントへ書き、<code>THEN OUTPUT</code>を正しく組み立てます。数値欠損値は通常の数値より小さいため、欠損判定を最初に置き、<code>ELSE IF</code>で1行を1つの出力先だけへ振り分けます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 修正前：出力先不足、THEN不足、欠損値の誤分類がある */</span>
+data work.low_amount work.high_amount;
+  set work.orders;
+  if amount &lt; 1000 output work.low_amount;
+  if amount &gt;= 1000 output work.high_amount;
+  if amount is missing output work.missing_amount;
+run;
+
+<span class="comment">/* 修正後：欠損、1000未満、1000以上のどれか1つへ出力する */</span>
+data work.missing_amount work.low_amount work.high_amount;
+  set work.orders;
+  if missing(amount) then output work.missing_amount;
+  else if amount &lt; 1000 then output work.low_amount;
+  else output work.high_amount;
+run;</pre>
+      <div class="output-example">
+        <h4>公式サンプルと同じSASHELP.HEARTでの確認結果</h4>
+        <pre class="example"><span class="comment">/* 変数をCHOLESTEROL、境界を200に置き換えて実行した結果 */</span>
+データセット       オブザベーション数
+WORK.HIGHCHOL      3652
+WORK.LOWCHOL       1405</pre>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -89,29 +216,37 @@ run;</pre>
     <p class="section-eyebrow">Debug Patterns</p>
     <h2>PUTLOG は「いつ」「どの行で」壊れたかを絞る</h2>
     <p>ロジックエラーは、全行を眺めても見つかりません。疑わしい条件、特定 ID、グループの先頭・末尾など、原因が出そうな場面だけログに出します。</p>
-    <div class="syntax-note">
-      <h3>構文解説: 境界と異常値を分けて見る</h3>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+      <h3>グループ境界と異常値をログへ出す</h3>
+      <p><strong>境界:</strong> <code>if first.変数 or last.変数 then putlog ...;</code></p>
+      <p><strong>異常値:</strong> <code>if missing(変数) then putlog ...;</code></p>
       <ul>
         <li><code>first.customer_id or last.customer_id</code> は、グループの先頭・末尾だけをログに出す条件。</li>
         <li><code>first.customer_id=</code> のように末尾に <code>=</code> を付けると、変数名と値を一緒に出せる。</li>
         <li><code>missing(amount)</code> は欠損値を見つける条件。</li>
         <li>境界ログと異常値ログを分けると、累計ミスと入力値ミスを切り分けやすい。</li>
       </ul>
-    </div>
-    <pre class="example">data work.debug_group;
+      </div>
+      <pre class="example"><span class="comment">/* グループ境界と金額の欠損行を分けてログへ出す */</span>
+data work.debug_group;
   set work.orders_by_customer;
   by customer_id;
+  <span class="comment">/* 顧客ごとの累計を作る */</span>
   if first.customer_id then total_amount = 0;
   total_amount + amount;
 
+  <span class="comment">/* グループの先頭・末尾で境界フラグと累計を確認する */</span>
   if first.customer_id or last.customer_id then
     putlog "BOUNDARY: " _n_= customer_id= first.customer_id= last.customer_id= total_amount=;
 
+  <span class="comment">/* 金額が欠損している行だけ入力値を確認する */</span>
   if missing(amount) then
     putlog "MISSING AMOUNT: " _n_= customer_id= order_date= amount=;
 
   if last.customer_id then output;
 run;</pre>
+    </div>
     <div class="detail-grid">
       <div class="detail-card">
         <h3>境界を見る</h3>
@@ -135,6 +270,25 @@ run;</pre>
   <div class="tile-inner section">
     <p class="section-eyebrow">Syntax</p>
     <h2>構文エラーの典型パターン</h2>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>SASステートメントの基本ルール</h3>
+        <ul>
+          <li>DATAステップは<code>DATA</code>、PROCステップは<code>PROC</code>で始まり、通常は<code>RUN;</code>または<code>QUIT;</code>で終了する。</li>
+          <li>各ステートメントはセミコロンで終了する。改行や字下げだけでは終了しない。</li>
+          <li>キーワードの大文字・小文字は区別されないが、引用符内の文字値は区別される。</li>
+          <li>文字定数は対応する引用符で囲み、format・informat名は通常ピリオドまで含める。</li>
+        </ul>
+      </div>
+      <pre class="example"><span class="comment">/* 1つのDATAステップと1つのPROCステップ */</span>
+data work.east_orders;
+  set work.orders;
+  if region = "East";
+run;
+
+proc print data=work.east_orders;
+run;</pre>
+    </div>
     <div class="compare">
       <div class="compare-card"><div class="compare-label">よくある</div><h4>セミコロン欠落</h4><p>次の行まで 1 つのステートメントとして読まれ、後続に連鎖エラーが出る。</p></div>
       <div class="compare-card after"><div class="compare-label">よくある</div><h4>引用符不一致</h4><p>文字列が閉じられず、以降のコードが文字列扱いになる。</p></div>
@@ -172,6 +326,18 @@ run;</pre>
         </ul>
       </div>
     </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>自動型変換が起きるコードを見分ける</h3>
+        <p>文字変数を数値式へ入れる、または数値変数を文字式へ入れると、SASが型を自動変換する場合があります。処理が続いてもログに変換のNOTEが出るため、<code>INPUT</code>または<code>PUT</code>で意図を明示します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 自動変換：amount_charが計算時に数値へ変換される */</span>
+total = amount_char + tax;
+
+<span class="comment">/* 明示変換：文字値の形式を指定して数値へ変換する */</span>
+amount = input(amount_char, comma12.);
+total = amount + tax;</pre>
+    </div>
   </div>
 </section>
 
@@ -189,40 +355,100 @@ run;</pre>
   </div>
 </section>
 
-<section class="tile tile-light">
+<section class="tile tile-light" id="error-comprehensive-test">
   <div class="tile-inner section">
-    <p class="section-eyebrow">Practice</p>
-    <h2>この項目の演習</h2>
-    <p>自分で壊したコードを作り、ログから直す練習をします。試験前にこの作業をすると、ログを読む速度がかなり上がります。</p>
-    <div class="syntax-note">
-      <h3>構文解説: わざと壊したコードの読み方</h3>
-      <ul>
-        <li><code>set cert.orders</code> の後にセミコロンがないため、次の <code>if</code> まで巻き込んで解釈される。</li>
-        <li><code>amount = "1000"</code> は、数値変数と文字リテラルの比較になり、自動変換の NOTE が出やすい。</li>
-        <li><code>first.customer_id</code> を使うには、事前ソートと DATA ステップ内の <code>by customer_id;</code> が必要。</li>
-      </ul>
+    <p class="section-eyebrow">Comprehensive Test</p>
+    <h2>ログの原因を直す総合確認テスト</h2>
+    <p>セミコロン不足、自動型変換、BY処理の前提不足を解消し、異常値をログへ出すコードを完成させてください。</p>
+    <div class="question-list">
+      <div class="question-item">
+        <fieldset class="choice-question" data-correct="a" data-answer-text="後続のエラーは連鎖している場合があるため、ログで最初に出たERRORから修正します。">
+          <legend>問題 1. ログに複数のERRORが出たとき、最初に確認するものはどれですか。</legend>
+          <div class="choices">
+            <label><input type="radio" name="error-test-1" value="a"> <span>最初に出たERROR</span></label>
+            <label><input type="radio" name="error-test-1" value="b"> <span>最後に出たERROR</span></label>
+            <label><input type="radio" name="error-test-1" value="c"> <span>出力結果の最終行だけ</span></label>
+          </div><p class="test-result" aria-live="polite"></p>
+        </fieldset>
+      </div>
+      <div class="question-item">
+        <fieldset class="choice-question" data-correct="a" data-answer-text="PROC、引用符、セミコロン、オプション名がすべて正しいのはAです。">
+          <legend>問題 2. 構文エラーをすべて直したコードはどれですか。</legend>
+          <div class="choices">
+            <label><input type="radio" name="error-test-2" value="a"> <span><code>proc print data=work.orders noobs;<br>title "Orders";<br>var customer_id amount;<br>run;</code></span></label>
+            <label><input type="radio" name="error-test-2" value="b"> <span><code>prco print data=work.orders noobs;<br>title "Orders";<br>var customer_id amount;<br>run;</code></span></label>
+            <label><input type="radio" name="error-test-2" value="c"> <span><code>proc print data=work.orders noob;<br>title "Orders;<br>var customer_id amount<br>run;</code></span></label>
+          </div><p class="test-result" aria-live="polite"></p>
+        </fieldset>
+      </div>
+      <div class="question-item">
+        <p><strong>問題 3.</strong> 顧客別累計を正しく計算し、金額の欠損行と高額行をログへ出してください。</p>
+        <pre class="example multi-blank"><span class="comment">/* BY処理の前に並べ替える */</span>
+<input class="syntax-input wide group-input" type="text" data-answer="proc sort" aria-label="並べ替えるプロシジャ" autocomplete="off" autocapitalize="none" spellcheck="false"> data=cert.orders out=work.orders_sorted;
+  <input class="syntax-input short group-input" type="text" data-answer="by" aria-label="並べ替えキーを指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> customer_id;
+run;
+
+data work.checked;
+  <input class="syntax-input short group-input" type="text" data-answer="set" aria-label="データセットを読み込む構文" autocomplete="off" autocapitalize="none" spellcheck="false"> work.orders_sorted;
+  <input class="syntax-input short group-input" type="text" data-answer="by" aria-label="BYグループを宣言する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> customer_id;
+  if amount = <input class="syntax-input short group-input" type="text" data-answer="1000" aria-label="数値として比較する値" autocomplete="off" autocapitalize="none" spellcheck="false"> then flag = 1;
+  if <input class="syntax-input wide group-input" type="text" data-answer="first.customer_id" aria-label="顧客グループの先頭を表す自動変数" autocomplete="off" autocapitalize="none" spellcheck="false"> then total = 0;
+  total <input class="syntax-input short group-input" type="text" data-answer="+" aria-label="累計するSUMステートメントの記号" autocomplete="off" autocapitalize="none" spellcheck="false"> amount;
+  if <input class="syntax-input group-input" type="text" data-answer="missing" aria-label="欠損を判定する関数" autocomplete="off" autocapitalize="none" spellcheck="false">(amount) then
+    <input class="syntax-input group-input" type="text" data-answer="putlog" aria-label="ログへ値を出す構文" autocomplete="off" autocapitalize="none" spellcheck="false"> "MISSING: " _n_= customer_id= amount=;
+  if amount &gt; 100000 then
+    <input class="syntax-input group-input" type="text" data-answer="putlog" aria-label="高額行をログへ出す構文" autocomplete="off" autocapitalize="none" spellcheck="false"> "HIGH: " customer_id= amount=<input class="syntax-input wide group-input" type="text" data-answer="comma12.2" aria-label="ログへ出す金額の表示形式" autocomplete="off" autocapitalize="none" spellcheck="false">;
+  if last.customer_id then output;
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+      </div>
+      <div class="question-item">
+        <p><strong>問題 4.</strong> 各行を1つの出力先へ振り分け、データエラーの行をログへ出してください。</p>
+        <pre class="example multi-blank"><span class="comment">/* 欠損、20万未満、20万以上の順で1か所へ出力する */</span>
+data work.missing_sales work.low_sales work.high_sales;
+  set work.orders;
+  if <input class="syntax-input group-input" type="text" data-answer="missing" aria-label="欠損を判定する関数" autocomplete="off" autocapitalize="none" spellcheck="false">(sales) then <input class="syntax-input group-input" type="text" data-answer="output" aria-label="行を指定先へ出力するステートメント" autocomplete="off" autocapitalize="none" spellcheck="false"> work.missing_sales;
+  else if sales &lt; 200000 then output work.low_sales;
+  else output work.high_sales;
+run;
+
+<span class="comment">/* INPUTで変換できなかった行だけ全変数をログへ出す */</span>
+data work.checked_input;
+  set work.imported;
+  amount = <input class="syntax-input short group-input" type="text" data-answer="input" aria-label="文字値を数値へ変換する関数" autocomplete="off" autocapitalize="none" spellcheck="false">(amount_char, comma12.);
+  if <input class="syntax-input short group-input" type="text" data-answer="_error_" aria-label="現在の反復のエラー状態を示す自動変数" autocomplete="off" autocapitalize="none" spellcheck="false"> = 1 then <input class="syntax-input group-input" type="text" data-answer="putlog" aria-label="ログへ出力するステートメント" autocomplete="off" autocapitalize="none" spellcheck="false"> <input class="syntax-input short group-input" type="text" data-answer="_all_" aria-label="全変数をログへ出すキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">;
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+      </div>
+      <div class="question-item">
+        <p><strong>問題 5.</strong> 入力は5行で、<code>category="A"</code>の行は3行です。<code>work.one</code>へ出力される行数を入力してください。</p>
+        <pre class="example multi-blank"><span class="comment">/* Aの行は指定OUTPUTと無条件OUTPUTの両方でONEへ書かれる */</span>
+data work.one work.two;
+  set work.input;
+  if category = "A" then output work.one;
+  output;
+run;
+
+WORK.ONEのオブザベーション数: <input class="syntax-input short group-input" type="text" inputmode="numeric" data-answer="8" aria-label="WORK.ONEへ出力されるオブザベーション数" autocomplete="off" spellcheck="false"><span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+      </div>
     </div>
-    <pre class="example"><span class="comment">/* 意図的な練習: どこを直すべきかログで確認する */</span>
-data work.bad;
-  set cert.orders
-  if amount = "1000" then flag = 1;
-  if first.customer_id then total = 0;
-  total + amount;
-run;</pre>
-    <div class="detail-grid">
-      <div class="detail-card"><h3>直す観点</h3><ul><li><code>set</code> 行のセミコロン。</li><li>数値変数と文字リテラルの比較。</li><li><code>first.customer_id</code> を使う前の <code>by customer_id;</code> とソート。</li></ul></div>
-      <div class="detail-card"><h3>採点観点</h3><ul><li>最初の ERROR を見つけられる。</li><li>WARNING / NOTE を結果品質のヒントとして読める。</li><li>修正後に件数と合計で検算できる。</li></ul></div>
+    <div class="answer-controls">
+      <button class="answer-toggle" id="error-answer-toggle" type="button" aria-controls="error-comprehensive-test" aria-pressed="false">答えを見る</button>
     </div>
   </div>
 </section>
 
-<footer class="site-footer"><div class="footer-inner"><p>© 2026 yotalab</p><div class="footer-links"><a href="../../../../">Home</a><a href="../base-programming-performance.html">試験対策ハブ</a><a href="../../../">Articles</a></div></div></footer>
+<footer class="site-footer"><div class="footer-inner"><p>© 2026 yotalab</p><div class="footer-links"><a href="../../../../">Home</a><a href="../base-programming-performance.html">SAS Base Programming 学習トップ</a><a href="../../../">Articles</a></div></div></footer>
 <script>
 const progress = document.getElementById('progress');
 window.addEventListener('scroll', () => {
   const max = document.documentElement.scrollHeight - window.innerHeight;
   progress.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%';
 });
+document.querySelectorAll('.choice-question').forEach((question)=>question.addEventListener('change',(event)=>{if(!event.target.matches('input[type="radio"]'))return;const result=question.querySelector('.test-result');const ok=event.target.value===question.dataset.correct;result.className=`test-result ${ok?'correct':'incorrect'}`;result.textContent=`${ok?'○ 正解です。':'× 不正解です。'}${question.dataset.answerText}`;}));
+document.querySelectorAll('.multi-blank').forEach((question)=>{const inputs=[...question.querySelectorAll('.group-input')];const mark=question.querySelector('.group-correct-mark');question.addEventListener('input',()=>{inputs.forEach((input)=>input.classList.toggle('is-correct',input.value.trim().toLowerCase()===input.dataset.answer));mark.textContent=inputs.every((input)=>input.value.trim().toLowerCase()===input.dataset.answer)?'○':'';});});
+const errorAnswerToggle=document.getElementById('error-answer-toggle');
+const errorInputs=[...document.querySelectorAll('#error-comprehensive-test .group-input')];
+const errorChoices=[...document.querySelectorAll('#error-comprehensive-test .choice-question')];
+errorAnswerToggle.addEventListener('click',()=>{const showing=errorAnswerToggle.getAttribute('aria-pressed')==='true';errorInputs.forEach((input)=>{if(!showing){input.dataset.previousValue=input.value;input.value=input.dataset.answer;}else{input.value=input.dataset.previousValue||'';delete input.dataset.previousValue;}input.dispatchEvent(new Event('input',{bubbles:true}));});errorChoices.forEach((question)=>{const radios=[...question.querySelectorAll('input[type="radio"]')];const result=question.querySelector('.test-result');if(!showing){question.dataset.previousChoice=(radios.find((radio)=>radio.checked)||{}).value||'';const correct=radios.find((radio)=>radio.value===question.dataset.correct);correct.checked=true;correct.dispatchEvent(new Event('change',{bubbles:true}));}else{radios.forEach((radio)=>radio.checked=radio.value===question.dataset.previousChoice);if(question.dataset.previousChoice){radios.find((radio)=>radio.checked).dispatchEvent(new Event('change',{bubbles:true}));}else{result.className='test-result';result.textContent='';}delete question.dataset.previousChoice;}});errorAnswerToggle.setAttribute('aria-pressed',String(!showing));errorAnswerToggle.textContent=showing?'答えを見る':'答えを隠す';});
 </script>
 </body>
 </html>

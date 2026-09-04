@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>データ構造へのアクセスと作成 — SAS 9.4 Base Programming — yotalab</title>
 <meta name="description" content="SAS 9.4 Base Programming の試験項目「データ構造へのアクセスと作成」の詳細学習ページ。">
-<link rel="stylesheet" href="../../../article.css">
+<link rel="stylesheet" href="../../../article.css?v=20260904">
 <style>
   .example{background:var(--bg);color:var(--ink);border:1px solid var(--hairline)}
   .example .comment{color:var(--ink-fine)}
@@ -20,15 +20,18 @@
   .syntax-unit .syntax-note{margin:0;border:0;border-radius:0;padding:22px 24px}
   .syntax-unit .example{margin:0 18px 18px}
   .output-guide{display:grid;gap:14px;margin:0 18px 18px}
-  .output-section{padding:20px;border:1px solid var(--hairline);border-radius:16px;background:var(--tile-soft)}
+  .output-section{min-width:0;padding:20px;border:1px solid var(--hairline);border-radius:16px;background:var(--tile-soft)}
   .output-section.check{background:var(--bg)}
   .output-guide h4{margin:0 0 12px;font-size:15px}
   .output-guide .example{margin:0 0 18px;overflow-x:auto}
-  .output-table-wrap{overflow-x:auto}
-  .output-table{width:100%;min-width:620px;border-collapse:collapse;font-size:14px;line-height:1.55}
-  .output-table th,.output-table td{padding:12px 14px;border-bottom:1px solid var(--hairline);text-align:left;vertical-align:top}
+  .output-table-wrap{width:100%;max-width:100%;min-width:0;overflow-x:visible}
+  .output-table{width:100%;min-width:0;table-layout:fixed;border-collapse:collapse;font-size:14px;line-height:1.55}
+  .output-table th,.output-table td{padding:12px 14px;border-bottom:1px solid var(--hairline);text-align:left;vertical-align:top;overflow-wrap:anywhere}
   .output-table th{font-size:13px;color:var(--ink-fine);background:var(--tile-soft)}
-  .output-table td:first-child{font-weight:600;white-space:nowrap}
+  .output-table th:nth-child(1){width:27%}
+  .output-table th:nth-child(2){width:30%}
+  .output-table th:nth-child(3){width:43%}
+  .output-table td:first-child{font-weight:600;white-space:normal}
   .output-table tr:last-child td{border-bottom:0}
   .question-list{display:grid;gap:14px;margin-top:16px}
   .detail-card > h3:not(:first-child){margin-top:32px}
@@ -37,7 +40,7 @@
   .question-item pre{position:relative;margin:10px 0 14px}
   .syntax-input{width:11ch;padding:5px 7px;border:2px solid var(--action);border-radius:7px;background:var(--bg);color:var(--ink);font:inherit;line-height:1;text-transform:lowercase}
   .syntax-input.short{width:8ch}
-  .syntax-input.wide{width:16ch}
+  .syntax-input.wide{width:19ch}
   .syntax-input:focus{outline:3px solid color-mix(in srgb,var(--action) 22%,transparent);outline-offset:2px}
   .syntax-input.is-correct{border-color:#218739;background:#f1fff4}
   .correct-mark{position:absolute;top:10px;right:12px;color:#218739;font-weight:800;font-size:22px;line-height:1}
@@ -51,6 +54,18 @@
   .result-explanation{font-size:12px}
   .test-result.correct{color:#218739}
   .test-result.incorrect{color:#b42318}
+  @media(max-width:600px){
+    .output-guide{margin:0 10px 14px}
+    .output-section{padding:14px 10px}
+    .output-table-wrap{overflow-x:visible}
+    .output-table{min-width:0;table-layout:fixed;font-size:11px;line-height:1.45}
+    .output-table th,.output-table td{padding:9px 6px;overflow-wrap:anywhere}
+    .output-table th{font-size:11px}
+    .output-table th:nth-child(1){width:27%}
+    .output-table th:nth-child(2){width:30%}
+    .output-table th:nth-child(3){width:43%}
+    .output-table td:first-child{white-space:normal}
+  }
 </style>
 </head>
 <body>
@@ -67,22 +82,22 @@
 </nav>
 
 <header class="article-hero">
-  <p class="eyebrow">SAS Base Programming · 20-25%</p>
   <h1>データ構造へのアクセスと作成</h1>
   <p class="lead">ライブラリを割り当て、既存データを読み、外部ファイルを取り込み、結合し、日付や行列制御まで扱う領域。</p>
-  <p class="series-tag"><a href="../base-programming-performance.html">試験対策ハブ</a> · 詳細項目</p>
+  <p class="series-tag"><a href="../base-programming-performance.html">← SAS Base Programming 学習トップへ</a></p>
 </header>
 
 <section class="tile tile-light">
   <div class="tile-inner section">
     <p class="section-eyebrow">Goal</p>
-    <h2>この項目で到達する状態</h2>
-    <p class="lead">問題文にある入力元を見て、SAS データセットとして読み込み、必要な行・列・型に整えて、次の処理へ渡せる状態を作ります。</p>
+    <h2>データの読み込みから結合・確認まで</h2>
+    <p class="lead">一時・永久データセットの作成、CSV・Excelの読み込み、データの結合、行・列の抽出、日付変換、構造確認を扱います。</p>
     <div class="mini-nav">
       <a href="#library">ライブラリ</a>
       <a href="#import">外部データ</a>
       <a href="#combine">結合</a>
-      <a href="#date-filter">日付と行・列制御</a>
+      <a href="#date-values">日付・時刻</a>
+      <a href="#date-filter">型変換と行・列制御</a>
       <a href="#practice">演習</a>
     </div>
   </div>
@@ -184,6 +199,25 @@ run;</pre>
         </div>
       </div>
     </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>ライブラリのデータセット一覧を調べる — _ALL_ / NODS</h3>
+        <p><strong>基本形:</strong> <code>proc contents data=ライブラリ名._all_ nods; run;</code></p>
+        <p><code>ライブラリ名._ALL_</code>は、そのライブラリにあるすべてのデータセットを対象にします。<code>NODS</code>は各データセットの変数詳細を省略し、ライブラリのディレクトリ情報だけを表示します。全データセットの変数情報も確認する場合は、<code>NODS</code>を外します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* CERTライブラリ内の全データセットをまとめて調べる */</span>
+proc contents data=cert._all_ nods;
+run;</pre>
+      <div class="output-example">
+        <h4>出力結果例</h4>
+        <pre class="example"><span class="comment">/* NODSにより、個別の変数詳細ではなくデータセット一覧が表示される */</span>
+CERTライブラリのディレクトリ
+
+番号  メンバー名     メンバータイプ
+1     CUSTOMERS      DATA
+2     SALES_CLEAN    DATA</pre>
+      </div>
+    </div>
     <div class="detail-grid">
       <div class="detail-card">
         <h3>確認テスト</h3>
@@ -252,6 +286,39 @@ proc import datafile="/home/user/source/orders.csv"
             dbms=csv
             replace;
   guessingrows=max;
+run;</pre>
+    </div>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>区切り文字を指定して読み込む — DELIMITER</h3>
+        <p><strong>基本形:</strong> <code>proc import ... dbms=dlm; delimiter="区切り文字";</code></p>
+        <p><code>DBMS=DLM</code>は一般的な区切り文字付きファイルを表します。<code>DELIMITER=</code>でパイプ、タブ、セミコロンなど、実際のファイルに使われている区切り文字を指定します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* パイプ区切りファイルを読み込む */</span>
+proc import datafile="/home/user/source/orders.txt"
+            out=work.orders_pipe
+            dbms=dlm
+            replace;
+  delimiter="|";
+  getnames=yes;
+  guessingrows=max;
+run;</pre>
+    </div>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>Excelシートを直接読み込む — PROC IMPORT</h3>
+        <p><strong>基本形:</strong> <code>proc import datafile="Excelファイル" out=出力 dbms=xlsx replace; sheet="シート名"; run;</code></p>
+        <p>1つのシートをSASデータセットへ直接取り込む方法です。複数シートをライブラリのように扱う場合は、次のXLSXエンジンを使います。</p>
+      </div>
+      <pre class="example"><span class="comment">/* JanuaryシートをWORKへ直接読み込む */</span>
+proc import datafile="/home/user/source/orders.xlsx"
+            out=work.orders_january
+            dbms=xlsx
+            replace;
+  sheet="January";
+  getnames=yes;
 run;</pre>
     </div>
 
@@ -402,16 +469,30 @@ run;</pre>
 
     <div class="syntax-unit">
       <div class="syntax-note">
-        <h3>共通キーで横に結合する — MERGE / BY</h3>
+        <h3>キーが一意なデータ同士を結合する — 1対1マージ</h3>
         <p><strong>基本形:</strong> <code>merge データセット1 データセット2; by キー変数;</code></p>
-        <p>同じBY変数の値を持つ行を1行にまとめ、列方向に結合します。入力データセットは事前にBY変数でソートされている必要があります。</p>
+        <p>両方のデータセットでBY変数が1行ずつなら、同じキーの2行を1行へまとめます。入力データセットは事前に同じBY変数でソートします。</p>
       </div>
-      <pre class="example"><span class="comment">/* customer_idをキーに顧客情報を付ける */</span>
-data work.sales_with_customer;
-  merge work.sales_sorted work.customers;
+      <pre class="example"><span class="comment">/* 1顧客1行の氏名データと地域データを結合する */</span>
+data work.customer_master;
+  merge work.customer_names_sorted work.customer_regions_sorted;
   by customer_id;
 run;</pre>
     </div>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>繰り返す取引へマスタ情報を付ける — 1対多マージ</h3>
+        <p><strong>基本形:</strong> <code>merge 多側データ 一側データ; by キー変数;</code></p>
+        <p>売上側に同じ顧客が複数行、顧客マスタ側に1行ある場合、マスタ側の値が同じ顧客の各売上行へ付加されます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 複数の売上行へ1顧客1行の顧客情報を付ける */</span>
+data work.sales_with_customer;
+  merge work.sales_sorted work.customer_master;
+  by customer_id;
+run;</pre>
+    </div>
+    <div class="callout"><div class="callout-title">多対多マージへの注意</div><p>両方のデータセットに同じBY値が複数行ある多対多マージは、SQLの直積と同じ結果にはなりません。試験範囲の1対1・1対多を見分け、キーの重複を事前に確認します。</p></div>
 
     <div class="syntax-unit">
       <div class="syntax-note">
@@ -459,10 +540,30 @@ run;</pre>
             </fieldset>
           </div>
           <div class="question-item">
-            <p><strong>問題 2.</strong> 結合キーを指定する構文を完成させてください。</p>
-            <pre class="example">merge work.sales work.customers;
-<input class="syntax-input short" type="text" data-answer="by" aria-label="結合キーを指定する構文を入力" autocomplete="off" autocapitalize="none" spellcheck="false"> customer_id;
-run;<span class="correct-mark" aria-live="polite"></span></pre>
+            <p><strong>問題 2.</strong> 2つのデータセットを <code>customer_id</code> で横に結合する構文を完成させてください。</p>
+            <pre class="example multi-blank"><input class="syntax-input short group-input" type="text" data-answer="merge" aria-label="データセットを横に結合する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> work.sales work.customers;
+<input class="syntax-input short group-input" type="text" data-answer="by" aria-label="結合キーを指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> customer_id;
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+          </div>
+          <div class="question-item">
+            <fieldset class="choice-question" data-correct="b" data-answer-text="IN=で作る一時フラグは、そのBYグループが入力データセットに存在すると1になります。">
+              <legend>問題 3. <code>IN=</code> で作るフラグは何を表しますか。</legend>
+              <div class="choices">
+                <label><input type="radio" name="question-03-3" value="a"> <span>データセット内の行番号</span></label>
+                <label><input type="radio" name="question-03-3" value="b"> <span>そのBYグループが結合元に存在したか</span></label>
+                <label><input type="radio" name="question-03-3" value="c"> <span>結合後に追加された変数の数</span></label>
+              </div>
+              <p class="test-result" aria-live="polite"></p>
+            </fieldset>
+          </div>
+          <div class="question-item">
+            <p><strong>問題 4.</strong> 売上と顧客の両方に存在する <code>customer_id</code> だけを残す構文を完成させてください。</p>
+            <pre class="example multi-blank">data work.matched_sales;
+  merge work.sales(<input class="syntax-input short group-input" type="text" data-answer="in" aria-label="売上側の存在フラグを作るオプション" autocomplete="off" autocapitalize="none" spellcheck="false">=in_sales)
+        work.customers(<input class="syntax-input short group-input" type="text" data-answer="in" aria-label="顧客側の存在フラグを作るオプション" autocomplete="off" autocapitalize="none" spellcheck="false">=in_customer);
+  by customer_id;
+  <input class="syntax-input short group-input" type="text" data-answer="if" aria-label="残す行を指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> in_sales <input class="syntax-input short group-input" type="text" data-answer="and" aria-label="両方の条件を満たす演算子" autocomplete="off" autocapitalize="none" spellcheck="false"> in_customer;
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
           </div>
         </div>
       </div>
@@ -470,17 +571,82 @@ run;<span class="correct-mark" aria-live="polite"></span></pre>
   </div>
 </section>
 
-<section class="tile tile-light" id="date-filter">
+<section class="tile tile-light" id="date-values">
   <div class="tile-inner section">
     <p class="section-eyebrow">04</p>
-    <h2>必要な行・列を選び、日付を扱う</h2>
-    <p>入力時に必要な行と列だけを読み込み、文字列の日付をSAS日付値へ変換します。値の保存方法と表示方法は別に考えます。</p>
+    <h2>SASの日付・時刻・日時を読み書きする</h2>
+    <p>SASは日付・時刻・日時を数値として保存します。保存値、入力時のinformat、表示時のformatを分けて考えます。</p>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>内部の数値として保存する — 日付・時刻・日時</h3>
+        <ul>
+          <li>SAS日付値は1960年1月1日からの日数。<code>'01JAN1960'd</code>は0、翌日は1。</li>
+          <li>SAS時刻値は午前0時からの秒数。<code>'00:01:30't</code>は90。</li>
+          <li>SAS日時値は1960年1月1日午前0時からの秒数。定数の末尾には<code>dt</code>を付ける。</li>
+        </ul>
+      </div>
+      <pre class="example"><span class="comment">/* 日付・時刻・日時の定数を内部値のまま保存する */</span>
+data work.temporal_values;
+  date_value = '02JAN1960'd;
+  time_value = '00:01:30't;
+  datetime_value = '01JAN1960:00:01:30'dt;
+run;</pre>
+      <div class="output-example">
+        <h4>formatを付けない場合の値</h4>
+        <pre class="example"><span class="comment">/* 日付は日数、時刻と日時は秒数 */</span>
+date_value    time_value    datetime_value
+     1             90              90</pre>
+      </div>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>文字表現を数値として読み込む — informat</h3>
+        <p><strong>基本形:</strong> <code>input 変数 informat.;</code></p>
+        <p>informatは、入力文字列をどの規則で数値へ変換するかを指定します。元の文字列の形に合うものを選びます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 日付・時刻・日時の文字表現を読み込む */</span>
+data work.temporal_input;
+  input order_date :date9. order_time :time8. ordered_at :datetime20.;
+datalines;
+30AUG2026 14:35:20 30AUG2026:14:35:20
+;
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>数値を読みやすく表示する — date/time format</h3>
+        <p><strong>基本形:</strong> <code>format 変数 format.;</code></p>
+        <p>formatは保存値を変更せず、出力時の見え方だけを変えます。日付値へ日時formatを付けるなど、単位の異なるformatを混同しないようにします。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 日付・時刻・日時に対応する表示形式を設定する */</span>
+data work.temporal_display;
+  set work.temporal_input;
+  format order_date yymmdd10.
+         order_time time8.
+         ordered_at datetime20.;
+run;</pre>
+      <div class="output-example">
+        <h4>出力結果例</h4>
+        <pre class="example"><span class="comment">/* 保存値は数値のまま、表示だけが変わる */</span>
+order_date    order_time    ordered_at
+2026-08-30    14:35:20      30AUG2026:14:35:20</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light" id="date-filter">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">05</p>
+    <h2>必要な行・列を選び、型を変換する</h2>
+    <p>入力時または出力時に必要な行・列へ絞り、文字と数値を明示的に変換します。</p>
 
     <div class="syntax-unit">
       <div class="syntax-note">
-        <h3>読み込む列を限定する — KEEP=</h3>
-        <p><strong>基本形:</strong> <code>set データセット名(keep=変数1 変数2 ...);</code></p>
-        <p><code>KEEP=</code> はデータセットオプションです。DATAステップへ読み込む前に、必要な列だけに限定します。</p>
+        <h3>読み込み時に列を選ぶ — KEEP= / DROP=</h3>
+        <p><strong>残す列を指定:</strong> <code>set データセット名(keep=変数1 変数2 ...);</code></p>
+        <p><strong>除く列を指定:</strong> <code>set データセット名(drop=変数1 変数2 ...);</code></p>
+        <p>丸括弧内にイコール付きで書く <code>KEEP=</code> と <code>DROP=</code> はデータセットオプションです。<code>SET</code> の入力データセットに付けると、DATAステップへ読み込む列を事前に制御できます。</p>
       </div>
       <pre class="example"><span class="comment">/* 3列だけ読み込む */</span>
 data work.orders_selected;
@@ -503,28 +669,63 @@ run;</pre>
 
     <div class="syntax-unit">
       <div class="syntax-note">
-        <h3>文字列をSAS日付値へ変換する — INPUT</h3>
+        <h3>文字列を数値へ変換する — INPUT</h3>
         <p><strong>基本形:</strong> <code>新しい変数 = input(文字変数, informat.);</code></p>
-        <p><code>INPUT</code> 関数は、文字値を指定したinformatで読み取り、数値へ変換します。日付文字列には、その並びに合う日付informatを指定します。</p>
+        <p><code>INPUT</code> 関数は、文字値を指定したinformatで読み取り、数値へ変換します。通常の数値文字列には <code>comma12.</code> など、日付文字列には <code>yymmdd10.</code> など、元の文字列に合うinformatを指定します。</p>
       </div>
-      <pre class="example"><span class="comment">/* 2026-08-29という文字列をSAS日付値へ変換する */</span>
-data work.orders_dates;
+      <pre class="example"><span class="comment">/* "12,500"という文字列を数値12500へ変換する */</span>
+data work.orders_numeric;
   set work.orders;
+  amount = input(amount_char, comma12.);
+
+  <span class="comment">/* "2026-08-29"という文字列をSAS日付値へ変換する */</span>
   order_date = input(order_date_char, yymmdd10.);
 run;</pre>
     </div>
 
     <div class="syntax-unit">
       <div class="syntax-note">
-        <h3>新しく作った値で行を限定する — IF</h3>
-        <p><strong>基本形:</strong> <code>if 条件式;</code></p>
-        <p>サブセット化IFステートメントは、DATAステップで処理した後に出力する行を限定します。<code>INPUT</code> で作った日付変数なども条件に使えます。</p>
+        <h3>数値を文字列へ変換する — PUT</h3>
+        <p><strong>基本形:</strong> <code>新しい文字変数 = put(数値変数, format.);</code></p>
+        <p><code>PUT</code> 関数は、数値を指定したformatで文字列へ変換します。数値のIDへ先頭の0を付ける、SAS日付値を文字列の日付へ変える、といった場合に使います。</p>
       </div>
-      <pre class="example"><span class="comment">/* 変換後の日付が2026年以降の行だけ残す */</span>
-data work.orders_2026;
+      <pre class="example"><span class="comment">/* 数値123を文字列"000123"へ変換する */</span>
+customer_id_char = put(customer_id, z6.);
+
+<span class="comment">/* SAS日付値を文字列"2026-08-29"へ変換する */</span>
+order_date_char = put(order_date, yymmdd10.);</pre>
+      <div class="output-guide">
+        <div class="output-section check">
+          <h4>Tips: PUTでよく使うformat</h4>
+          <div class="output-table-wrap">
+            <table class="output-table">
+              <thead><tr><th>format</th><th>変換例</th><th>主な用途</th></tr></thead>
+              <tbody>
+                <tr><td><code>8.</code></td><td><code>12345</code> → <code>"   12345"</code></td><td>全体を8文字分の幅にし、余った左側を空白にする</td></tr>
+                <tr><td><code>8.2</code></td><td><code>123.4</code> → <code>"  123.40"</code></td><td>全体を8文字分の幅にし、小数点以下を2桁にする</td></tr>
+                <tr><td><code>COMMA12.2</code></td><td><code>12345.6</code> → <code>"12,345.60"</code></td><td>桁区切りと小数点以下の桁数を付ける</td></tr>
+                <tr><td><code>YYMMDD10.</code></td><td><code>'30AUG2026'd</code> → <code>"2026-08-30"</code></td><td>SAS日付値を年月日の文字列にする</td></tr>
+                <tr><td><code>Z6.</code></td><td><code>123</code> → <code>"000123"</code></td><td>先頭を0で埋めて固定桁のIDなどを作る</td></tr>
+                <tr><td><code>DATE9.</code></td><td><code>'30AUG2026'd</code> → <code>"30AUG2026"</code></td><td>SAS日付値を日月年の文字列にする</td></tr>
+                <tr><td><code>DOLLAR12.2</code></td><td><code>12345.6</code> → <code>"$12,345.60"</code></td><td>金額をドル記号付きの文字列にする</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><code>w.d</code> の <code>w</code> は全体の幅、<code>d</code> は小数点以下の桁数です。たとえば <code>COMMA12.2</code> は全体を12桁分の幅で、小数点以下2桁として変換します。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>条件に合う行だけを出力する — IF</h3>
+        <p><strong>基本形:</strong> <code>if 条件式;</code></p>
+        <p>サブセット化IFステートメントは、DATAステップで処理した後に出力する行を限定します。入力データに元からある変数だけでなく、DATAステップ内で新しく作った変数も条件に使えます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 売上金額が10000以上の行だけ残す */</span>
+data work.large_orders;
   set work.orders;
-  order_date = input(order_date_char, yymmdd10.);
-  if order_date &gt;= '01JAN2026'd;
+  if amount &gt;= 10000;
 run;</pre>
     </div>
 
@@ -540,35 +741,24 @@ format order_date yymmdd10.;</pre>
 
     <div class="syntax-unit">
       <div class="syntax-note">
-        <h3>出力から不要な列を除く — DROP</h3>
-        <p><strong>基本形:</strong> <code>drop 変数1 変数2 ...;</code></p>
-        <p><code>DROP</code> ステートメントは、DATAステップが出力するデータセットから指定した変数を除きます。</p>
+        <h3>出力する列を選ぶ — KEEP / DROP</h3>
+        <p><strong>残す列を指定:</strong> <code>keep 変数1 変数2 ...;</code></p>
+        <p><strong>除く列を指定:</strong> <code>drop 変数1 変数2 ...;</code></p>
+        <p>DATAステップ内にイコールなしで書く <code>KEEP</code> と <code>DROP</code> はステートメントです。処理には変数を使用できますが、最終的に出力する列を制御します。</p>
+        <p>出力データセット名に <code>data work.orders_clean(keep=...);</code> または <code>data work.orders_clean(drop=...);</code> とデータセットオプションを付けても、出力列を制御できます。</p>
       </div>
-      <pre class="example"><span class="comment">/* 変換元の文字変数を出力しない */</span>
+      <pre class="example"><span class="comment">/* ステートメント: イコールなし */</span>
 data work.orders_2026;
   set work.orders;
   order_date = input(order_date_char, yymmdd10.);
   format order_date yymmdd10.;
   drop order_date_char;
-run;</pre>
-    </div>
+run;
 
-    <div class="output-guide">
-      <div class="output-section check">
-        <h4>構文の役割と使うタイミング</h4>
-        <div class="output-table-wrap">
-          <table class="output-table">
-            <thead><tr><th>構文</th><th>役割</th><th>使うタイミング</th></tr></thead>
-            <tbody>
-              <tr><td><code>KEEP=</code></td><td>読み込む列を限定する</td><td>入力前</td></tr>
-              <tr><td><code>WHERE</code></td><td>既存変数の条件で行を限定する</td><td>入力時</td></tr>
-              <tr><td><code>IF</code></td><td>処理後の条件で出力行を限定する</td><td>DATAステップ内</td></tr>
-              <tr><td><code>DROP</code></td><td>出力から列を除く</td><td>出力時</td></tr>
-              <tr><td><code>FORMAT</code></td><td>値の表示方法を設定する</td><td>表示時</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+<span class="comment">/* 出力データセットオプション: イコールあり */</span>
+data work.orders_public(keep=customer_id order_date amount);
+  set work.orders_2026;
+run;</pre>
     </div>
 
     <div class="detail-grid">
@@ -577,7 +767,7 @@ run;</pre>
         <div class="question-list">
           <div class="question-item">
             <fieldset class="choice-question" data-correct="c" data-answer-text="DATAステップ内で新しく作った変数による抽出にはIFを使います。">
-              <legend>問題 1. <code>INPUT</code> で新しく作った <code>order_date</code> を条件に行を残す構文はどれですか。</legend>
+              <legend>問題 1. <code>INPUT</code> で新しく作った数値変数 <code>amount</code> が10000以上の行だけを残す構文はどれですか。</legend>
               <div class="choices">
                 <label><input type="radio" name="question-04-1" value="a"> <span><code>KEEP=</code></span></label>
                 <label><input type="radio" name="question-04-1" value="b"> <span><code>WHERE</code></span></label>
@@ -587,12 +777,28 @@ run;</pre>
             </fieldset>
           </div>
           <div class="question-item">
-            <p><strong>問題 2.</strong> 文字列をSAS日付値へ変換する関数を入力してください。</p>
-            <pre class="example">order_date = <input class="syntax-input short" type="text" data-answer="input" aria-label="日付変換に使う関数を入力" autocomplete="off" autocapitalize="none" spellcheck="false">(order_date_char, yymmdd10.);<span class="correct-mark" aria-live="polite"></span></pre>
+            <p><strong>問題 2.</strong> 文字列から数値、数値から文字列へ変換する関数を入力してください。</p>
+            <pre class="example multi-blank">amount = <input class="syntax-input short group-input" type="text" data-answer="input" aria-label="文字列を数値へ変換する関数" autocomplete="off" autocapitalize="none" spellcheck="false">(amount_char, comma12.);
+customer_id_char = <input class="syntax-input short group-input" type="text" data-answer="put" aria-label="数値を文字列へ変換する関数" autocomplete="off" autocapitalize="none" spellcheck="false">(customer_id, z6.);<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
           </div>
           <div class="question-item">
-            <p><strong>問題 3.</strong> 出力から <code>order_date_char</code> を除く構文を完成させてください。</p>
-            <pre class="example"><input class="syntax-input short" type="text" data-answer="drop" aria-label="変数を出力から除く構文を入力" autocomplete="off" autocapitalize="none" spellcheck="false"> order_date_char;<span class="correct-mark" aria-live="polite"></span></pre>
+            <fieldset class="choice-question" data-correct="a" data-answer-text="SETのデータセット名にKEEP=を付けると、DATAステップへ読み込む列を事前に限定できます。">
+              <legend>問題 3. 読み込み時に3列だけへ限定する正しい書き方はどれですか。</legend>
+              <div class="choices">
+                <label><input type="radio" name="question-04-3" value="a"> <span><code>set work.orders(keep=customer_id order_date amount);</code></span></label>
+                <label><input type="radio" name="question-04-3" value="b"> <span><code>set work.orders keep customer_id order_date amount;</code></span></label>
+                <label><input type="radio" name="question-04-3" value="c"> <span><code>keep=customer_id order_date amount;</code></span></label>
+              </div>
+              <p class="test-result" aria-live="polite"></p>
+            </fieldset>
+          </div>
+          <div class="question-item">
+            <p><strong>問題 4.</strong> DATAステップの出力から <code>order_date_char</code> を除くステートメントを完成させてください。</p>
+            <pre class="example"><input class="syntax-input short" type="text" data-answer="drop" aria-label="変数を出力から除くステートメント" autocomplete="off" autocapitalize="none" spellcheck="false"> order_date_char;<span class="correct-mark" aria-live="polite"></span></pre>
+          </div>
+          <div class="question-item">
+            <p><strong>問題 5.</strong> SAS日付値を年月日の形式で表示する構文を完成させてください。</p>
+            <pre class="example"><input class="syntax-input" type="text" data-answer="format" aria-label="表示形式を設定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> order_date yymmdd10.;<span class="correct-mark" aria-live="polite"></span></pre>
           </div>
         </div>
       </div>
@@ -602,13 +808,122 @@ run;</pre>
 
 <section class="tile tile-soft" id="practice">
   <div class="tile-inner section">
-    <p class="section-eyebrow">Practice</p>
-    <h2>この項目の演習</h2>
-    <div class="steps">
-      <div class="step"><div class="step-content"><h4>CSV と Excel を読み込む</h4><p>読み込み後に <code>PROC CONTENTS</code> と <code>PROC PRINT(obs=10)</code> を実行し、型と日付表示を確認する。</p></div></div>
-      <div class="step"><div class="step-content"><h4>月別売上を連結する</h4><p>3 つの月別データを <code>SET</code> で縦結合し、件数を検算する。</p></div></div>
-      <div class="step"><div class="step-content"><h4>顧客マスタをマージする</h4><p>売上と顧客マスタを <code>customer_id</code> でソートし、<code>MERGE ... BY</code> で結合する。</p></div></div>
-      <div class="step"><div class="step-content"><h4>必要な行と列だけにする</h4><p>日付変換、金額条件、列制御を入れて、最終データセットを作る。</p></div></div>
+    <p class="section-eyebrow">Comprehensive Test</p>
+    <h2>総合演習</h2>
+    <p>空欄を埋めて、外部データの読み込みから最終データの確認までを行う1本のプログラムを完成させてください。</p>
+    <div class="detail-card">
+      <h3>完成条件</h3>
+      <ul>
+        <li><code>cert</code>ライブラリを割り当て、CSVを<code>work.orders_raw</code>へ読み込む。</li>
+        <li>同名データセットの上書きを許可し、全行から列のタイプと長さを推測する。</li>
+        <li>必要な列だけを読み込み、売上が0より大きく、変換後の日付が2026年以降の行だけを残す。</li>
+        <li>不要な文字型日付を除き、日付の表示形式を設定する。</li>
+        <li>売上と顧客マスタを並べ替え、両方に存在する顧客だけを永久データセットへ出力する。</li>
+        <li>最終データの構造と先頭10行を確認する。</li>
+        <li>追加問題で、区切り文字付きファイル、Excel、日付・時刻・日時、1対多マージを確認する。</li>
+      </ul>
+    </div>
+    <div class="question-list">
+      <div class="question-item">
+        <p><strong>総合問題.</strong> すべての空欄が正しく入力されると、コード欄の右上に「○」が表示されます。</p>
+        <pre class="example multi-blank"><span class="comment">/* 1. 永久ライブラリを割り当てる */</span>
+<input class="syntax-input group-input" type="text" data-answer="libname" aria-label="ライブラリを割り当てる構文" autocomplete="off" autocapitalize="none" spellcheck="false"> cert "/home/user/cert";
+
+<span class="comment">/* 2. CSVを一時データセットへ読み込む */</span>
+<input class="syntax-input wide group-input" type="text" data-answer="proc import" aria-label="CSVを読み込むプロシジャ" autocomplete="off" autocapitalize="none" spellcheck="false"> <input class="syntax-input group-input" type="text" data-answer="datafile" aria-label="入力ファイルを指定するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">="/home/user/source/orders.csv"
+            <input class="syntax-input short group-input" type="text" data-answer="out" aria-label="出力先を指定するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">=work.orders_raw
+            <input class="syntax-input short group-input" type="text" data-answer="dbms" aria-label="ファイル形式を指定するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">=csv
+            <input class="syntax-input group-input" type="text" data-answer="replace" aria-label="上書きを許可するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">;
+  <input class="syntax-input wide group-input" type="text" data-answer="guessingrows" aria-label="型を推測する行数を指定するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">=max;
+run;
+
+<span class="comment">/* 3. 必要な列と行を選び、日付を変換する */</span>
+<input class="syntax-input short group-input" type="text" data-answer="data" aria-label="データセットを作る構文" autocomplete="off" autocapitalize="none" spellcheck="false"> work.orders_clean;
+  <input class="syntax-input short group-input" type="text" data-answer="set" aria-label="データセットを読み込む構文" autocomplete="off" autocapitalize="none" spellcheck="false"> work.orders_raw(<input class="syntax-input short group-input" type="text" data-answer="keep" aria-label="読み込む列を限定するオプション" autocomplete="off" autocapitalize="none" spellcheck="false">=customer_id order_date_char amount region);
+  <input class="syntax-input group-input" type="text" data-answer="where" aria-label="入力時に行を限定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> amount &gt; 0;
+  order_date = <input class="syntax-input short group-input" type="text" data-answer="input" aria-label="文字列を数値へ変換する関数" autocomplete="off" autocapitalize="none" spellcheck="false">(order_date_char, yymmdd10.);
+  <input class="syntax-input short group-input" type="text" data-answer="if" aria-label="処理後に行を限定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> order_date &gt;= '01JAN2026'd;
+  <input class="syntax-input short group-input" type="text" data-answer="drop" aria-label="出力から列を除く構文" autocomplete="off" autocapitalize="none" spellcheck="false"> order_date_char;
+  <input class="syntax-input group-input" type="text" data-answer="format" aria-label="表示形式を設定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> order_date yymmdd10.;
+run;
+
+<span class="comment">/* 4. 2つのデータセットを結合キー順に並べる */</span>
+<input class="syntax-input wide group-input" type="text" data-answer="proc sort" aria-label="売上データを並べ替えるプロシジャ" autocomplete="off" autocapitalize="none" spellcheck="false"> data=work.orders_clean out=work.orders_sorted;
+  <input class="syntax-input short group-input" type="text" data-answer="by" aria-label="売上データの並べ替えキーを指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> customer_id;
+run;
+
+<input class="syntax-input wide group-input" type="text" data-answer="proc sort" aria-label="顧客データを並べ替えるプロシジャ" autocomplete="off" autocapitalize="none" spellcheck="false"> data=cert.customers out=work.customers_sorted;
+  <input class="syntax-input short group-input" type="text" data-answer="by" aria-label="顧客データの並べ替えキーを指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> customer_id;
+run;
+
+<span class="comment">/* 5. 両方に存在する顧客だけを永久データセットへ出力する */</span>
+<input class="syntax-input short group-input" type="text" data-answer="data" aria-label="最終データセットを作る構文" autocomplete="off" autocapitalize="none" spellcheck="false"> cert.orders_final;
+  <input class="syntax-input short group-input" type="text" data-answer="merge" aria-label="データセットを横に結合する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> work.orders_sorted(<input class="syntax-input short group-input" type="text" data-answer="in" aria-label="売上側の存在フラグを作るオプション" autocomplete="off" autocapitalize="none" spellcheck="false">=in_order)
+        work.customers_sorted(<input class="syntax-input short group-input" type="text" data-answer="in" aria-label="顧客側の存在フラグを作るオプション" autocomplete="off" autocapitalize="none" spellcheck="false">=in_customer);
+  <input class="syntax-input short group-input" type="text" data-answer="by" aria-label="結合キーを指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> customer_id;
+  <input class="syntax-input short group-input" type="text" data-answer="if" aria-label="出力する行を限定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> in_order <input class="syntax-input short group-input" type="text" data-answer="and" aria-label="両方の条件を満たす演算子" autocomplete="off" autocapitalize="none" spellcheck="false"> in_customer;
+  <input class="syntax-input short group-input" type="text" data-answer="keep" aria-label="最終出力へ残す列を指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> customer_id customer_name order_date amount region;
+run;
+
+<span class="comment">/* 6. 最終データの構造と先頭10行を確認する */</span>
+<input class="syntax-input wide group-input" type="text" data-answer="proc contents" aria-label="データ構造を確認するプロシジャ" autocomplete="off" autocapitalize="none" spellcheck="false"> data=cert.orders_final;
+run;
+
+<input class="syntax-input wide group-input" type="text" data-answer="proc print" aria-label="データの値を表示するプロシジャ" autocomplete="off" autocapitalize="none" spellcheck="false"> data=cert.orders_final(<input class="syntax-input group-input" type="text" data-answer="obs=10" aria-label="表示する行数を指定するオプション" autocomplete="off" autocapitalize="none" spellcheck="false">);
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+      </div>
+      <div class="question-item">
+        <p><strong>追加問題 1.</strong> パイプ区切りファイルとExcelファイルを読み込むコードを完成させてください。</p>
+        <pre class="example multi-blank"><span class="comment">/* パイプ区切りファイルを読み込む */</span>
+proc import datafile="/home/user/source/orders.txt"
+            out=work.orders_pipe
+            dbms=<input class="syntax-input short group-input" type="text" data-answer="dlm" aria-label="区切り文字付きファイルの形式" autocomplete="off" autocapitalize="none" spellcheck="false">
+            replace;
+  <input class="syntax-input wide group-input" type="text" data-answer="delimiter" aria-label="区切り文字を指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false">="|";
+  guessingrows=max;
+run;
+
+<span class="comment">/* ExcelのJanuaryシートを読み込む */</span>
+proc import datafile="/home/user/source/orders.xlsx"
+            out=work.orders_january
+            dbms=<input class="syntax-input short group-input" type="text" data-answer="xlsx" aria-label="Excelファイルの形式" autocomplete="off" autocapitalize="none" spellcheck="false">
+            replace;
+  <input class="syntax-input short group-input" type="text" data-answer="sheet" aria-label="Excelのシートを指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false">="January";
+  getnames=yes;
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+      </div>
+      <div class="question-item">
+        <p><strong>追加問題 2.</strong> 日付・時刻・日時を読み込み、表示形式を設定するコードを完成させてください。</p>
+        <pre class="example multi-blank"><span class="comment">/* 文字列をSAS日付・時刻・日時値として読み込む */</span>
+data work.temporal;
+  input order_date :<input class="syntax-input group-input" type="text" data-answer="date9." aria-label="日付を読み込む入力形式" autocomplete="off" autocapitalize="none" spellcheck="false">
+        order_time :<input class="syntax-input group-input" type="text" data-answer="time8." aria-label="時刻を読み込む入力形式" autocomplete="off" autocapitalize="none" spellcheck="false">
+        ordered_at :<input class="syntax-input wide group-input" type="text" data-answer="datetime20." aria-label="日時を読み込む入力形式" autocomplete="off" autocapitalize="none" spellcheck="false">;
+  <input class="syntax-input group-input" type="text" data-answer="format" aria-label="表示形式を設定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> order_date yymmdd10.
+         order_time time8.
+         ordered_at datetime20.;
+  datalines;
+04SEP2026 09:30:00 04SEP2026:09:30:00
+;
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+      </div>
+      <div class="question-item">
+        <p><strong>追加問題 3.</strong> 注文側は顧客ごとに複数行、顧客マスタ側は顧客ごとに1行です。1対多の結合を完成させてください。</p>
+        <pre class="example multi-blank"><span class="comment">/* 両方をcustomer_id順に並べた後で結合する */</span>
+data work.orders_with_customer;
+  <input class="syntax-input short group-input" type="text" data-answer="merge" aria-label="データセットを横に結合する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> work.orders_sorted work.customers_sorted;
+  <input class="syntax-input short group-input" type="text" data-answer="by" aria-label="結合キーを指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> customer_id;
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+      </div>
+      <div class="question-item">
+        <p><strong>追加問題 4.</strong> <code>cert</code>ライブラリ内の全データセットをまとめて調べてください。</p>
+        <pre class="example multi-blank"><span class="comment">/* ライブラリ全体の変数情報を確認する */</span>
+proc contents data=cert.<input class="syntax-input short group-input" type="text" data-answer="_all_" aria-label="ライブラリ内の全データセットを表すキーワード" autocomplete="off" autocapitalize="none" spellcheck="false"> <input class="syntax-input short group-input" type="text" data-answer="nods" aria-label="各データセットの詳細情報を省略するオプション" autocomplete="off" autocapitalize="none" spellcheck="false">;
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+      </div>
+    </div>
+    <div class="answer-controls">
+      <button class="answer-toggle" id="access-answer-toggle" type="button" aria-expanded="false">答えを見る</button>
     </div>
   </div>
 </section>
@@ -618,7 +933,7 @@ run;</pre>
     <p>© 2026 yotalab</p>
     <div class="footer-links">
       <a href="../../../../">Home</a>
-      <a href="../base-programming-performance.html">試験対策ハブ</a>
+      <a href="../base-programming-performance.html">SAS Base Programming 学習トップ</a>
       <a href="../../../">Articles</a>
     </div>
   </div>
@@ -666,6 +981,23 @@ document.querySelectorAll('.multi-blank').forEach((question) => {
     const allCorrect = inputs.every((input) => input.value.trim().toLowerCase() === input.dataset.answer);
     mark.textContent = allCorrect ? '○' : '';
   });
+});
+
+const accessAnswerToggle = document.getElementById('access-answer-toggle');
+const accessTest = document.getElementById('practice');
+accessAnswerToggle.addEventListener('click', () => {
+  const showingAnswers = accessAnswerToggle.getAttribute('aria-expanded') === 'true';
+  accessTest.querySelectorAll('.group-input').forEach((input) => {
+    if (!showingAnswers) {
+      input.dataset.previousValue = input.value;
+      input.value = input.dataset.answer;
+    } else {
+      input.value = input.dataset.previousValue || '';
+    }
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  accessAnswerToggle.setAttribute('aria-expanded', String(!showingAnswers));
+  accessAnswerToggle.textContent = showingAnswers ? '答えを見る' : '答えを隠す';
 });
 </script>
 </body>

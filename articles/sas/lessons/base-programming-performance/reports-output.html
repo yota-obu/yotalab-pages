@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>レポートとアウトプット生成 — SAS 9.4 Base Programming — yotalab</title>
 <meta name="description" content="SAS 9.4 Base Programming の試験項目「レポートやアウトプットの生成」の詳細学習ページ。">
-<link rel="stylesheet" href="../../../article.css">
+<link rel="stylesheet" href="../../../article.css?v=20260904">
 <style>
   .example{background:var(--bg);color:var(--ink);border:1px solid var(--hairline)}
   .example .comment{color:var(--ink-fine)}
@@ -20,17 +20,16 @@
 <div class="progress-bar" id="progress"></div>
 <nav class="site-nav"><div class="nav-inner"><a href="../../../../" class="logo">yotalab</a><ul class="nav-links"><li><a href="../../../../apps/">Apps</a></li><li><a href="../../../" class="active">Articles</a></li><li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li></ul></div></nav>
 <header class="article-hero">
-  <p class="eyebrow">SAS Base Programming · 15-20%</p>
   <h1>レポートとアウトプット生成</h1>
   <p class="lead">一覧、度数、要約統計、カスタム format、ODS、EXPORT を使い、結果を人が読める形・外部ファイルへ渡せる形にする領域。</p>
-  <p class="series-tag"><a href="../base-programming-performance.html">試験対策ハブ</a> · 詳細項目</p>
+  <p class="series-tag"><a href="../base-programming-performance.html">← SAS Base Programming 学習トップへ</a></p>
 </header>
 
 <section class="tile tile-light">
   <div class="tile-inner section">
     <p class="section-eyebrow">Goal</p>
-    <h2>この項目で到達する状態</h2>
-    <p class="lead">データセットを作るだけで終わらせず、確認用の一覧、検証用の集計、提出用のファイル出力まで一通り書ける状態を作ります。</p>
+    <h2>一覧・集計からファイル出力まで</h2>
+    <p class="lead">一覧表、度数表、要約統計、表示形式、ODSレポート、CSV・Excel出力を扱います。</p>
   </div>
 </section>
 
@@ -38,24 +37,28 @@
   <div class="tile-inner section">
     <p class="section-eyebrow">01</p>
     <h2>PROC PRINT で一覧レポートを作る</h2>
-    <p><code>PROC PRINT</code> は最も基本的な一覧出力です。試験では、表示列、合計、条件、ID、BY、ラベル表示を組み合わせられることが重要です。</p>
-    <div class="syntax-note">
-      <h3>構文解説: 一覧表の表示を制御する</h3>
+    <p><code>PROC PRINT</code> は最も基本的な一覧出力です。表示列、合計、条件、ID、BY、ラベル表示を組み合わせて、必要な形の一覧表を作ります。</p>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+      <h3>表示する行・列・合計を指定する — PROC PRINT</h3>
+      <p><strong>基本形:</strong> <code>proc print data=データセット名; var 表示変数; run;</code></p>
       <ul>
         <li><code>proc sort ... by region customer_id;</code> は、BY レポートの前提として地域・顧客順に並べる。</li>
         <li><code>title</code> と <code>footnote</code> はレポートの見出しと脚注を設定する。</li>
-        <li><code>proc print ... label split="*";</code> は、ラベルを列見出しに使い、<code>*</code> で見出しを改行する。</li>
+        <li><code>proc print ... noobs label split="*";</code> は、Obs列を隠し、ラベルを列見出しに使い、<code>*</code> で見出しを改行する。</li>
         <li><code>id</code>、<code>var</code>、<code>sum</code>、<code>where</code> で、識別列・表示列・合計・行条件を指定する。</li>
       </ul>
-    </div>
-    <pre class="example">proc sort data=work.orders_clean out=work.orders_report;
+      </div>
+      <pre class="example"><span class="comment">/* BYレポートの前に地域、顧客IDの順で並べ替える */</span>
+proc sort data=work.orders_clean out=work.orders_report;
   by region customer_id;
 run;
 
+<span class="comment">/* 表題と脚注を設定し、地域別の一覧表を作る */</span>
 title "Orders by Region";
 footnote "Generated for certification practice";
 
-proc print data=work.orders_report label split="*";
+proc print data=work.orders_report noobs label split="*";
   by region;
   id customer_id;
   var order_date product amount;
@@ -65,8 +68,22 @@ proc print data=work.orders_report label split="*";
         amount = "Order*Amount";
 run;
 
+<span class="comment">/* 後続の出力へ引き継がないよう表題と脚注を解除する */</span>
 title;
 footnote;</pre>
+      <div class="output-example">
+        <h4>出力結果例</h4>
+        <pre class="example"><span class="comment">/* NOOBSによりObs列はなく、ラベル内の*で見出しが改行される */</span>
+Region=East
+
+customer_id    Order       product    Order
+               Date                   Amount
+C001           2026-08-01  Desk        8,000
+C002           2026-08-03  Chair       7,000
+                                      ------
+                                      15,000</pre>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -76,6 +93,13 @@ footnote;</pre>
     <h2>PROC PRINT は「表示の制御」を細かく指定する</h2>
     <p>一覧表では、単に全行を出すのではなく、問題文に合わせて列順、識別列、合計、列見出し、グループ単位を制御します。</p>
     <div class="detail-grid">
+      <div class="detail-card">
+        <h3>指定なしの表示</h3>
+        <ul>
+          <li><code>VAR</code>を省略すると全変数、<code>WHERE</code>を省略すると全オブザベーションを表示する。</li>
+          <li><code>NOOBS</code>を付けなければ、左端にオブザベーション番号のObs列が表示される。</li>
+        </ul>
+      </div>
       <div class="detail-card">
         <h3><code>VAR</code> と <code>ID</code></h3>
         <ul>
@@ -97,6 +121,38 @@ footnote;</pre>
           <li><code>SPLIT=</code> は列見出しを指定文字で折り返す。</li>
         </ul>
       </div>
+      <div class="detail-card">
+        <h3><code>NOOBS</code></h3>
+        <ul>
+          <li>左端に自動表示されるObs列を表示しない。</li>
+          <li><code>ID</code>で業務上の識別列を表示する場合に組み合わせやすい。</li>
+        </ul>
+      </div>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>指定されたオブザベーションだけ確認する — FIRSTOBS= / OBS=</h3>
+        <p><strong>基本形:</strong> <code>proc print data=データセット(firstobs=開始番号 obs=終了番号); run;</code></p>
+        <p><code>FIRSTOBS=</code>は読み始めるオブザベーション番号、<code>OBS=</code>は読み終える番号です。同じ番号を指定すると、その1行だけを確認できます。番号は現在の並び順に対する位置なので、先に指定どおり並べ替えます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 並べ替え後の148番目の商品名だけを表示する */</span>
+proc print data=work.sortedshoes(firstobs=148 obs=148) noobs;
+  var product;
+run;
+
+<span class="comment">/* 並べ替え後の130番目の地域だけを表示する */</span>
+proc print data=work.sortedshoes(firstobs=130 obs=130) noobs;
+  var region;
+run;</pre>
+      <div class="output-example">
+        <h4>出力結果例</h4>
+        <pre class="example"><span class="comment">/* 148番目の1行だけが表示される */</span>
+product
+Slipper
+
+region
+Pacific</pre>
+      </div>
     </div>
   </div>
 </section>
@@ -106,11 +162,58 @@ footnote;</pre>
     <p class="section-eyebrow">02</p>
     <h2>FREQ / MEANS / UNIVARIATE で検証する</h2>
     <p>これらの PROC はレポート作成だけでなく、データ品質の確認にも使います。カテゴリの種類、欠損、外れ値、合計値をすばやく確認します。</p>
-    <div class="syntax-grid">
-      <div class="syntax-card"><h4>PROC FREQ</h4><p><code>proc freq data=work.orders_clean nlevels;<br>tables region*status / missing;<br>run;</code></p></div>
-      <div class="syntax-card"><h4>PROC MEANS</h4><p><code>proc means data=work.orders_clean n mean sum min max maxdec=2;<br>class region; var amount; run;</code></p></div>
-      <div class="syntax-card"><h4>PROC UNIVARIATE</h4><p><code>proc univariate data=work.orders_clean;<br>var amount; run;</code></p></div>
-      <div class="syntax-card"><h4>BY と CLASS</h4><p><code>BY</code> は事前ソートが必要。<code>CLASS</code> は分類変数で要約する。</p></div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>カテゴリの件数を確認する — PROC FREQ</h3>
+        <p><strong>基本形:</strong> <code>proc freq data=データセット名; tables 変数; run;</code></p>
+        <p>一元表でカテゴリ別件数、アスタリスクで変数を結んだ二元表でカテゴリの組み合わせを確認します。<code>MISSING</code>を付けると欠損値も集計します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 地域とステータスの組み合わせ別件数を確認する */</span>
+proc freq data=work.orders_clean nlevels;
+  tables region*status / missing;
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>基本統計量を集計する — PROC MEANS</h3>
+        <p><strong>基本形:</strong> <code>proc means data=データセット名 統計量; class 分類変数; var 数値変数; run;</code></p>
+        <p><code>N</code>、<code>MEAN</code>、<code>SUM</code>、<code>MIN</code>、<code>MAX</code>などを指定し、<code>CLASS</code>の値ごとに数値変数を集計します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 地域別に金額の基本統計量を集計する */</span>
+proc means data=work.orders_clean n mean sum min max maxdec=2;
+  class region;
+  var amount;
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>集計レベルと出力データを指定する — WAYS / OUTPUT</h3>
+        <p><strong>集計レベル:</strong> <code>ways 分類変数の組合せ数;</code></p>
+        <p><strong>データセット出力:</strong> <code>output out=出力データ 統計量= / autoname;</code></p>
+        <ul>
+          <li><code>WAYS 1</code>はCLASS変数を1つずつ使った集計、<code>WAYS 2</code>は2変数の組合せで集計する。</li>
+          <li><code>OUTPUT OUT=</code>は表示結果とは別に、統計量をSASデータセットとして保存する。</li>
+          <li><code>AUTONAME</code>は<code>amount_Mean</code>のように元変数名と統計量を組み合わせた列名を付ける。</li>
+        </ul>
+      </div>
+      <pre class="example"><span class="comment">/* 地域別、ステータス別、両者の組合せで集計する */</span>
+proc means data=work.orders_clean n mean sum;
+  class region status;
+  ways 1 2;
+  var amount;
+  output out=work.amount_summary mean= sum= / autoname;
+run;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>分布と極値を詳しく確認する — PROC UNIVARIATE</h3>
+        <p><strong>基本形:</strong> <code>proc univariate data=データセット名; var 数値変数; run;</code></p>
+        <p>基本統計量に加えて、分位点や極端な値など、数値変数の分布を詳しく確認します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 金額の分布と極端な値を詳しく確認する */</span>
+proc univariate data=work.orders_clean;
+  var amount;
+run;</pre>
     </div>
   </div>
 </section>
@@ -120,18 +223,22 @@ footnote;</pre>
     <p class="section-eyebrow">Frequency</p>
     <h2>PROC FREQ はカテゴリ確認と検算の中心</h2>
     <p><code>PROC FREQ</code> は一元表と二元表を作るだけでなく、カテゴリの種類、欠損、想定外の値を見つける検証用 PROC として使います。</p>
-    <div class="syntax-note">
-      <h3>構文解説: 度数表でカテゴリを検算する</h3>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+      <h3>度数表の表示を調整する — NLEVELS / ORDER= / MISSING</h3>
+      <p><strong>基本形:</strong> <code>proc freq data=データセット名 nlevels order=並び順; tables 変数 / missing; run;</code></p>
       <ul>
         <li><code>nlevels</code> は、各変数に何種類の値があるかを表示する。</li>
         <li><code>order=freq</code> は、度数の多い順に結果を並べる。</li>
         <li><code>tables region status</code> は一元表、<code>region*status</code> は二元表を作る。</li>
         <li><code>/ missing</code> は欠損値も度数表に含める。</li>
       </ul>
-    </div>
-    <pre class="example">proc freq data=work.orders_clean nlevels order=freq;
+      </div>
+      <pre class="example"><span class="comment">/* 欠損を含め、度数の多い順にカテゴリを確認する */</span>
+proc freq data=work.orders_clean nlevels order=freq;
   tables region status region*status / missing;
 run;</pre>
+    </div>
     <div class="detail-grid">
       <div class="detail-card"><h3><code>NLEVELS</code></h3><ul><li>変数ごとの水準数を確認する。</li><li>表記ゆれや想定外カテゴリの発見に使う。</li></ul></div>
       <div class="detail-card"><h3><code>ORDER=</code></h3><ul><li>度数表の表示順を制御する。</li><li>頻度順やデータ順など、問題文の指定に合わせる。</li></ul></div>
@@ -145,26 +252,99 @@ run;</pre>
     <p class="section-eyebrow">Summary</p>
     <h2>PROC MEANS と UNIVARIATE は、集計と異常値確認で使い分ける</h2>
     <p><code>PROC MEANS</code> は基本統計量やクラス別集計に強く、<code>PROC UNIVARIATE</code> は極値や欠損、分布の確認に向きます。レポート作成だけでなく、作ったデータセットの検算にも使います。</p>
-    <div class="syntax-note">
-      <h3>構文解説: 要約統計と極値確認</h3>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+      <h3>集計と分布確認を使い分ける — MEANS / UNIVARIATE</h3>
+      <p><strong>MEANS:</strong> <code>proc means data=データセット名 統計量; class 分類変数; var 数値変数; run;</code></p>
+      <p><strong>UNIVARIATE:</strong> <code>proc univariate data=データセット名; var 数値変数; run;</code></p>
       <ul>
         <li><code>n</code>、<code>nmiss</code>、<code>mean</code>、<code>sum</code> などは出力する統計量を指定する。</li>
         <li><code>class region status;</code> は地域・ステータス別に要約する。</li>
         <li><code>var amount;</code> は統計量を計算する数値変数を指定する。</li>
         <li><code>PROC UNIVARIATE</code> は、極値や分布を詳しく確認するときに使う。</li>
       </ul>
-    </div>
-    <pre class="example">proc means data=work.orders_clean n nmiss mean median sum min max maxdec=2;
+      </div>
+      <pre class="example"><span class="comment">/* 地域・ステータス別に件数、欠損、要約統計を確認する */</span>
+proc means data=work.orders_clean n nmiss mean median sum min max maxdec=2;
   class region status;
   var amount;
 run;
 
+<span class="comment">/* 同じ金額変数の分布と極値を詳しく確認する */</span>
 proc univariate data=work.orders_clean;
   var amount;
 run;</pre>
+    </div>
     <div class="compare">
       <div class="compare-card"><div class="compare-label">MEANS</div><h4>集計の確認</h4><p>件数、欠損、平均、合計、最小、最大を素早く見る。<code>CLASS</code> でカテゴリ別の要約を作る。</p></div>
       <div class="compare-card after"><div class="compare-label">UNIVARIATE</div><h4>極値と分布</h4><p>極端な値や欠損を見つけたいときに使う。データ品質確認の最後に役立つ。</p></div>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>要約表の対象と表示を調整する — NWAY / MISSING / MAXDEC=</h3>
+        <p><strong>基本形:</strong> <code>proc means data=データ nway missing maxdec=桁数; class 分類変数; var 数値変数; output out=出力 統計量= / autoname; run;</code></p>
+        <ul>
+          <li><code>NWAY</code>は、すべてのCLASS変数を組み合わせた最も細かい集計レベルだけを出す。</li>
+          <li><code>MISSING</code>は、CLASS変数の欠損値を1つの分類として集計に含める。</li>
+          <li><code>MAXDEC=</code>は表示する小数点以下の最大桁数を指定する。</li>
+          <li><code>OUTPUT OUT=</code>の出力には、集計レベルを示す<code>_TYPE_</code>と、そのグループの行数を示す<code>_FREQ_</code>が自動的に含まれる。</li>
+        </ul>
+      </div>
+      <pre class="example"><span class="comment">/* 地域×ステータスの最も細かい組み合わせだけを集計する */</span>
+proc means data=work.orders_clean nway missing maxdec=0;
+  class region status;
+  var amount;
+  output out=work.amount_nway mean= sum= / autoname;
+run;</pre>
+      <div class="output-example">
+        <h4>出力結果例</h4>
+        <pre class="example"><span class="comment">/* _TYPE_=3は2つのCLASS変数を両方使った集計を表す */</span>
+region    status    _TYPE_    _FREQ_    amount_Mean    amount_Sum
+East      Open         3          4          12500         50000</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tile tile-light" id="sample-verification">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">結果の検算</p>
+    <h2>条件別の件数と平均を確認する</h2>
+    <p>分類変数を作った後は、度数表で各区分の件数を確認し、<code>WHERE</code>で対象区分を絞って要約統計を求めます。公式サンプル問題のように、作成したデータを別のPROCで検算する流れです。</p>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>区分別件数を求める — PROC FREQ</h3>
+        <p><strong>基本形:</strong> <code>proc freq data=データセット名; tables 区分変数; run;</code></p>
+        <p>区分ごとの行数を確認します。合計件数が入力データの行数と一致するか、境界値や欠損値が意図しない区分へ入っていないかも確認します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 売上区分ごとのオブザベーション数を確認する */</span>
+proc freq data=work.shoerange;
+  tables salesrange;
+run;</pre>
+      <div class="output-example">
+        <h4>出力結果例</h4>
+        <pre class="example"><span class="comment">/* 出力からLower区分の行を抜粋 */</span>
+SalesRange    度数
+Lower          288</pre>
+      </div>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>対象区分の平均を求める — WHERE + PROC MEANS</h3>
+        <p><strong>基本形:</strong> <code>proc means data=データセット mean maxdec=0; where 区分変数="値"; var 数値変数; run;</code></p>
+        <p><code>WHERE</code>で集計対象を限定し、<code>MEAN</code>で平均、<code>MAXDEC=0</code>で整数表示にします。</p>
+      </div>
+      <pre class="example"><span class="comment">/* Middle区分だけに絞ってSalesの平均を求める */</span>
+proc means data=work.shoerange mean maxdec=0;
+  where salesrange = "Middle";
+  var sales;
+run;</pre>
+      <div class="output-example">
+        <h4>出力結果例</h4>
+        <pre class="example"><span class="comment">/* 平均は小数点以下を表示せず135127となる */</span>
+変数      平均
+Sales    135127</pre>
+      </div>
     </div>
   </div>
 </section>
@@ -174,28 +354,34 @@ run;</pre>
     <p class="section-eyebrow">03</p>
     <h2>PROC FORMAT とラベルで出力を読みやすくする</h2>
     <p><code>PROC FORMAT</code> は値の表示を変えます。保存値そのものは変えず、レポート上の見え方を変える点が重要です。</p>
-    <div class="syntax-note">
-      <h3>構文解説: 値を表示用グループに変える</h3>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+      <h3>値に表示用の区分名を付ける — PROC FORMAT</h3>
+      <p><strong>基本形:</strong> <code>proc format; value format名 範囲="表示文字"; run;</code></p>
       <ul>
         <li><code>proc format;</code> でユーザー定義 format を作る。</li>
         <li><code>value amountgrp</code> は数値用の format 名を定義する。</li>
+        <li><code>VALUE</code>で定義するときの名前にはピリオドを付けず、<code>FORMAT</code>で適用するときは<code>amountgrp.</code>のように末尾へピリオドを付ける。</li>
         <li><code>low-&lt;3000</code> は 3000 未満、<code>3000-&lt;10000</code> は 3000 以上 10000 未満を表す。</li>
         <li><code>format amount amountgrp.;</code> は、保存値を変えずに表示だけグループ名へ変える。</li>
       </ul>
-    </div>
-    <pre class="example">proc format;
+      </div>
+      <pre class="example"><span class="comment">/* 金額をLow・Middle・Highで表示するformatを作る */</span>
+proc format;
   value amountgrp
     low-&lt;3000 = "Low"
     3000-&lt;10000 = "Middle"
     10000-high = "High";
 run;
 
+<span class="comment">/* 作成したformatと変数ラベルを一覧表へ適用する */</span>
 proc print data=work.orders_clean label;
   var customer_id order_date amount;
   format amount amountgrp.;
   label customer_id = "Customer ID"
         order_date = "Order Date";
 run;</pre>
+    </div>
     <div class="callout"><div class="callout-title">CNTLIN=</div><p>試験範囲には、データセットから format 定義を読み込む <code>CNTLIN=</code> も含まれます。大量のコードを手書きせず、定義表から format を作る仕組みです。</p></div>
   </div>
 </section>
@@ -205,8 +391,10 @@ run;</pre>
     <p class="section-eyebrow">CNTLIN</p>
     <h2>format 定義をデータセットから作る</h2>
     <p><code>CNTLIN=</code> は、format 定義をデータとして持ち、<code>PROC FORMAT</code> に読み込ませる方法です。大量の範囲やラベルを手書きしないときに使います。</p>
-    <div class="syntax-note">
-      <h3>構文解説: CNTLIN 用データセットの列</h3>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+      <h3>定義データからformatを作る — CNTLIN=</h3>
+      <p><strong>基本形:</strong> <code>proc format cntlin=定義データセット; run;</code></p>
       <ul>
         <li><code>fmtname</code> は作成する format 名、<code>type</code> は文字用か数値用かを指定する。</li>
         <li><code>start</code> と <code>end</code> は範囲の下限・上限を表す。</li>
@@ -214,8 +402,9 @@ run;</pre>
         <li><code>hlo</code> は LOW や HIGH などの特殊範囲を指定する。</li>
         <li><code>proc format cntlin=...</code> で、その定義データセットから format を作る。</li>
       </ul>
-    </div>
-    <pre class="example">data work.amount_format;
+      </div>
+      <pre class="example"><span class="comment">/* formatの範囲と表示文字を定義データとして作る */</span>
+data work.amount_format;
   length fmtname $ 12 start 8 end 8 label $ 12 type $ 1 hlo $ 1;
   fmtname = "amountgrp";
   type = "N";
@@ -225,51 +414,174 @@ run;</pre>
   hlo = "H"; start = 10000; end = .; label = "High"; output;
 run;
 
+<span class="comment">/* 定義データを読み込んでformatを作る */</span>
 proc format cntlin=work.amount_format;
 run;</pre>
+    </div>
     <div class="callout"><div class="callout-title">確認ポイント</div><p><code>FMTNAME</code>、<code>START</code>、<code>END</code>、<code>LABEL</code>、<code>TYPE</code> の役割を押さえます。文字 format なら <code>TYPE="C"</code>、数値 format なら <code>TYPE="N"</code> です。範囲の LOW / HIGH は <code>HLO</code> で表します。</p></div>
+  </div>
+</section>
+
+<section class="tile tile-soft" id="reporting-options">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">04</p>
+    <h2>SASシステムオプションでレポート全体を調整する</h2>
+    <p><code>OPTIONS</code>は個別のPROCではなく、後続の出力全体へ作用するグローバルステートメントです。日付・ページ番号・用紙方向などをまとめて制御します。</p>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>日付・ページ番号・用紙方向を設定する — OPTIONS</h3>
+        <p><strong>基本形:</strong> <code>options nodate nonumber orientation=landscape;</code></p>
+        <ul>
+          <li><code>NODATE</code>は出力日時、<code>NONUMBER</code>はページ番号を非表示にする。</li>
+          <li><code>ORIENTATION=LANDSCAPE</code>は横向き、<code>ORIENTATION=PORTRAIT</code>は縦向きにする。</li>
+          <li>設定は後続の出力にも残るため、必要な処理が終わったら元の設定へ戻す。</li>
+        </ul>
+      </div>
+      <pre class="example"><span class="comment">/* 以降のレポートから日付とページ番号を除き、横向きにする */</span>
+options nodate nonumber orientation=landscape;
+
+proc print data=work.orders_clean noobs;
+  var customer_id order_date amount;
+run;
+
+<span class="comment">/* 後続のレポート用に標準的な設定へ戻す */</span>
+options date number orientation=portrait;</pre>
+    </div>
   </div>
 </section>
 
 <section class="tile tile-light">
   <div class="tile-inner section">
-    <p class="section-eyebrow">04</p>
+    <p class="section-eyebrow">05</p>
     <h2>ODS と EXPORT でファイルへ出す</h2>
     <p>ODS は SAS の出力先を制御します。HTML、PDF、RTF、Excel などの出力に使います。単純な外部データファイル作成には <code>PROC EXPORT</code> も使えます。</p>
-    <div class="syntax-note">
-      <h3>構文解説: レポート出力とデータ出力を分ける</h3>
-      <ul>
-        <li><code>ods html/pdf/rtf file=...</code> は、PROC の出力を指定ファイルへ送る。</li>
-        <li><code>style=</code> は ODS 出力の見た目を指定する。</li>
-        <li><code>ods ... close;</code> は、開いた出力先を閉じる。</li>
-        <li><code>proc export</code> は、SAS データセットを CSV などの生データファイルへ書き出す。</li>
-        <li><code>libname out xlsx</code> は Excel ワークブックを出力先ライブラリとして扱う。</li>
-      </ul>
-    </div>
-    <pre class="example">ods html file="/home/user/report.html" style=htmlblue;
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>PROCの結果をレポートファイルへ出す — ODS</h3>
+        <p><strong>基本形:</strong> <code>ods 出力形式 file="ファイルのパス" style=スタイル名;</code></p>
+        <p>ODSはPROCが作る表やグラフをHTML、PDF、RTFなどへ送ります。処理後は、開いた形式に対応する<code>ods 出力形式 close;</code>で閉じます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* PDF出力を開き、地域別集計を保存する */</span>
 ods pdf file="/home/user/report.pdf" style=journal;
-ods rtf file="/home/user/report.rtf" style=journal;
 
 proc means data=work.orders_clean n mean sum maxdec=2;
   class region;
   var amount;
 run;
 
-ods rtf close;
+<span class="comment">/* PDF出力を閉じる */</span>
 ods pdf close;
-ods html close;
-
+</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>Webページとして出す — ODS HTML</h3>
+        <p><strong>基本形:</strong> <code>ods html file="出力.html" style=スタイル名; ... ods html close;</code></p>
+        <p>HTMLはブラウザで閲覧するレポートを作ります。<code>STYLE=</code>は表や見出しのデザインを指定します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 一覧表をHTMLファイルへ保存する */</span>
+ods html file="/home/user/orders.html" style=htmlblue;
+proc print data=work.orders_clean noobs;
+run;
+ods html close;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>文書として出す — ODS RTF</h3>
+        <p><strong>基本形:</strong> <code>ods rtf file="出力.rtf" style=スタイル名; ... ods rtf close;</code></p>
+        <p>RTFはWordなどの文書ソフトで開いて編集できるレポートを作ります。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 地域別の要約統計をRTFファイルへ保存する */</span>
+ods rtf file="/home/user/summary.rtf" style=journal;
+proc means data=work.orders_clean <input class="syntax-input short group-input" type="text" data-answer="nway" aria-label="最も細かいCLASS組み合わせだけを出すオプション" autocomplete="off" autocapitalize="none" spellcheck="false"> <input class="syntax-input group-input" type="text" data-answer="missing" aria-label="CLASS変数の欠損値を集計に含めるオプション" autocomplete="off" autocapitalize="none" spellcheck="false"> mean sum;
+  class region;
+  var amount;
+run;
+ods rtf close;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>Excelブックとして出す — ODS EXCEL</h3>
+        <p><strong>基本形:</strong> <code>ods excel file="出力.xlsx" options(sheet_name="シート名"); ... ods excel close;</code></p>
+        <p>ODS EXCELはPROCの一覧表や集計表を、Excelで開けるレポートとして保存します。データセットそのものを書き出すXLSXエンジンとは目的が異なります。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 地域別集計をSummaryシートへ出す */</span>
+ods excel file="/home/user/summary.xlsx"
+          options(sheet_name="Summary");
+proc means data=work.orders_clean mean sum;
+  class region;
+  var amount;
+run;
+ods excel close;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>PowerPointとして出す — ODS POWERPOINT</h3>
+        <p><strong>基本形:</strong> <code>ods powerpoint file="出力.pptx" style=スタイル名; ... ods powerpoint close;</code></p>
+        <p>PROCの結果をPowerPointファイルへ出力します。出力先を開いた後にPROCを実行し、最後に同じ出力先を閉じます。</p>
+      </div>
+      <pre class="example"><span class="comment">/* 地域の度数表をPowerPointへ保存する */</span>
+ods powerpoint file="/home/user/regions.pptx" style=powerpointlight;
+proc freq data=work.orders_clean;
+  tables region;
+run;
+ods powerpoint close;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>PROCの表をCSVとして出す — ODS CSV</h3>
+        <p><strong>基本形:</strong> <code>ods csv file="出力.csv"; ... ods csv close;</code></p>
+        <p>ODS CSVはPROCが作った表をCSVへ出します。元のSASデータセットをそのまま外部データへ変換する場合は<code>PROC EXPORT</code>を使います。</p>
+      </div>
+      <pre class="example"><span class="comment">/* PROC PRINTの表をCSVファイルへ保存する */</span>
+ods csv file="/home/user/orders_report.csv";
+proc print data=work.orders_clean noobs;
+run;
+ods csv close;</pre>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>SASデータセットをCSVへ書き出す — PROC EXPORT</h3>
+        <p><strong>基本形:</strong> <code>proc export data=データセット名 outfile="ファイルのパス" dbms=csv replace; run;</code></p>
+        <p><code>DATA=</code>に出力元、<code>OUTFILE=</code>に保存先を指定します。<code>REPLACE</code>は既存ファイルの上書きを許可します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* SASデータセットをCSVファイルへ書き出す */</span>
 proc export data=work.orders_clean
             outfile="/home/user/orders_clean.csv"
             dbms=csv
             replace;
-run;
-
-libname out xlsx "/home/user/orders.xlsx";
-data out.orders_clean;
+run;</pre>
+      <div class="output-guide">
+        <div class="output-section check">
+          <h4>主なDBMS指定</h4>
+          <div class="output-table-wrap">
+            <table class="output-table">
+              <thead><tr><th>指定</th><th>出力形式</th><th>追加指定</th></tr></thead>
+              <tbody>
+                <tr><td><code>DBMS=CSV</code></td><td>カンマ区切り</td><td>通常はそのまま使用</td></tr>
+                <tr><td><code>DBMS=TAB</code></td><td>タブ区切り</td><td>通常はそのまま使用</td></tr>
+                <tr><td><code>DBMS=DLM</code></td><td>任意の区切り文字</td><td><code>delimiter="|";</code>など</td></tr>
+                <tr><td><code>DBMS=JMP</code></td><td>JMPデータファイル</td><td>利用環境の対応を確認</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="syntax-unit">
+      <div class="syntax-note">
+        <h3>Excelブックへシートを書き出す — XLSXエンジン</h3>
+        <p><strong>基本形:</strong> <code>libname ライブラリ名 xlsx "Excelファイルのパス";</code></p>
+        <p>Excelブックをライブラリとして割り当て、データセット名をシート名として書き出します。最後に<code>CLEAR</code>で割り当てを解除します。</p>
+      </div>
+      <pre class="example"><span class="comment">/* Excelブックを出力先ライブラリとして割り当てる */</span>
+libname excelout xlsx "/home/user/orders.xlsx";
+data excelout.orders_clean;
   set work.orders_clean;
 run;
-libname out clear;</pre>
+<span class="comment">/* Excelブックのライブラリ割り当てを解除する */</span>
+libname excelout clear;</pre>
+    </div>
   </div>
 </section>
 
@@ -279,33 +591,162 @@ libname out clear;</pre>
     <h2>ODS と EXPORT は「何を出すか」で選ぶ</h2>
     <p>ODS は PROC の結果を人が読むレポートとして出す仕組みです。<code>PROC EXPORT</code> と XLSX エンジンは、データセットを外部データとして渡すときに使います。</p>
     <div class="detail-grid">
-      <div class="detail-card"><h3>ODS HTML / PDF / RTF</h3><ul><li>一覧表や集計結果など、PROC の出力をレポートとして保存する。</li><li>開いた出力先は、最後に対応する <code>close</code> で閉じる。</li></ul></div>
+      <div class="detail-card"><h3>ODS HTML / PDF / RTF</h3><ul><li>ブラウザ向け、固定レイアウト、編集可能な文書としてPROCの結果を保存する。</li><li>開いた出力先は、最後に対応する <code>close</code> で閉じる。</li></ul></div>
+      <div class="detail-card"><h3>ODS EXCEL / POWERPOINT / CSV</h3><ul><li>PROCの表をExcelブック、プレゼンテーション、CSVへ保存する。</li><li>元データをそのまま受け渡すCSVには<code>PROC EXPORT</code>を使う。</li></ul></div>
       <div class="detail-card"><h3>PROC EXPORT</h3><ul><li>シンプルな生データファイルを作る。</li><li><code>DBMS=csv</code>、<code>DBMS=tab</code>、<code>DBMS=dlm</code> などを指定する。</li></ul></div>
       <div class="detail-card"><h3>XLSX エンジン</h3><ul><li>Excel ワークブックをライブラリのように扱ってデータを書き出す。</li><li>複数シートへ出したい場合に、メンバ名をシート名として使える。</li></ul></div>
     </div>
   </div>
 </section>
 
-<section class="tile tile-soft">
+<section class="tile tile-soft" id="reports-comprehensive-test">
   <div class="tile-inner section">
-    <p class="section-eyebrow">Practice</p>
-    <h2>この項目の演習</h2>
-    <div class="steps">
-      <div class="step"><div class="step-content"><h4>一覧表</h4><p><code>PROC PRINT</code> で列順、ID、合計、ラベル、条件を指定した一覧を作る。</p></div></div>
-      <div class="step"><div class="step-content"><h4>検証表</h4><p><code>PROC FREQ</code> と <code>PROC MEANS</code> で、カテゴリ件数、欠損、合計、平均を検算する。</p></div></div>
-      <div class="step"><div class="step-content"><h4>表示形式</h4><p><code>PROC FORMAT</code> で金額帯やステータス表示を作り、レポートに適用する。</p></div></div>
-      <div class="step"><div class="step-content"><h4>出力</h4><p>同じ結果を HTML、PDF、RTF、CSV、XLSX へ出力し、開閉ステートメントの位置を確認する。</p></div></div>
+    <p class="section-eyebrow">Comprehensive Test</p>
+    <h2>レポート作成からファイル出力までの総合確認テスト</h2>
+    <p>空欄を埋めて、一覧、度数、要約統計、format、ODSレポート、外部ファイル出力を行う一連のコードを完成させてください。</p>
+    <div class="question-list">
+      <div class="question-item">
+        <pre class="example multi-blank"><span class="comment">/* BYレポート用に地域順へ並べ替える */</span>
+proc sort data=work.orders_clean out=work.orders_report;
+  <input class="syntax-input short group-input" type="text" data-answer="by" aria-label="並べ替えキーを指定するステートメント" autocomplete="off" autocapitalize="none" spellcheck="false"> region;
+run;
+
+<span class="comment">/* 表題と脚注を付け、一覧表を作る */</span>
+<input class="syntax-input short group-input" type="text" data-answer="title" aria-label="表題を設定するステートメント" autocomplete="off" autocapitalize="none" spellcheck="false"> "Orders by Region";
+<input class="syntax-input group-input" type="text" data-answer="footnote" aria-label="脚注を設定するステートメント" autocomplete="off" autocapitalize="none" spellcheck="false"> "Positive Amounts";
+<input class="syntax-input wide group-input" type="text" data-answer="proc print" aria-label="一覧を表示するプロシジャ" autocomplete="off" autocapitalize="none" spellcheck="false"> data=work.orders_report <input class="syntax-input short group-input" type="text" data-answer="noobs" aria-label="Obs列を非表示にするオプション" autocomplete="off" autocapitalize="none" spellcheck="false"> label <input class="syntax-input short group-input" type="text" data-answer="split" aria-label="ラベル内の指定文字で列見出しを改行するオプション" autocomplete="off" autocapitalize="none" spellcheck="false">="*";
+  <input class="syntax-input short group-input" type="text" data-answer="by" aria-label="グループ別レポートを作るステートメント" autocomplete="off" autocapitalize="none" spellcheck="false"> region;
+  <input class="syntax-input short group-input" type="text" data-answer="id" aria-label="行の識別列を指定するステートメント" autocomplete="off" autocapitalize="none" spellcheck="false"> customer_id;
+  <input class="syntax-input short group-input" type="text" data-answer="var" aria-label="表示変数を指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> order_date amount;
+  <input class="syntax-input short group-input" type="text" data-answer="sum" aria-label="合計を表示する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> amount;
+  <input class="syntax-input group-input" type="text" data-answer="where" aria-label="表示する行を限定するステートメント" autocomplete="off" autocapitalize="none" spellcheck="false"> amount &gt; 0;
+run;
+title;
+footnote;
+
+<span class="comment">/* カテゴリ別件数を確認する */</span>
+<input class="syntax-input wide group-input" type="text" data-answer="proc freq" aria-label="度数表を作るプロシジャ" autocomplete="off" autocapitalize="none" spellcheck="false"> data=work.orders_clean;
+  <input class="syntax-input group-input" type="text" data-answer="tables" aria-label="度数表の変数を指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> region / missing;
+run;
+
+<span class="comment">/* 地域別の件数・平均・合計をPDFへ出す */</span>
+<input class="syntax-input short group-input" type="text" data-answer="ods" aria-label="ODSを開く構文" autocomplete="off" autocapitalize="none" spellcheck="false"> pdf file="/home/user/summary.pdf" <input class="syntax-input wide group-input" type="text" data-answer="style=journal" aria-label="ODSのスタイルテンプレート指定" autocomplete="off" autocapitalize="none" spellcheck="false">;
+<input class="syntax-input wide group-input" type="text" data-answer="proc means" aria-label="要約統計を作るプロシジャ" autocomplete="off" autocapitalize="none" spellcheck="false"> data=work.orders_clean n mean sum;
+  <input class="syntax-input short group-input" type="text" data-answer="class" aria-label="分類変数を指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> region;
+  <input class="syntax-input short group-input" type="text" data-answer="var" aria-label="集計する数値変数を指定する構文" autocomplete="off" autocapitalize="none" spellcheck="false"> amount;
+run;
+ods pdf <input class="syntax-input short group-input" type="text" data-answer="close" aria-label="ODS出力先を閉じる構文" autocomplete="off" autocapitalize="none" spellcheck="false">;
+
+<span class="comment">/* データをCSVへ書き出す */</span>
+<input class="syntax-input wide group-input" type="text" data-answer="proc export" aria-label="CSVへ書き出すプロシジャ" autocomplete="off" autocapitalize="none" spellcheck="false"> data=work.orders_clean
+            <input class="syntax-input group-input" type="text" data-answer="outfile" aria-label="出力ファイルを指定するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">="/home/user/orders.csv"
+            <input class="syntax-input short group-input" type="text" data-answer="dbms" aria-label="出力形式を指定するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">=csv
+            <input class="syntax-input group-input" type="text" data-answer="replace" aria-label="上書きを許可するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">;
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+      </div>
+      <div class="question-item">
+        <pre class="example multi-blank"><span class="comment">/* ユーザー定義formatを作る */</span>
+proc format;
+  <input class="syntax-input short group-input" type="text" data-answer="value" aria-label="ユーザー定義formatを定義するステートメント" autocomplete="off" autocapitalize="none" spellcheck="false"> score low-&lt;60="Fail" 60-high="Pass";
+run;
+
+<span class="comment">/* 定義データセットからformatを作る */</span>
+proc format <input class="syntax-input wide group-input" type="text" data-answer="cntlin=work.formats" aria-label="format定義データセットを指定するオプション" autocomplete="off" autocapitalize="none" spellcheck="false">;
+run;
+
+<span class="comment">/* ユーザー定義formatをピリオド付きで適用する */</span>
+proc print data=work.scores <input class="syntax-input short group-input" type="text" data-answer="label" aria-label="変数ラベルを列見出しに使うオプション" autocomplete="off" autocapitalize="none" spellcheck="false">;
+  format test <input class="syntax-input group-input" type="text" data-answer="score." aria-label="適用するユーザー定義format名" autocomplete="off" autocapitalize="none" spellcheck="false">;
+run;
+
+<span class="comment">/* 1変数・2変数の分類レベルで集計結果を保存する */</span>
+proc means data=work.orders_clean mean sum;
+  class region status;
+  <input class="syntax-input short group-input" type="text" data-answer="ways" aria-label="集計レベルを指定するステートメント" autocomplete="off" autocapitalize="none" spellcheck="false"> 1 2;
+  var amount;
+  <input class="syntax-input group-input" type="text" data-answer="output" aria-label="統計量をデータセットへ保存するステートメント" autocomplete="off" autocapitalize="none" spellcheck="false"> out=work.amount_summary mean= sum= / autoname;
+run;
+
+<span class="comment">/* PROCの結果をExcel、PowerPoint、CSVへ出す構文 */</span>
+ods <input class="syntax-input short group-input" type="text" data-answer="excel" aria-label="Excel形式のODS出力先" autocomplete="off" autocapitalize="none" spellcheck="false"> file="/home/user/report.xlsx";
+ods excel close;
+ods <input class="syntax-input group-input" type="text" data-answer="powerpoint" aria-label="PowerPoint形式のODS出力先" autocomplete="off" autocapitalize="none" spellcheck="false"> file="/home/user/report.pptx";
+ods powerpoint close;
+ods <input class="syntax-input short group-input" type="text" data-answer="csv" aria-label="CSV形式のODS出力先" autocomplete="off" autocapitalize="none" spellcheck="false"> file="/home/user/report.csv";
+ods csv close;
+ods <input class="syntax-input short group-input" type="text" data-answer="html" aria-label="HTML形式のODS出力先" autocomplete="off" autocapitalize="none" spellcheck="false"> file="/home/user/report.html";
+ods html close;
+ods <input class="syntax-input short group-input" type="text" data-answer="rtf" aria-label="RTF形式のODS出力先" autocomplete="off" autocapitalize="none" spellcheck="false"> file="/home/user/report.rtf";
+ods rtf close;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+      </div>
+      <div class="question-item">
+        <pre class="example multi-blank"><span class="comment">/* 水準数を表示し、度数の多い順に欠損も含めて集計する */</span>
+proc freq data=work.orders_clean <input class="syntax-input group-input" type="text" data-answer="nlevels" aria-label="水準数を表示するオプション" autocomplete="off" autocapitalize="none" spellcheck="false"> <input class="syntax-input wide group-input" type="text" data-answer="order=freq" aria-label="度数の多い順に並べるオプション" autocomplete="off" autocapitalize="none" spellcheck="false">;
+  tables region*status / <input class="syntax-input group-input" type="text" data-answer="missing" aria-label="欠損値も度数に含めるオプション" autocomplete="off" autocapitalize="none" spellcheck="false">;
+run;
+
+<span class="comment">/* 分布、欠損、極値を詳しく確認する */</span>
+<input class="syntax-input wide group-input" type="text" data-answer="proc univariate" aria-label="分布と極値を確認するプロシジャ" autocomplete="off" autocapitalize="none" spellcheck="false"> data=work.orders_clean;
+  var amount;
+run;
+
+<span class="comment">/* パイプ区切り、JMP、タブ区切りファイルを書き出す */</span>
+proc export data=work.orders_clean outfile="/home/user/orders.txt" dbms=<input class="syntax-input short group-input" type="text" data-answer="dlm" aria-label="任意区切り文字のDBMS指定" autocomplete="off" autocapitalize="none" spellcheck="false"> replace;
+  <input class="syntax-input wide group-input" type="text" data-answer="delimiter" aria-label="区切り文字を指定するステートメント" autocomplete="off" autocapitalize="none" spellcheck="false">="|";
+run;
+
+proc export data=work.orders_clean outfile="/home/user/orders.jmp" dbms=<input class="syntax-input short group-input" type="text" data-answer="jmp" aria-label="JMPファイルのDBMS指定" autocomplete="off" autocapitalize="none" spellcheck="false"> replace;
+run;
+
+proc export data=work.orders_clean outfile="/home/user/orders.tsv" dbms=<input class="syntax-input short group-input" type="text" data-answer="tab" aria-label="タブ区切りファイルのDBMS指定" autocomplete="off" autocapitalize="none" spellcheck="false"> replace;
+run;
+
+<span class="comment">/* XLSXエンジンでExcelブックへデータを書き出す */</span>
+libname excelout <input class="syntax-input short group-input" type="text" data-answer="xlsx" aria-label="Excelブックを扱うライブラリエンジン" autocomplete="off" autocapitalize="none" spellcheck="false"> "/home/user/orders.xlsx";
+data excelout.orders_clean;
+  set work.orders_clean;
+run;
+libname excelout <input class="syntax-input short group-input" type="text" data-answer="clear" aria-label="Excelライブラリの割り当てを解除するキーワード" autocomplete="off" autocapitalize="none" spellcheck="false">;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+      </div>
+      <div class="question-item">
+        <pre class="example multi-blank"><span class="comment">/* 並べ替え後の148番目だけを確認する */</span>
+proc print data=work.sortedshoes(<input class="syntax-input wide group-input" type="text" data-answer="firstobs=148" aria-label="読み始めるオブザベーション番号の指定" autocomplete="off" autocapitalize="none" spellcheck="false"> <input class="syntax-input group-input" type="text" data-answer="obs=148" aria-label="読み終えるオブザベーション番号の指定" autocomplete="off" autocapitalize="none" spellcheck="false">) noobs;
+  var product;
+run;
+
+<span class="comment">/* 同じデータの130番目から地域だけを確認する */</span>
+proc print data=work.sortedshoes(<input class="syntax-input wide group-input" type="text" data-answer="firstobs=130" aria-label="130番目から読み始める指定" autocomplete="off" autocapitalize="none" spellcheck="false"> <input class="syntax-input group-input" type="text" data-answer="obs=130" aria-label="130番目で読み終える指定" autocomplete="off" autocapitalize="none" spellcheck="false">) noobs;
+  var region;
+run;
+
+<span class="comment">/* レポート全体の日付とページ番号を除き、横向きにする */</span>
+options <input class="syntax-input short group-input" type="text" data-answer="nodate" aria-label="出力日時を非表示にするシステムオプション" autocomplete="off" autocapitalize="none" spellcheck="false"> <input class="syntax-input group-input" type="text" data-answer="nonumber" aria-label="ページ番号を非表示にするシステムオプション" autocomplete="off" autocapitalize="none" spellcheck="false"> orientation=<input class="syntax-input group-input" type="text" data-answer="landscape" aria-label="横向きを指定する値" autocomplete="off" autocapitalize="none" spellcheck="false">;
+
+<span class="comment">/* Middle区分だけの平均を整数表示で求める */</span>
+proc means data=work.shoerange mean <input class="syntax-input group-input" type="text" data-answer="maxdec=0" aria-label="小数点以下を表示しないオプション" autocomplete="off" autocapitalize="none" spellcheck="false">;
+  <input class="syntax-input group-input" type="text" data-answer="where" aria-label="集計対象を限定するステートメント" autocomplete="off" autocapitalize="none" spellcheck="false"> salesrange="Middle";
+  var sales;
+run;<span class="correct-mark group-correct-mark" aria-live="polite"></span></pre>
+      </div>
+    </div>
+    <div class="answer-controls">
+      <button class="answer-toggle" id="reports-answer-toggle" type="button" aria-controls="reports-comprehensive-test" aria-pressed="false">答えを見る</button>
     </div>
   </div>
 </section>
 
-<footer class="site-footer"><div class="footer-inner"><p>© 2026 yotalab</p><div class="footer-links"><a href="../../../../">Home</a><a href="../base-programming-performance.html">試験対策ハブ</a><a href="../../../">Articles</a></div></div></footer>
+<footer class="site-footer"><div class="footer-inner"><p>© 2026 yotalab</p><div class="footer-links"><a href="../../../../">Home</a><a href="../base-programming-performance.html">SAS Base Programming 学習トップ</a><a href="../../../">Articles</a></div></div></footer>
 <script>
 const progress = document.getElementById('progress');
 window.addEventListener('scroll', () => {
   const max = document.documentElement.scrollHeight - window.innerHeight;
   progress.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%';
 });
+document.querySelectorAll('.syntax-input:not(.group-input)').forEach((input)=>input.addEventListener('input',()=>{const ok=input.value.trim().toLowerCase()===input.dataset.answer;input.classList.toggle('is-correct',ok);input.nextElementSibling.textContent=ok?'○':'';}));
+document.querySelectorAll('.multi-blank').forEach((question)=>{const inputs=[...question.querySelectorAll('.group-input')];const mark=question.querySelector('.group-correct-mark');question.addEventListener('input',()=>{inputs.forEach((input)=>input.classList.toggle('is-correct',input.value.trim().toLowerCase()===input.dataset.answer));mark.textContent=inputs.every((input)=>input.value.trim().toLowerCase()===input.dataset.answer)?'○':'';});});
+const reportsAnswerToggle=document.getElementById('reports-answer-toggle');
+const reportsInputs=[...document.querySelectorAll('#reports-comprehensive-test .group-input')];
+reportsAnswerToggle.addEventListener('click',()=>{const showing=reportsAnswerToggle.getAttribute('aria-pressed')==='true';reportsInputs.forEach((input)=>{if(!showing){input.dataset.previousValue=input.value;input.value=input.dataset.answer;}else{input.value=input.dataset.previousValue||'';delete input.dataset.previousValue;}input.dispatchEvent(new Event('input',{bubbles:true}));});reportsAnswerToggle.setAttribute('aria-pressed',String(!showing));reportsAnswerToggle.textContent=showing?'答えを見る':'答えを隠す';});
 </script>
 </body>
 </html>

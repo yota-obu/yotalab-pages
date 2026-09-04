@@ -291,6 +291,40 @@ nav.site-nav{
   font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
   color:var(--action);
 }
+
+/* ── Lesson syntax groups and quizzes ── */
+.syntax-unit{margin:26px 0;border:1px solid var(--hairline);border-radius:20px;background:var(--bg);overflow:hidden}
+.syntax-unit .syntax-note{margin:0;border:0;border-radius:0;padding:22px 24px}
+.syntax-unit .example{position:relative;margin:0 18px 18px}
+.question-list{display:grid;gap:14px;margin-top:16px;min-width:0}
+.question-item{min-width:0;border:1px solid var(--hairline);border-radius:14px;padding:16px 18px;background:var(--tile-soft)}
+.question-item p{margin:0 0 12px;line-height:1.65}
+.question-item pre{position:relative;max-width:100%;box-sizing:border-box;margin:10px 0 14px}
+.syntax-input{width:11ch;padding:5px 7px;border:2px solid var(--action);border-radius:7px;background:var(--bg);color:var(--ink);font:inherit;line-height:1;text-transform:lowercase}
+.syntax-input.tiny{width:4ch}.syntax-input.short{width:8ch}.syntax-input.wide{width:19ch}
+.syntax-input:focus{outline:3px solid color-mix(in srgb,var(--action) 22%,transparent);outline-offset:2px}
+.syntax-input.is-correct{border-color:#218739;background:#f1fff4}
+.correct-mark{position:absolute;top:10px;right:12px;color:#218739;font-weight:800;font-size:22px;line-height:1}
+.choice-question{margin:0;border:0;padding:0}
+.choice-question legend{margin-bottom:12px;line-height:1.65;font-weight:600}
+.choices{display:grid;gap:8px}
+.choices label{display:flex;gap:9px;align-items:flex-start;padding:10px 12px;border:1px solid var(--hairline);border-radius:10px;background:var(--bg);cursor:pointer;font-size:14px;line-height:1.5}
+.choices input{margin-top:3px}
+.section .test-result{min-height:1.5em;margin:8px 0 0!important;font-size:12px;font-weight:400;line-height:1.5}
+.result-label{margin-right:6px}.test-result.correct{color:#218739}.test-result.incorrect{color:#b42318}
+.answer-controls{display:flex;justify-content:center;margin-top:18px}
+.answer-toggle{padding:10px 20px;border:1px solid var(--action);border-radius:980px;background:var(--bg);color:var(--action);font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s,color .2s}
+.answer-toggle:hover{background:var(--action);color:#fff}
+.answer-toggle:focus-visible{outline:3px solid color-mix(in srgb,var(--action) 22%,transparent);outline-offset:3px}
+.output-example{margin:0 18px 18px;padding:18px;border:1px solid var(--hairline);border-radius:16px;background:var(--tile-soft)}
+.output-example h4{margin:0 0 12px;font-size:15px}
+.output-example .example{margin:0;max-width:100%;box-sizing:border-box}
+.output-guide,.output-section,.output-table-wrap{min-width:0}
+.output-table-wrap{width:100%;max-width:100%;overflow-x:visible}
+.output-table{width:100%;min-width:0;table-layout:fixed;border-collapse:collapse;font-size:14px;line-height:1.55}
+.output-table th,.output-table td{padding:12px 14px;border-bottom:1px solid var(--hairline);text-align:left;vertical-align:top;overflow-wrap:anywhere;word-break:normal}
+.output-table th{font-size:13px;color:var(--ink-fine);background:var(--tile-soft)}
+.output-table tr:last-child td{border-bottom:0}
 .example{
   background:var(--tile-dark);color:#e8eaed;
   padding:22px 26px;border-radius:18px;margin:22px 0;
@@ -302,6 +336,12 @@ nav.site-nav{
 .example .highlight{color:#7fbcff;font-weight:600}
 .example .arrow{color:rgba(255,255,255,0.55);margin:0 8px}
 .example .key{color:#a5d6ff}
+
+@media (max-width:600px){
+  .output-table{font-size:11px;line-height:1.45}
+  .output-table th,.output-table td{padding:9px 6px}
+  .output-table th{font-size:11px}
+}
 
 /* ── Params (parameter list) ── */
 .params{
