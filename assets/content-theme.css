@@ -3,8 +3,34 @@
 body{background:var(--bg)}
 nav,.site-nav{background:rgba(246,245,240,.96)!important;backdrop-filter:blur(12px)}
 .logo{font-weight:800!important;letter-spacing:-1px!important}
-.hero{background:var(--bg)}
 a:focus-visible,button:focus-visible{outline:3px solid #718f35;outline-offset:5px}
-.appstore-btn{background:#23271f!important}
+.appstore-btn{background:#23271f!important;color:#fff!important}
+.appstore-btn .label-sub{opacity:1}
 .article-hero{background:#eeeee6}
+.app-page{--dark:#23271f;--app-tint:#eef0e8;--app-accent:#456026;--app-night:#222c20;--app-on-night:#c6dfaa;color:var(--dark)}
+.app-english-karuta{--app-tint:#ececf6;--app-accent:#4d4f91;--app-night:#27283d;--app-on-night:#d1d2ff}
+.app-molkky-3d{--app-tint:#e9efdf;--app-accent:#3e612e;--app-night:#233221;--app-on-night:#cce5b3}
+.app-palettly{--app-tint:#f3e8df;--app-accent:#87503c;--app-night:#362c28;--app-on-night:#f0c5ab}
+.app-progress-bar-timer{--app-tint:#e9edeb;--app-accent:#3c5b50;--app-night:#232c28;--app-on-night:#c9e6d7}
+.app-page{--accent:var(--app-accent);--accent2:var(--app-accent)}
+.app-page .hero{background:var(--app-tint);color:var(--dark)}
+.app-page .hero:before{display:none}
+.app-page .hero h1{color:var(--dark)}
+.app-page .hero .catchcopy{color:var(--app-accent)}
+.app-page .hero .en-name,.app-page .hero .desc{color:#50554e}
+.app-page .hero-icon{box-shadow:0 10px 28px #23271f18}
+.app-page .hero-badges .badge,.app-page .hero-badges .badge.alt{background:#ffffffa6;color:var(--app-accent);border-color:var(--app-accent)}
+.app-page .section-light{background:var(--bg);color:var(--dark)}
+.app-page .section-dark,.app-page .showcase-section,.app-page footer{background:var(--app-night);color:#fff;--accent:var(--app-on-night)}
+.app-page .section-dark .subtitle,.app-page .showcase-section .subtitle,.app-page footer p,.app-page footer a{color:#cdd1c9}
+.app-page .section-dark .feat p,.app-page .section-dark .mode-card p,.app-page .credits-list li,.app-page .showcase-section .caption p{color:#cdd1c9}
+.app-page .mode-card{background:var(--app-night);color:#fff;--accent:var(--app-on-night)}
+.app-page .mode-card h3{color:#fff}
+.app-page .mode-card p{color:#cdd1c9}
+.app-page .section-light .recommend-list li{color:#454c43}
+.app-page .privacy-link{background:var(--app-tint)}
+.app-page .palette-preview .chip{color:#fff;text-shadow:0 1px 3px #000}
+.app-page .palette-preview .chip.light{color:#23271f;text-shadow:none}
+.app-palettly .palette-preview .chip:nth-child(3){color:#111;text-shadow:none}
+@media(max-width:600px){.app-page nav .nav-inner{height:auto;min-height:60px;flex-wrap:wrap;gap:12px;padding-top:12px;padding-bottom:12px}.app-page .nav-links{gap:16px}.app-page .nav-links a{font-size:12px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*:before,*:after{animation:none!important;transition:none!important}}
