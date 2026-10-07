@@ -1,0 +1,10 @@
+/* Shared identity for existing app details and reading pages. */
+:root{--bg:#f6f5f0;--parchment:#eeeee6;--text:#23271f;--ink:#23271f;--sub:#64685e;--accent:#506a25;--accent2:#33451b;--action:#506a25;--action-bright:#506a25;--border:#d9dbd2}
+body{background:var(--bg)}
+nav,.site-nav{background:rgba(246,245,240,.96)!important;backdrop-filter:blur(12px)}
+.logo{font-weight:800!important;letter-spacing:-1px!important}
+.hero{background:var(--bg)}
+a:focus-visible,button:focus-visible{outline:3px solid #718f35;outline-offset:5px}
+.appstore-btn{background:#23271f!important}
+.article-hero{background:#eeeee6}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*,*:before,*:after{animation:none!important;transition:none!important}}

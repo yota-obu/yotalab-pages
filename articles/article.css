@@ -1,7 +1,8 @@
-/* ── yotalab Articles · Apple-style ── */
+@import url("../assets/content-theme.css");
+/* yotalab reading layout */
 :root{
-  --bg:#ffffff;
-  --parchment:#f5f5f7;
+  --bg:#f6f5f0;
+  --parchment:#eeeee6;
   --ink:#1d1d1f;
   --ink-muted:rgba(0,0,0,0.8);
   --ink-faint:rgba(0,0,0,0.56);
@@ -12,8 +13,8 @@
   --tile-dark-3:#252527;
   --hairline:rgba(0,0,0,0.08);
   --hairline-soft:rgba(0,0,0,0.04);
-  --action:#0066cc;
-  --action-bright:#0071e3;
+  --action:#506a25;
+  --action-bright:#506a25;
   --sky:#2997ff;
 }
 *{margin:0;padding:0;box-sizing:border-box}
