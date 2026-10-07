@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>エラーハンドリング — SAS 9.4 Base Programming — yotalab</title>
 <meta name="description" content="SAS 9.4 Base Programming の試験項目「エラーハンドリング」の詳細学習ページ。">
-<link rel="stylesheet" href="../../../article.css?v=20260904">
+<link rel="stylesheet" href="../../../article.css?v=20260905">
 <style>
   .example{background:var(--bg);color:var(--ink);border:1px solid var(--hairline)}
   .example .comment{color:var(--ink-fine)}
@@ -14,6 +14,8 @@
   .detail-card h3{margin-top:0}
   .detail-card ul{padding-left:1.1em;margin:8px 0 0}
   .detail-card li{font-size:15px;line-height:1.65;color:var(--ink-muted);margin:4px 0}
+  .output-example .output-table-wrap{margin-top:14px}
+  .output-caption{margin:12px 0 0!important;font-size:13px!important;line-height:1.6!important;color:var(--ink-muted)}
 </style>
 </head>
 <body>
@@ -61,8 +63,17 @@
     ERROR: IF-THEN/ELSEステートメントの構文を確認してください。
 
 <span class="comment">/* 修正後：THEN側の代入文をセミコロンで終了する */</span>
-if amount &gt;= 10000 then status = "High";
-else status = "Other";</pre>
+data work.checked;
+  set work.orders;
+  if amount &gt;= 10000 then status = "High";
+  else status = "Other";
+run;</pre>
+      <div class="output-example">
+        <h4>WORK.ORDERSがamountだけを持つ4行の場合のログ例</h4>
+        <pre class="example">NOTE: DATAステップが正常に完了しました。
+NOTE: データセット WORK.CHECKED は4オブザベーション、2変数です。</pre>
+        <p class="output-caption">表示言語や文言は実行環境により異なります。<code>ERROR</code>が消えただけで終わらず、出力行数と変数数も確認します。</p>
+      </div>
     </div>
   </div>
 </section>
@@ -99,6 +110,21 @@ data work.debug_total;
   <span class="comment">/* 顧客グループの最終行だけ結果へ出力する */</span>
   if last.customer_id then output;
 run;</pre>
+      <div class="output-example">
+        <h4>ログ出力例</h4>
+        <pre class="example">DEBUG: _N_=1 customer_id=C001 order_date=01AUG2026 amount=100 total_amount=100
+DEBUG: _N_=2 customer_id=C001 order_date=03AUG2026 amount=150 total_amount=250</pre>
+        <div class="output-table-wrap">
+          <table class="output-table">
+            <thead><tr><th>表示項目</th><th>意味</th><th>確認すること</th></tr></thead>
+            <tbody>
+              <tr><td><code>_N_</code></td><td>DATAステップの反復回数</td><td>想定した入力行を処理しているか</td></tr>
+              <tr><td><code>customer_id</code></td><td>現在処理中の顧客ID</td><td>C001の行だけが表示されているか</td></tr>
+              <tr><td><code>total_amount</code></td><td>顧客内の累計金額</td><td>100、250の順に正しく加算されているか</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
     <div class="callout"><div class="callout-title">覚える形</div><p><code>putlog _all_;</code> は全変数を出せます。原因が見えないときの最終手段として便利ですが、ログが大きくなるため条件付きで使います。</p></div>
     <div class="callout"><div class="callout-title">自動変数</div><p><code>_N_</code> は DATA ステップの反復回数、<code>_ERROR_</code> はその反復でエラーが発生したかを示す一時変数です。ログ確認や条件付きデバッグで役立ちます。</p></div>
@@ -114,6 +140,12 @@ data work.debug_format;
   set work.orders;
   putlog order_date= date9. amount= comma12.2;
 run;</pre>
+      <div class="output-example">
+        <h4>ログ出力例</h4>
+        <pre class="example">order_date=01AUG2026 amount=1,250.00
+order_date=03AUG2026 amount=12,500.00</pre>
+        <p class="output-caption"><code>DATE9.</code>と<code>COMMA12.2</code>で読みやすく表示されます。変更されるのはログ上の見え方だけで、保存された値やformat属性は変わりません。</p>
+      </div>
     </div>
     <div class="syntax-unit">
       <div class="syntax-note">
@@ -126,6 +158,21 @@ data work.debug_all;
   set work.orders;
   if _n_ = 5 then putlog _all_;
 run;</pre>
+      <div class="output-example">
+        <h4>ログ出力例</h4>
+        <pre class="example">customer_id=C003 order_date=05AUG2026 amount=300 region=West _ERROR_=0 _N_=5</pre>
+        <div class="output-table-wrap">
+          <table class="output-table">
+            <thead><tr><th>表示項目</th><th>意味</th><th>確認すること</th></tr></thead>
+            <tbody>
+              <tr><td>各変数</td><td>5回目の反復時点にPDVが持つ値</td><td>想定した1行の値になっているか</td></tr>
+              <tr><td><code>_ERROR_=0</code></td><td>現在の反復ではデータエラーなし</td><td>エラーを調べる場合は1になった行がないか</td></tr>
+              <tr><td><code>_N_=5</code></td><td>5回目のDATAステップ反復</td><td>条件どおり5回目だけ表示されたか</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="output-caption">変数の表示順は、PDV内の並びによって異なります。</p>
+      </div>
     </div>
     <div class="syntax-unit">
       <div class="syntax-note">
@@ -136,8 +183,35 @@ run;</pre>
 data work.checked_input;
   set work.imported;
   amount = input(amount_char, comma12.);
-  if _error_ = 1 then putlog "DATA ERROR: " _n_= _all_;
+  if _error_ = 1 then putlog "DATA ERROR: " _all_;
 run;</pre>
+      <div class="output-example">
+        <h4><code>amount_char="ABC"</code>を処理したときのログ例</h4>
+        <pre class="example">NOTE: INPUT関数に無効な引数があります。
+DATA ERROR: _N_=5 customer_id=C003 amount_char=ABC amount=. _ERROR_=1</pre>
+        <div class="output-table-wrap">
+          <table class="output-table">
+            <thead><tr><th>表示項目</th><th>意味</th><th>確認すること</th></tr></thead>
+            <tbody>
+              <tr><td><code>_N_=5</code></td><td>エラーが起きた反復回数</td><td>入力データのどの行に対応するか</td></tr>
+              <tr><td><code>amount_char=ABC</code></td><td>変換前の文字値</td><td><code>COMMA12.</code>で数値として読める値か</td></tr>
+              <tr><td><code>amount=.</code></td><td>変換できず生成された数値欠損値</td><td>想定外の欠損値が出力へ残っていないか</td></tr>
+              <tr><td><code>_ERROR_=1</code></td><td>現在の反復でデータエラーが発生</td><td>エラー行だけがPUTLOGに出ているか</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="concept-visual" role="img" aria-label="DATAステップが入力を1行ずつ処理し、反復番号をNに持ち、変換エラーが起きた行だけERRORが1になってPUTLOGへ流れる図">
+        <p class="concept-visual-title">_N_は何行目の処理か、_ERROR_はその処理で失敗したか</p>
+        <div class="visual-flow">
+          <div class="visual-node"><strong>入力を1行読む</strong><span><code>_N_=5</code></span></div>
+          <span class="visual-arrow">→</span>
+          <div class="visual-node"><strong>型変換でエラー</strong><span><code>_ERROR_=1</code></span></div>
+          <span class="visual-arrow">→</span>
+          <div class="visual-node"><strong>その行だけログへ</strong><code>putlog _all_;</code></div>
+        </div>
+        <p class="concept-visual-note">次の入力行へ進むと<code>_N_</code>は増え、<code>_ERROR_</code>は新しい反復用に0へ戻ります。</p>
+      </div>
     </div>
   </div>
 </section>
@@ -160,6 +234,22 @@ data work.low_sales work.high_sales work.missing_sales;
   else if sales &lt; 200000 then output work.low_sales;
   else output work.high_sales;
 run;</pre>
+      <div class="output-example">
+        <h4>入力値が「欠損、50,000、180,000、200,000、250,000」の場合</h4>
+        <pre class="example">WORK.MISSING_SALES   1オブザベーション
+WORK.LOW_SALES       2オブザベーション
+WORK.HIGH_SALES      2オブザベーション</pre>
+        <div class="output-table-wrap">
+          <table class="output-table">
+            <thead><tr><th>出力先</th><th>意味</th><th>確認すること</th></tr></thead>
+            <tbody>
+              <tr><td><code>MISSING_SALES</code></td><td><code>sales</code>が欠損の行</td><td>欠損値が低額側へ入らず、1行だけ入ったか</td></tr>
+              <tr><td><code>LOW_SALES</code></td><td>欠損ではなく20万円未満の行</td><td>50,000と180,000の2行か</td></tr>
+              <tr><td><code>HIGH_SALES</code></td><td>20万円以上の行</td><td>境界値200,000を含む2行か</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
     <div class="syntax-unit">
       <div class="syntax-note">
@@ -177,7 +267,12 @@ run;</pre>
         <pre class="example"><span class="comment">/* 無条件のOUTPUTは両方の出力先へ書く */</span>
 category    WORK.ONE    WORK.TWO
 A           2回         1回
-A以外       1回         1回</pre>
+A以外       1回         1回
+
+入力が5行（Aが3行、A以外が2行）の場合
+WORK.ONE    8オブザベーション
+WORK.TWO    5オブザベーション</pre>
+        <p class="output-caption">Aの3行はONEへ2回ずつ、A以外の2行はONEへ1回ずつ出るため、ONEは<code>3×2＋2×1＝8</code>行になります。</p>
       </div>
     </div>
     <div class="syntax-unit">
@@ -206,6 +301,16 @@ run;</pre>
 データセット       オブザベーション数
 WORK.HIGHCHOL      3652
 WORK.LOWCHOL       1405</pre>
+        <div class="output-table-wrap">
+          <table class="output-table">
+            <thead><tr><th>表示項目</th><th>意味</th><th>確認すること</th></tr></thead>
+            <tbody>
+              <tr><td><code>HIGHCHOL</code></td><td>コレステロール値が200以上の行数</td><td>境界値200がこちらへ入っているか</td></tr>
+              <tr><td><code>LOWCHOL</code></td><td>欠損ではなく200未満の行数</td><td>欠損値が含まれていないか</td></tr>
+              <tr><td><code>MISSCHOL</code></td><td>コレステロール値が欠損の行数</td><td>別データセットへ漏れなく振り分けられたか</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -246,6 +351,24 @@ data work.debug_group;
 
   if last.customer_id then output;
 run;</pre>
+      <div class="output-example">
+        <h4>ログ出力例</h4>
+        <pre class="example">BOUNDARY: _N_=1 customer_id=C001 FIRST.customer_id=1 LAST.customer_id=0 total_amount=100
+BOUNDARY: _N_=2 customer_id=C001 FIRST.customer_id=0 LAST.customer_id=1 total_amount=250
+BOUNDARY: _N_=3 customer_id=C002 FIRST.customer_id=1 LAST.customer_id=0 total_amount=80
+MISSING AMOUNT: _N_=4 customer_id=C002 order_date=04AUG2026 amount=.
+BOUNDARY: _N_=5 customer_id=C002 FIRST.customer_id=0 LAST.customer_id=1 total_amount=130</pre>
+        <div class="output-table-wrap">
+          <table class="output-table">
+            <thead><tr><th>表示内容</th><th>意味</th><th>確認すること</th></tr></thead>
+            <tbody>
+              <tr><td><code>BOUNDARY</code></td><td>顧客グループの先頭または末尾</td><td>C001とC002の境界でフラグが正しく立つか</td></tr>
+              <tr><td><code>MISSING AMOUNT</code></td><td>金額が欠損している入力行</td><td>入力元の4行目を修正・除外する必要があるか</td></tr>
+              <tr><td><code>total_amount</code></td><td>顧客ごとの累計金額</td><td>欠損値を加えても累計が壊れず、最終値が想定どおりか</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
     <div class="detail-grid">
       <div class="detail-card">
@@ -288,12 +411,34 @@ run;
 
 proc print data=work.east_orders;
 run;</pre>
+      <div class="output-example">
+        <h4>入力が3行（Eastが2行、Westが1行）の場合のPROC PRINT出力例</h4>
+        <pre class="example">Obs    customer_id    region    amount
+ 1     C001           East         100
+ 2     C003           East         300</pre>
+        <p class="output-caption">エラーなく完了した後も、Eastの2行だけが残ったかを出力結果で確認します。</p>
+      </div>
     </div>
     <div class="compare">
       <div class="compare-card"><div class="compare-label">よくある</div><h4>セミコロン欠落</h4><p>次の行まで 1 つのステートメントとして読まれ、後続に連鎖エラーが出る。</p></div>
       <div class="compare-card after"><div class="compare-label">よくある</div><h4>引用符不一致</h4><p>文字列が閉じられず、以降のコードが文字列扱いになる。</p></div>
       <div class="compare-card"><div class="compare-label">よくある</div><h4>キーワードのスペルミス</h4><p><code>formt</code>、<code>legnth</code> など。SAS は補正しない。</p></div>
       <div class="compare-card after"><div class="compare-label">よくある</div><h4>無効なオプション</h4><p>PROC やステートメントごとに使えるオプションが違う。</p></div>
+    </div>
+    <div class="output-example">
+      <h4>ログに表示されるメッセージ例</h4>
+      <div class="output-table-wrap">
+        <table class="output-table">
+          <thead><tr><th>原因</th><th>ログに出る例</th><th>確認すること</th></tr></thead>
+          <tbody>
+            <tr><td>セミコロン欠落</td><td>ERROR: ステートメントの構文または順序が正しくありません。</td><td>最初の下線より前の文が<code>;</code>で終わっているか</td></tr>
+            <tr><td>引用符不一致</td><td>ERROR: 引用符で囲まれた文字列が正しく終了していません。</td><td>開始と終了の引用符が同じ種類で対になっているか</td></tr>
+            <tr><td>スペルミス</td><td>ERROR: ステートメントを認識できません。</td><td>キーワードや変数名を元データと照合したか</td></tr>
+            <tr><td>無効なオプション</td><td>ERROR: オプションを認識できません。</td><td>そのPROCやステートメントで使える位置・オプションか</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="output-caption">実際のエラー番号や文言は、コードと実行環境によって異なります。最後のメッセージではなく、最初に表示された異常から確認します。</p>
     </div>
   </div>
 </section>
@@ -337,6 +482,27 @@ total = amount_char + tax;
 <span class="comment">/* 明示変換：文字値の形式を指定して数値へ変換する */</span>
 amount = input(amount_char, comma12.);
 total = amount + tax;</pre>
+      <div class="output-example">
+        <h4><code>amount_char="1,250"</code>、<code>tax=125</code>の場合</h4>
+        <pre class="example"><span class="comment">/* 自動変換したコードのログ例 */</span>
+NOTE: 文字値を数値に自動変換しました。
+NOTE: 無効な数値データ amount_char='1,250' が見つかりました。
+total=.
+
+<span class="comment">/* INPUTで明示変換した結果 */</span>
+amount=1250
+total=1375</pre>
+        <div class="output-table-wrap">
+          <table class="output-table">
+            <thead><tr><th>表示項目</th><th>意味</th><th>確認すること</th></tr></thead>
+            <tbody>
+              <tr><td>自動変換のNOTE</td><td>SASが式に合わせて文字値を数値へ変換した</td><td>意図したinformatで変換されているか</td></tr>
+              <tr><td><code>total=.</code></td><td>自動変換に失敗し、計算結果が欠損</td><td>出力に想定外の欠損値が残っていないか</td></tr>
+              <tr><td><code>amount=1250</code></td><td><code>COMMA12.</code>でカンマ付き文字列を数値化</td><td>変換後の値と最終計算結果が正しいか</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </section>

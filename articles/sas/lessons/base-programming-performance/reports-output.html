@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>レポートとアウトプット生成 — SAS 9.4 Base Programming — yotalab</title>
 <meta name="description" content="SAS 9.4 Base Programming の試験項目「レポートやアウトプットの生成」の詳細学習ページ。">
-<link rel="stylesheet" href="../../../article.css?v=20260904">
+<link rel="stylesheet" href="../../../article.css?v=20260905">
 <style>
   .example{background:var(--bg);color:var(--ink);border:1px solid var(--hairline)}
   .example .comment{color:var(--ink-fine)}
@@ -302,6 +302,13 @@ run;</pre>
 region    status    _TYPE_    _FREQ_    amount_Mean    amount_Sum
 East      Open         3          4          12500         50000</pre>
       </div>
+      <div class="concept-visual" role="img" aria-label="2つのCLASS変数を指定した場合、WAYS 1は地域だけとステータスだけを別々に集計し、WAYS 2またはNWAYは地域とステータスの組み合わせを集計する図">
+        <p class="concept-visual-title">CLASSが2つあると、集計レベルを選べる</p>
+        <div class="visual-compare">
+          <div class="visual-compare-card"><strong>WAYS 1</strong><div class="visual-chip-row"><span class="visual-chip selected">region</span><span class="visual-chip">status</span><span class="visual-chip">＋</span><span class="visual-chip">region</span><span class="visual-chip selected">status</span></div><p class="concept-visual-note">1変数ずつの集計</p></div>
+          <div class="visual-compare-card"><strong>WAYS 2／NWAY</strong><div class="visual-chip-row"><span class="visual-chip selected">region</span><span class="visual-chip selected">status</span><span class="visual-arrow">→</span><span class="visual-chip result">East × Open</span></div><p class="concept-visual-note">2変数を組み合わせた最も細かい集計</p></div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -472,6 +479,17 @@ run;
 <span class="comment">/* PDF出力を閉じる */</span>
 ods pdf close;
 </pre>
+      <div class="concept-visual" role="img" aria-label="ODS PDFで出力先を開き、その間に実行したPROC MEANSの結果をPDFへ送り、最後にODS PDF CLOSEでファイルを閉じる図">
+        <p class="concept-visual-title">ODSは「開く → PROCを実行 → 閉じる」</p>
+        <div class="visual-flow">
+          <div class="visual-node"><strong>1. 開く</strong><code>ods pdf file=...;</code></div>
+          <span class="visual-arrow">→</span>
+          <div class="visual-node"><strong>2. 結果を送る</strong><code>proc means ...;</code></div>
+          <span class="visual-arrow">→</span>
+          <div class="visual-node"><strong>3. 閉じる</strong><code>ods pdf close;</code></div>
+        </div>
+        <p class="concept-visual-note">開いている間に実行したPROCの出力がファイルへ入ります。閉じ忘れると、ファイルが完成しない・後続結果まで入る原因になります。</p>
+      </div>
     </div>
     <div class="syntax-unit">
       <div class="syntax-note">

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>データ構造へのアクセスと作成 — SAS 9.4 Base Programming — yotalab</title>
 <meta name="description" content="SAS 9.4 Base Programming の試験項目「データ構造へのアクセスと作成」の詳細学習ページ。">
-<link rel="stylesheet" href="../../../article.css?v=20260904">
+<link rel="stylesheet" href="../../../article.css?v=20260905">
 <style>
   .example{background:var(--bg);color:var(--ink);border:1px solid var(--hairline)}
   .example .comment{color:var(--ink-fine)}
@@ -449,6 +449,16 @@ run;<span class="correct-mark" aria-live="polite"></span></pre>
 data work.all_sales;
   set cert.sales_jan cert.sales_feb cert.sales_mar;
 run;</pre>
+      <div class="concept-visual" role="img" aria-label="1月、2月、3月の同じ列構造のデータをSETで上から順に積み、1つの全期間売上データにする図">
+        <p class="concept-visual-title">SETは列を増やさず、行を下へ積む</p>
+        <div class="visual-flow">
+          <div class="visual-node"><strong>入力</strong><span>JAN 2行<br>FEB 2行<br>MAR 2行</span></div>
+          <span class="visual-arrow">→</span>
+          <div class="visual-node"><strong>SET</strong><code>set jan feb mar;</code></div>
+          <span class="visual-arrow">→</span>
+          <div class="visual-node"><strong>出力</strong><span>ALL_SALES 6行<br>同じ列構造</span></div>
+        </div>
+      </div>
     </div>
 
     <div class="syntax-unit">
@@ -491,6 +501,16 @@ data work.sales_with_customer;
   merge work.sales_sorted work.customer_master;
   by customer_id;
 run;</pre>
+      <div class="concept-visual" role="img" aria-label="顧客マスタのC001の地域Eastが、C001の2つの売上行それぞれへ付加される1対多マージの図">
+        <p class="concept-visual-title">1対多マージは、1側の情報を各取引行へ付ける</p>
+        <div class="visual-flow">
+          <div class="visual-node"><strong>売上：多側</strong><span>C001・100<br>C001・150</span></div>
+          <span class="visual-arrow">＋</span>
+          <div class="visual-node"><strong>顧客：1側</strong><span>C001・East</span></div>
+          <span class="visual-arrow">→</span>
+          <div class="visual-node"><strong>結合後</strong><span>C001・100・East<br>C001・150・East</span></div>
+        </div>
+      </div>
     </div>
     <div class="callout"><div class="callout-title">多対多マージへの注意</div><p>両方のデータセットに同じBY値が複数行ある多対多マージは、SQLの直積と同じ結果にはなりません。試験範囲の1対1・1対多を見分け、キーの重複を事前に確認します。</p></div>
 
@@ -631,6 +651,17 @@ run;</pre>
 order_date    order_time    ordered_at
 2026-08-30    14:35:20      30AUG2026:14:35:20</pre>
       </div>
+      <div class="concept-visual" role="img" aria-label="文字の日付をinformatでSAS内部の数値へ変換し、formatで保存値を変えず表示だけを年月日形式へ整える図">
+        <p class="concept-visual-title">informatは入口、formatは出口</p>
+        <div class="visual-flow">
+          <div class="visual-node"><strong>入力文字列</strong><code>30AUG2026</code></div>
+          <span class="visual-arrow">→</span>
+          <div class="visual-node"><strong>informatで数値化</strong><span>1960-01-01からの日数</span></div>
+          <span class="visual-arrow">→</span>
+          <div class="visual-node"><strong>formatで表示</strong><code>2026-08-30</code></div>
+        </div>
+        <p class="concept-visual-note">中央の保存値は数値のままです。formatを変更しても、保存されている日付そのものは変わりません。</p>
+      </div>
     </div>
   </div>
 </section>
@@ -694,6 +725,14 @@ customer_id_char = put(customer_id, z6.);
 
 <span class="comment">/* SAS日付値を文字列"2026-08-29"へ変換する */</span>
 order_date_char = put(order_date, yymmdd10.);</pre>
+      <div class="concept-visual" role="img" aria-label="INPUTは文字型から数値型へ、PUTは数値型から文字型へ変換する反対方向の関数であることを示す図">
+        <p class="concept-visual-title">INPUTとPUTは変換方向が反対</p>
+        <div class="visual-compare">
+          <div class="visual-compare-card"><strong>INPUT：文字 → 数値</strong><div class="visual-chip-row"><span class="visual-chip">"12,500"</span><span class="visual-arrow">→</span><span class="visual-chip result">12500</span></div></div>
+          <div class="visual-compare-card"><strong>PUT：数値 → 文字</strong><div class="visual-chip-row"><span class="visual-chip">123</span><span class="visual-arrow">→</span><span class="visual-chip result">"000123"</span></div></div>
+        </div>
+        <p class="concept-visual-note">覚え方は「INPUTで文字を数値として読み取る」「PUTで数値を指定形式の文字として書き出す」です。</p>
+      </div>
       <div class="output-guide">
         <div class="output-section check">
           <h4>Tips: PUTでよく使うformat</h4>

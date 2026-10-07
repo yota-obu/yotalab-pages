@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>データ管理 — SAS 9.4 Base Programming — yotalab</title>
 <meta name="description" content="SAS 9.4 Base Programming の試験項目「データ管理」の詳細学習ページ。">
-<link rel="stylesheet" href="../../../article.css?v=20260904">
+<link rel="stylesheet" href="../../../article.css?v=20260905">
 <style>
   .example{background:var(--bg);color:var(--ink);border:1px solid var(--hairline)}
   .example .comment{color:var(--ink-fine)}
@@ -349,6 +349,42 @@ data work.orders_with_edges;
   is_first = first.customer_id;
   is_last = last.customer_id;
 run;</pre>
+      <div class="output-example">
+        <h4>例の6行を読み込んだときに実際に作成される表</h4>
+        <div class="output-table-wrap">
+          <table class="output-table">
+            <caption>WORK.ORDERS_WITH_EDGES</caption>
+            <thead><tr><th>顧客ID</th><th>注文日</th><th>金額</th><th>is_first</th><th>is_last</th></tr></thead>
+            <tbody>
+              <tr><td>C001</td><td>2026-08-01</td><td>100</td><td>1</td><td>0</td></tr>
+              <tr><td>C001</td><td>2026-08-03</td><td>150</td><td>0</td><td>1</td></tr>
+              <tr><td>C002</td><td>2026-08-02</td><td>80</td><td>1</td><td>0</td></tr>
+              <tr><td>C002</td><td>2026-08-04</td><td>120</td><td>0</td><td>0</td></tr>
+              <tr><td>C002</td><td>2026-08-05</td><td>50</td><td>0</td><td>1</td></tr>
+              <tr><td>C003</td><td>2026-08-06</td><td>300</td><td>1</td><td>1</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><code>FIRST.CUSTOMER_ID</code>と<code>LAST.CUSTOMER_ID</code>自体は出力表に保存されない一時変数です。このコードでは値を<code>is_first</code>と<code>is_last</code>へ代入しているため、表で確認できます。</p>
+      </div>
+      <div class="concept-visual" role="img" aria-label="C001は2行の先頭でFIRSTが1、末尾でLASTが1。C002は3行の先頭と末尾だけが1。1行だけのC003はFIRSTとLASTが両方1になる図">
+        <p class="concept-visual-title">BYグループの境界イメージ</p>
+        <div class="group-track">
+          <div class="group-segment"><span class="group-label">C001</span><div class="group-rows">
+            <div class="group-row"><b>100</b><div class="group-flags"><span class="flag-pill on">F=1</span><span class="flag-pill">L=0</span></div></div>
+            <div class="group-row"><b>150</b><div class="group-flags"><span class="flag-pill">F=0</span><span class="flag-pill on">L=1</span></div></div>
+          </div></div>
+          <div class="group-segment"><span class="group-label">C002</span><div class="group-rows">
+            <div class="group-row"><b>80</b><div class="group-flags"><span class="flag-pill on">F=1</span><span class="flag-pill">L=0</span></div></div>
+            <div class="group-row"><b>120</b><div class="group-flags"><span class="flag-pill">F=0</span><span class="flag-pill">L=0</span></div></div>
+            <div class="group-row"><b>50</b><div class="group-flags"><span class="flag-pill">F=0</span><span class="flag-pill on">L=1</span></div></div>
+          </div></div>
+          <div class="group-segment"><span class="group-label">C003</span><div class="group-rows">
+            <div class="group-row"><b>300</b><div class="group-flags"><span class="flag-pill on">F=1</span><span class="flag-pill on">L=1</span></div></div>
+          </div></div>
+        </div>
+        <p class="concept-visual-note">FはFIRST、LはLASTです。グループが1行しかないC003では、その行が先頭でも末尾でもあるため両方が1になります。</p>
+      </div>
     </div>
     <div class="syntax-unit">
       <div class="syntax-note">
@@ -362,6 +398,17 @@ data work.orders_numbered;
   retain row_no 0;
   row_no = row_no + 1;
 run;</pre>
+      <div class="concept-visual" role="img" aria-label="RETAINにより1行目で作ったrow_noの1が次の行へ保持され、2行目では1から2へ増える図">
+        <p class="concept-visual-title">RETAINは前の行の値を次の行へ渡す</p>
+        <div class="visual-flow">
+          <div class="visual-node"><strong>開始</strong><code>row_no = 0</code></div>
+          <span class="visual-arrow">→</span>
+          <div class="visual-node"><strong>1行目</strong><code>0 + 1 = 1</code></div>
+          <span class="visual-arrow">→</span>
+          <div class="visual-node"><strong>2行目へ保持</strong><code>1 + 1 = 2</code></div>
+        </div>
+        <p class="concept-visual-note"><code>RETAIN</code>がなければ、代入文で作った<code>row_no</code>は次の行の開始時に欠損へ戻ります。</p>
+      </div>
     </div>
     <div class="callout"><div class="callout-title">SUMステートメントとの違い</div><p><code>running_total + amount;</code> は値を自動的に保持するため、<code>RETAIN</code> を別に書く必要はありません。通常の代入文で累計する場合は、<code>RETAIN</code> が必要です。</p></div>
   </div>
@@ -402,6 +449,21 @@ data work.region_customer_summary;
   if last.customer_id then output;
   keep region customer_id customer_total customer_count;
 run;</pre>
+      <div class="output-example">
+        <h4>最終行だけOUTPUTした結果</h4>
+        <div class="output-table-wrap">
+          <table class="output-table">
+            <caption>WORK.REGION_CUSTOMER_SUMMARY</caption>
+            <thead><tr><th>region</th><th>customer_id</th><th>customer_total</th><th>customer_count</th></tr></thead>
+            <tbody>
+              <tr><td>East</td><td>C001</td><td>250</td><td>2</td></tr>
+              <tr><td>East</td><td>C002</td><td>250</td><td>3</td></tr>
+              <tr><td>West</td><td>C003</td><td>300</td><td>1</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>この例ではC001・C002をEast、C003をWestとしています。C001は<code>100 + 150</code>、C002は<code>80 + 120 + 50</code>です。途中行では累計だけを更新し、<code>LAST.CUSTOMER_ID=1</code>の行だけが出力されます。</p>
+      </div>
     </div>
     <div class="callout"><div class="callout-title">読む順番</div><p><code>by region customer_id;</code> の場合、顧客単位の集計なら <code>first.customer_id</code> で初期化します。地域全体の集計なら <code>first.region</code> を使うため、問題文の「単位」を先に確認します。</p></div>
   </div>
@@ -446,6 +508,15 @@ ABC               2026    2345             Desk                   5            X
 
 status_upper    status_lower    phone_digits    new_status
 ACTIVE          active          0312345678      Order-Complete</pre>
+      </div>
+      <div class="concept-visual" role="img" aria-label="SCANは区切った単語を選び、SUBSTRは開始位置から指定文字数を選び、COMPRESSは不要な文字を除く図">
+        <p class="concept-visual-title">文字関数は「分ける・位置で取る・消す」で考える</p>
+        <div class="visual-stack">
+          <div class="visual-stack-row"><span class="visual-stack-label">SCAN</span><div class="visual-chip-row"><span class="visual-chip selected">ABC</span><span class="visual-chip">2026</span><span class="visual-chip">01</span><span class="visual-arrow">→</span><span class="visual-chip result">ABC</span></div></div>
+          <div class="visual-stack-row"><span class="visual-stack-label">SUBSTR</span><div class="visual-chip-row"><span class="visual-chip">0</span><span class="visual-chip">1</span><span class="visual-chip selected">2</span><span class="visual-chip selected">3</span><span class="visual-chip selected">4</span><span class="visual-chip selected">5</span><span class="visual-arrow">→</span><span class="visual-chip result">2345</span></div></div>
+          <div class="visual-stack-row"><span class="visual-stack-label">COMPRESS</span><div class="visual-chip-row"><span class="visual-chip">(03) 1234-5678</span><span class="visual-arrow">→</span><span class="visual-chip result">0312345678</span></div></div>
+        </div>
+        <p class="concept-visual-note"><code>SCAN</code>は区切った語の番号、<code>SUBSTR</code>は文字位置と長さ、<code>COMPRESS</code>は取り除く文字を指定します。</p>
       </div>
     </div>
     <div class="syntax-unit">
@@ -507,6 +578,14 @@ run;</pre>
         <pre class="example"><span class="comment">/* 3種類の変数リストで、それぞれ指定された変数が合計される */</span>
 revenue_total    quarter_total    position_total
      4.8              100               18</pre>
+      </div>
+      <div class="concept-visual" role="img" aria-label="REVENUEコロンは同じ接頭辞の変数、Q1ハイフンQ4は連番変数、START二重ハイフンENDはデータセット上で間にある変数を選ぶ図">
+        <p class="concept-visual-title">記号によって「選ばれる変数」が変わる</p>
+        <div class="visual-stack">
+          <div class="visual-stack-row"><span class="visual-stack-label">revenue:</span><div class="visual-chip-row"><span class="visual-chip selected">revenue2024</span><span class="visual-chip selected">revenue2025</span><span class="visual-chip selected">revenue2026</span><span class="visual-chip">region</span></div></div>
+          <div class="visual-stack-row"><span class="visual-stack-label">q1-q4</span><div class="visual-chip-row"><span class="visual-chip selected">q1</span><span class="visual-chip selected">q2</span><span class="visual-chip selected">q3</span><span class="visual-chip selected">q4</span><span class="visual-chip">q_total</span></div></div>
+          <div class="visual-stack-row"><span class="visual-stack-label">start--end</span><div class="visual-chip-row"><span class="visual-chip selected">start</span><span class="visual-chip selected">middle</span><span class="visual-chip selected">end</span><span class="visual-chip">after_end</span></div></div>
+        </div>
       </div>
     </div>
     <div class="syntax-unit">
@@ -582,6 +661,16 @@ run;</pre>
 months    next_month    days    years
   12      01FEB2026     365       1</pre>
       </div>
+      <div class="concept-visual" role="img" aria-label="1月15日から3月10日までに2月1日と3月1日の月境界を2回またぐためINTCKは2、INTNXで1か月先の月初を求めると2月1日になる図">
+        <p class="concept-visual-title">INTCKは境界を数え、INTNXは移動先の日付を作る</p>
+        <div class="visual-timeline">
+          <div class="timeline-point"><b>15JAN</b><span>開始日</span></div>
+          <div class="timeline-point boundary"><b>01FEB</b><span>境界1／INTNXの移動先</span></div>
+          <div class="timeline-point boundary"><b>01MAR</b><span>境界2</span></div>
+          <div class="timeline-point"><b>10MAR</b><span>終了日</span></div>
+        </div>
+        <p class="concept-visual-note"><code>intck("month", '15JAN2026'd, '10MAR2026'd)</code>は2です。<code>intnx("month", '15JAN2026'd, 1, "b")</code>は翌月の先頭<code>01FEB2026</code>を返します。</p>
+      </div>
     </div>
   </div>
 </section>
@@ -607,6 +696,16 @@ data &amp;outlib..target_year;
 run;</pre>
     </div>
     <div class="callout"><div class="callout-title">マクロ変数のドット</div><p><code>&amp;outlib..target_year</code> のようにドットが2つ見えるのは、1つ目がマクロ変数名の終端、2つ目がライブラリ名とデータセット名の区切りだからです。</p></div>
+    <div class="concept-visual" role="img" aria-label="マクロ変数OUTLIBの値WORKが置換され、最初のドットはマクロ変数名の終端として消費され、2つ目のドットがライブラリ名とデータセット名の区切りとして残る図">
+      <p class="concept-visual-title">2つのドットは、展開後に1つになる</p>
+      <div class="visual-flow">
+        <div class="visual-node"><strong>定義</strong><code>%let outlib=work;</code></div>
+        <span class="visual-arrow">→</span>
+        <div class="visual-node"><strong>コード上</strong><code>&amp;outlib..target_year</code></div>
+        <span class="visual-arrow">→</span>
+        <div class="visual-node"><strong>実行時</strong><code>work.target_year</code></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -669,6 +768,13 @@ data work.savings_until;
     month = month + 1;
   end;
 run;</pre>
+      <div class="concept-visual" role="img" aria-label="DO WHILEは処理前に条件を確認するため0回の場合があり、DO UNTILは処理後に条件を確認するため最低1回実行する比較図">
+        <p class="concept-visual-title">条件を確認する位置が違う</p>
+        <div class="visual-compare">
+          <div class="visual-compare-card"><strong>DO WHILE：先に確認</strong><ol><li>条件が成立しているか確認</li><li>成立していれば処理</li><li>最初から不成立なら0回</li></ol></div>
+          <div class="visual-compare-card"><strong>DO UNTIL：後で確認</strong><ol><li>まず処理を実行</li><li>終了条件が成立したか確認</li><li>最低でも1回は実行</li></ol></div>
+        </div>
+      </div>
     </div>
     <div class="syntax-unit">
       <div class="syntax-note">
@@ -717,6 +823,15 @@ proc transpose data=work.sales_long
   id month;
   var amount;
 run;</pre>
+      <div class="concept-visual" role="img" aria-label="同じ顧客IDの月別売上2行が、月を列名にして顧客1行の横持ちデータへ変わる図">
+        <p class="concept-visual-title">IDの値が、新しい列名になる</p>
+        <div class="visual-flow two">
+          <div class="visual-node"><strong>縦持ち</strong><span>C001・1月・100<br>C001・2月・150</span></div>
+          <span class="visual-arrow">→</span>
+          <div class="visual-node"><strong>横持ち</strong><span>C001<br><code>month_1=100</code>　<code>month_2=150</code></span></div>
+        </div>
+        <p class="concept-visual-note"><code>BY customer_id</code>で1行の単位を決め、<code>ID month</code>の値を列名にし、<code>VAR amount</code>の値をセルへ入れます。</p>
+      </div>
       <div class="output-example">
         <h4>入力と出力の例</h4>
         <pre class="example"><span class="comment">/* 入力：同じ顧客が月ごとに複数行ある */</span>

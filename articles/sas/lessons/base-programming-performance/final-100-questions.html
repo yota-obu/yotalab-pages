@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>最終確認 120問4択問題集 — SAS 9.4 Base Programming — yotalab</title>
+<meta name="description" content="SAS 9.4 Base Programming Performance-Based Examの全範囲を確認する120問の4択問題集。">
+<link rel="stylesheet" href="../../../article.css?v=20260905">
+<style>
+  .quiz-intro{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end}
+  .quiz-count{font-size:52px;font-weight:800;line-height:1;color:var(--action);letter-spacing:-.05em}
+  .quiz-count small{display:block;margin-top:8px;font-size:12px;font-weight:600;letter-spacing:0;color:var(--ink-muted);text-align:right}
+  .domain-map{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:28px 0 0}
+  .domain-map a{padding:16px;border:1px solid var(--hairline);border-radius:14px;background:var(--bg);color:var(--ink);font-size:13px;font-weight:650;line-height:1.5;text-decoration:none}
+  .domain-map a:hover{border-color:var(--action);color:var(--action)}
+  .domain-map span{display:block;margin-top:4px;font-size:12px;font-weight:400;color:var(--ink-muted)}
+  .quiz-status{position:sticky;top:58px;z-index:20;display:grid;grid-template-columns:repeat(3,1fr) auto;gap:10px;align-items:center;margin:22px auto;padding:12px 16px;max-width:900px;border:1px solid var(--hairline);border-radius:16px;background:color-mix(in srgb,var(--bg) 94%,transparent);box-shadow:0 8px 28px rgba(0,0,0,.06);backdrop-filter:blur(12px)}
+  .status-item{min-width:0}
+  .status-item b{display:block;font-size:18px;font-feature-settings:"tnum"}
+  .status-item span{display:block;font-size:11px;color:var(--ink-muted)}
+  .jump-unanswered{padding:9px 13px;border:1px solid var(--action);border-radius:999px;background:var(--bg);color:var(--action);font:600 12px/1.2 inherit;cursor:pointer}
+  .quiz-domain-head{display:flex;gap:16px;align-items:baseline;justify-content:space-between;margin-bottom:24px}
+  .quiz-domain-head p{margin:0;font-size:13px;color:var(--ink-muted)}
+  .quiz-list{display:grid;gap:16px}
+  .quiz-question{min-width:0;margin:0;padding:20px;border:1px solid var(--hairline);border-radius:18px;background:var(--bg)}
+  .quiz-question.is-correct{border-color:rgba(33,135,57,.42)}
+  .quiz-question.is-incorrect{border-color:rgba(180,35,24,.38)}
+  .quiz-question legend{width:100%;padding:0;font-size:16px;font-weight:650;line-height:1.65;color:var(--ink)}
+  .question-number{display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:26px;margin-right:9px;padding:0 8px;border-radius:999px;background:var(--tile-soft);color:var(--action);font-size:12px;font-weight:750;vertical-align:2px}
+  .question-code{max-width:100%;box-sizing:border-box;margin:14px 0;padding:15px 17px;border:1px solid var(--hairline);border-radius:12px;background:var(--tile-soft);font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink)}
+  .quiz-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:15px}
+  .quiz-option{display:flex;gap:9px;align-items:flex-start;min-width:0;padding:12px 13px;border:1px solid var(--hairline);border-radius:12px;background:var(--tile-soft);font-size:14px;line-height:1.55;cursor:pointer}
+  .quiz-option:hover{border-color:rgba(0,102,204,.32)}
+  .quiz-option input{flex:0 0 auto;margin-top:4px}
+  .quiz-option span{min-width:0;overflow-wrap:anywhere}
+  .quiz-option.is-answer{border-color:#218739;background:#f1fff4}
+  .quiz-option.is-wrong{border-color:#b42318;background:#fff4f2}
+  .question-feedback{min-height:1.5em;margin:12px 0 0!important;font-size:12px!important;font-weight:400;line-height:1.6!important;color:var(--ink-muted)}
+  .question-feedback.correct{color:#218739}.question-feedback.incorrect{color:#b42318}
+  .quiz-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:26px}
+  .quiz-button{padding:11px 20px;border:1px solid var(--action);border-radius:999px;background:var(--action);color:#fff;font:650 14px/1.2 inherit;cursor:pointer}
+  .quiz-button.secondary{background:var(--bg);color:var(--action)}
+  .quiz-button.quiet{border-color:var(--hairline);background:var(--bg);color:var(--ink-muted)}
+  .final-result{display:none;margin:24px 0 0;padding:24px;border:1px solid var(--hairline);border-radius:18px;background:var(--bg)}
+  .final-result.show{display:block}
+  .score-line{display:flex;gap:18px;align-items:baseline;flex-wrap:wrap}
+  .score-line strong{font-size:44px;letter-spacing:-.04em;color:var(--action)}
+  .score-line span{color:var(--ink-muted)}
+  .domain-results{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:18px}
+  .domain-result{padding:14px;border:1px solid var(--hairline);border-radius:12px;background:var(--tile-soft)}
+  .domain-result b{display:block;font-size:18px}.domain-result span{font-size:11px;color:var(--ink-muted)}
+  @media(max-width:760px){.domain-map,.domain-results{grid-template-columns:repeat(2,minmax(0,1fr))}.quiz-options{grid-template-columns:1fr}.quiz-status{top:54px;grid-template-columns:repeat(3,1fr);margin:14px 12px;padding:10px 12px}.jump-unanswered{grid-column:1/-1}.quiz-intro{grid-template-columns:1fr}.quiz-count{font-size:38px}.quiz-count small{text-align:left}}
+  @media(max-width:440px){.domain-map,.domain-results{grid-template-columns:1fr}.quiz-question{padding:16px}.quiz-question legend{font-size:15px}.quiz-domain-head{display:block}.quiz-domain-head p{margin-top:6px}}
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+<nav class="site-nav"><div class="nav-inner"><a href="../../../../" class="logo">yotalab</a><ul class="nav-links"><li><a href="../../../../apps/">Apps</a></li><li><a href="../../../" class="active">Articles</a></li><li><a href="mailto:yotalab.tech@gmail.com">Contact</a></li></ul></div></nav>
+
+<header class="article-hero">
+  <p class="eyebrow">SAS Learning · Final Review</p>
+  <h1>最終確認 120問4択問題集</h1>
+  <p class="lead">全範囲100問に、公式サンプルの出題形式を参考にした実践問題20問を加えました。構文の選択、コードの結果、変数の値、ログと出力を確認します。</p>
+  <p class="series-tag"><a href="../base-programming-performance.html">← SAS Base Programming 学習トップへ</a></p>
+</header>
+
+<section class="tile tile-light">
+  <div class="tile-inner section">
+    <div class="quiz-intro">
+      <div>
+        <p class="section-eyebrow">How to Use</p>
+        <h2>1問ずつ選び、最後に全体を採点する</h2>
+        <p>選択すると、その場で正誤と短い解説が表示されます。ページ下部の「採点する」で120点満点と分野別の結果を確認できます。<code>PROC SQL</code>はこの試験の範囲外なので出題していません。</p>
+      </div>
+      <div class="quiz-count">120<small>すべて4択</small></div>
+    </div>
+    <div class="domain-map">
+      <a href="#access">データ構造へのアクセスと作成<span>問題1〜25</span></a>
+      <a href="#manage">データ管理<span>問題26〜65</span></a>
+      <a href="#error">エラーハンドリング<span>問題66〜82</span></a>
+      <a href="#reports">レポートとアウトプット<span>問題83〜100</span></a>
+      <a href="#practical">実践形式<span>問題101〜120</span></a>
+    </div>
+    <div class="callout">
+      <div class="callout-title">公式サンプルから取り入れた出題形式</div>
+      <p>指定どおりにデータを加工した後の特定行の値、条件区分ごとの件数・平均、複数の構文・構造・ロジックエラーの修正、短いDATAステップ実行後の変数値や出力行数を問う形式です。追加20問は、この考え方で作成した独自問題です。</p>
+      <cite><a href="https://www.sas.com/content/dam/SAS/documents/technical/training/en/sample-questions-base-programming-specialist.pdf">SAS公式サンプル問題</a></cite>
+    </div>
+  </div>
+</section>
+
+<div class="quiz-status" aria-live="polite">
+  <div class="status-item"><b id="answered-count">0 / 120</b><span>回答済み</span></div>
+  <div class="status-item"><b id="correct-count">0</b><span>現在の正解数</span></div>
+  <div class="status-item"><b id="remaining-count">120</b><span>未回答</span></div>
+  <button class="jump-unanswered" id="jump-unanswered" type="button">次の未回答へ</button>
+</div>
+
+<main id="quiz-root"></main>
+
+<section class="tile tile-soft" id="final-actions">
+  <div class="tile-inner section">
+    <p class="section-eyebrow">Final Score</p>
+    <h2>すべての分野をまとめて確認</h2>
+  <p>未回答があっても途中経過を採点できます。「答えを見る」では、120問すべての正解選択肢と解説を表示します。</p>
+    <div class="quiz-actions">
+      <button class="quiz-button" id="grade-button" type="button">採点する</button>
+      <button class="quiz-button secondary" id="answer-toggle" type="button" aria-pressed="false">答えを見る</button>
+      <button class="quiz-button quiet" id="reset-button" type="button">最初からやり直す</button>
+    </div>
+    <div class="final-result" id="final-result" tabindex="-1" aria-live="polite"></div>
+  </div>
+</section>
+
+<footer class="site-footer"><div class="footer-inner"><p>© 2026 yotalab</p><div class="footer-links"><a href="../../../../">Home</a><a href="../base-programming-performance.html">SAS Base Programming 学習トップ</a><a href="../../../">Articles</a></div></div></footer>
+
+<script>
+const domains={
+  access:{title:"データ構造へのアクセスと作成",range:"問題1〜25",tone:"tile-light"},
+  manage:{title:"データ管理",range:"問題26〜65",tone:"tile-soft"},
+  error:{title:"エラーハンドリング",range:"問題66〜82",tone:"tile-light"},
+  reports:{title:"レポートとアウトプット生成",range:"問題83〜100",tone:"tile-soft"},
+  practical:{title:"サンプル形式の実践問題",range:"問題101〜120",tone:"tile-light"}
+};
+
+const questions=[
+{d:"access",q:"ライブラリ名を省略して <code>data sample;</code> と書いた場合、作成先はどこですか。",o:["WORK.SAMPLE","SASUSER.SAMPLE","永久ライブラリのSAMPLE","作成先がないためエラー"],a:0,e:"1レベル名で作成したデータセットはWORKライブラリに置かれ、セッション終了時に削除されます。"},
+{d:"access",q:"一時データセット <code>WORK.SALES</code>について正しい説明はどれですか。",o:["SAS終了後も必ず残る","現在のSASセッション中だけ利用できる","CSVとして自動保存される","読み取り専用である"],a:1,e:"WORKライブラリは一時領域です。SASセッションを終了すると内容は削除されます。"},
+{d:"access",q:"フォルダーにライブラリ参照名 <code>cert</code>を割り当てる構文はどれですか。",o:["<code>libname cert &quot;/home/user/cert&quot;;</code>","<code>library cert = &quot;/home/user/cert&quot;;</code>","<code>data cert &quot;/home/user/cert&quot;;</code>","<code>set cert &quot;/home/user/cert&quot;;</code>"],a:0,e:"LIBNAMEステートメントは、8文字以内のライブラリ参照名と物理的な保存場所を対応付けます。"},
+{d:"access",q:"割り当て済みのライブラリ参照名 <code>cert</code>を解除する構文はどれですか。",o:["<code>delete cert;</code>","<code>libname cert clear;</code>","<code>libname clear cert;</code>","<code>drop library cert;</code>"],a:1,e:"<code>libname cert clear;</code>で割り当てを解除します。保存済みデータセット自体を削除する構文ではありません。"},
+{d:"access",q:"ライブラリCERT内の全データセットの記述情報を一覧化し、個別の変数情報を省略したい場合はどれですか。",o:["<code>proc contents data=cert._all_ nods; run;</code>","<code>proc print data=cert._all_; run;</code>","<code>proc sort data=cert._all_ nods; run;</code>","<code>proc freq data=cert nods; run;</code>"],a:0,e:"<code>_ALL_</code>でライブラリ全体を対象にし、<code>NODS</code>で各メンバーの詳細記述を抑制します。"},
+{d:"access",q:"<code>PROC CONTENTS</code>で主に確認するものはどれですか。",o:["各行の実データ","変数名・型・長さ・formatなどの属性","平均値と標準偏差","CSVの区切り文字"],a:1,e:"PROC CONTENTSはデータセットの記述部を表示します。実際の値を見るにはPROC PRINTなどを使います。"},
+{d:"access",q:"既存の <code>CERT.SALES</code>を読み、<code>WORK.SALES_COPY</code>を作る正しいコードはどれですか。",o:["<code>data work.sales_copy; set cert.sales; run;</code>","<code>set work.sales_copy; data cert.sales; run;</code>","<code>proc data out=work.sales_copy; cert.sales; run;</code>","<code>data cert.sales; output work.sales_copy; run;</code>"],a:0,e:"DATAステートメントで出力先、SETステートメントで入力元を指定します。"},
+{d:"access",q:"CSVを読み込み、既存のWORK.ORDERSを上書きする構文として正しいものはどれですか。",c:"proc import datafile=&quot;/home/user/orders.csv&quot;\n  out=work.orders dbms=csv _____;\nrun;",o:["OVERWRITE","REPLACE","UPDATE","FORCE"],a:1,e:"PROC IMPORTで同名の出力データセットを置き換えるにはREPLACEを指定します。"},
+{d:"access",q:"<code>PROC IMPORT</code>の <code>OUT=</code>に指定するものはどれですか。",o:["入力ファイルのパス","作成するSASデータセット","区切り文字","読み込む行数"],a:1,e:"DATAFILE=は入力ファイル、OUT=は読み込み後に作成するSASデータセットを指定します。"},
+{d:"access",q:"CSVの後半に長い文字列や文字値が現れる場合、型や長さの推測精度を上げる指定はどれですか。",o:["<code>guessingrows=max;</code>","<code>obs=max;</code>","<code>length=max;</code>","<code>scanrows=first;</code>"],a:0,e:"GUESSINGROWS=MAXは全行を調べて列属性を推測します。ただし読み込み時間は増える場合があります。"},
+{d:"access",q:"縦棒区切りファイルをPROC IMPORTで読むときの指定として正しいものはどれですか。",o:["<code>dbms=dlm; delimiter=&quot;|&quot;;</code>","<code>dbms=csv; separator=&quot;|&quot;;</code>","<code>dbms=xlsx; delimiter=&quot;|&quot;;</code>","<code>format=dlm; split=&quot;|&quot;;</code>"],a:0,e:"任意の区切り文字付きファイルではDBMS=DLMとDELIMITERステートメントを組み合わせます。"},
+{d:"access",q:"XLSXエンジンでExcelブックをライブラリとして開く正しい構文はどれですか。",o:["<code>libname excel xlsx &quot;/home/user/orders.xlsx&quot;;</code>","<code>libname xlsx excel &quot;/home/user/orders.xlsx&quot;;</code>","<code>proc import excel=&quot;/home/user/orders.xlsx&quot;;</code>","<code>set excel xlsx &quot;/home/user/orders.xlsx&quot;;</code>"],a:0,e:"ライブラリ参照名excelの後ろにXLSXエンジンとブックのパスを指定します。"},
+{d:"access",q:"ExcelブックのJanuaryシートをWORK.JANへ直接読み込む正しいPROC IMPORTはどれですか。",o:["<code>proc import datafile='orders.xlsx' out=work.jan dbms=xlsx replace; sheet='January'; run;</code>","<code>proc import datafile='orders.xlsx' out=work.jan dbms=csv; sheet='January'; run;</code>","<code>proc export datafile='orders.xlsx' in=work.jan sheet='January'; run;</code>","<code>data work.jan; import xlsx sheet='January'; run;</code>"],a:0,e:"Excelの直接読み込みではDBMS=XLSXを指定し、SHEET=で対象シートを選びます。"},
+{d:"access",q:"次のDATAステップは何を行いますか。",c:"data work.all_sales;\n  set work.jan work.feb work.mar;\nrun;",o:["3表をキーで横結合する","3表を行方向に連結する","3表の共通行だけ残す","3表を並べ替える"],a:1,e:"SETに複数のデータセットを並べると、指定順に行方向へ連結します。"},
+{d:"access",q:"顧客マスタの列を売上データへ顧客IDで追加したい場合に使う基本構文はどれですか。",o:["<code>set sales customers; by customer_id;</code>","<code>merge sales customers; by customer_id;</code>","<code>append sales customers; key customer_id;</code>","<code>combine sales customers; on customer_id;</code>"],a:1,e:"キーで横方向に変数を結合するDATAステップの基本はMERGEとBYです。"},
+{d:"access",q:"<code>merge work.sales work.customers; by customer_id;</code>の前提として最も重要なものはどれですか。",o:["両データセットをcustomer_idで並べ替えておく","両データセットの行数を同じにする","変数名をすべて異なる名前にする","WORK以外へ移動する"],a:0,e:"BYマージでは、入力データセットをBY変数でソート済みにしておく必要があります。"},
+{d:"access",q:"<code>merge sales(in=a) customers(in=b);</code>の <code>a</code>と <code>b</code>は何ですか。",o:["出力データセット","入力元にBYグループが存在するかを示す一時フラグ","変数名を変更する指定","ソート順を保存する変数"],a:1,e:"IN=で作る一時変数は、その反復またはBYグループに入力元の行が寄与していると1になります。通常は出力されません。"},
+{d:"access",q:"両方の入力データセットに存在する顧客だけを残す条件はどれですか。",c:"data work.matched;\n  merge work.sales(in=a) work.customers(in=b);\n  by customer_id;\n  _____;\nrun;",o:["<code>if a or b;</code>","<code>if a and b;</code>","<code>if not a;</code>","<code>where a=b;</code>"],a:1,e:"両方に存在するときだけaとbがともに1になるため、<code>if a and b;</code>を使います。"},
+{d:"access",q:"1人の顧客マスタ1行と、その顧客の売上3行をBYマージした場合、通常その顧客について何行出力されますか。",o:["1行","2行","3行","4行"],a:2,e:"1対多のBYマージでは多側の行数に合わせて3行出力され、マスタ側の値が各行へ組み合わされます。"},
+{d:"access",q:"SAS日付値0が表す日付はどれですか。",o:["1900年1月1日","1960年1月1日","1970年1月1日","2000年1月1日"],a:1,e:"SAS日付値は1960年1月1日からの日数です。0は1960年1月1日を表します。"},
+{d:"access",q:"2026年1月1日をSAS日付定数として正しく書いたものはどれですか。",o:["<code>&quot;2026-01-01&quot;</code>","<code>'01JAN2026'd</code>","<code>01JAN2026</code>","<code>date(2026,1,1)</code>"],a:1,e:"SAS日付定数はDATE9形式の文字を引用符で囲み、直後にdを付けます。"},
+{d:"access",q:"日付・時刻・日時の文字列を読み込むinformatの対応として正しいものはどれですか。",o:["日付DATE9.、時刻TIME8.、日時DATETIME20.","日付TIME8.、時刻DATE9.、日時YYMMDD10.","日付COMMA12.、時刻Z8.、日時DATE9.","すべてBEST12."],a:0,e:"日付、時刻、日時はそれぞれDATE9.、TIME8.、DATETIME20.など、入力表現に合うinformatで読み込みます。"},
+{d:"access",q:"数値のSAS日付値を <code>2026-09-05</code>の形で表示するステートメントはどれですか。",o:["<code>informat order_date yymmdd10.;</code>","<code>format order_date yymmdd10.;</code>","<code>input order_date yymmdd10.;</code>","<code>length order_date yymmdd10.;</code>"],a:1,e:"FORMATは保存値を変えずに表示方法を指定します。"},
+{d:"access",q:"DATAステップ内で新しく作成した <code>profit</code>を条件に行を残す場合、通常使うものはどれですか。",o:["WHEREステートメント","IFサブセットステートメント","KEEP=オプション","FORMATステートメント"],a:1,e:"WHEREは入力前に評価されるため新規変数を参照できません。作成後の値で絞るときはIFを使います。"},
+{d:"access",q:"<code>set cert.sales(keep=id amount);</code>と <code>keep id amount;</code>の違いとして正しいものはどれですか。",o:["どちらも必ず同じタイミングで働く","KEEP=は読み込む列を限定し、KEEPステートメントは出力列を限定する","KEEP=は行を限定し、KEEPは列を限定する","KEEPステートメントは入力データを削除する"],a:1,e:"入力側のKEEP=はPDVへ入る前に列を絞れます。KEEPステートメントはDATAステップから出す列を指定します。"},
+{d:"manage",q:"元のWORK.SALESを変更せず、customer_id順のWORK.SALES_SORTEDを作るコードはどれですか。",o:["<code>proc sort data=work.sales out=work.sales_sorted; by customer_id; run;</code>","<code>proc sort out=work.sales data=work.sales_sorted; by customer_id; run;</code>","<code>data work.sales_sorted sort customer_id; set work.sales; run;</code>","<code>proc print data=work.sales out=work.sales_sorted; run;</code>"],a:0,e:"PROC SORTのDATA=に入力、OUT=に別の出力データセットを指定します。"},
+{d:"manage",q:"regionは昇順、amountは降順に並べるBYステートメントはどれですか。",o:["<code>by descending region amount;</code>","<code>by region descending amount;</code>","<code>by region amount descending;</code>","<code>by region order=descending amount;</code>"],a:1,e:"DESCENDINGは降順にしたい変数の直前へ置きます。"},
+{d:"manage",q:"重複削除オプションの説明として正しいものはどれですか。",o:["NODUPKEYはBYキー重複、NODUPRECSは完全重複行を除く","NODUPKEYは完全重複行、NODUPRECSはBYキー重複を除く","どちらも欠損行だけ除く","どちらも入力順を保持したままソートを省略する"],a:0,e:"NODUPKEYはBY変数が同じ後続行を除き、NODUPRECSは全変数が同じ隣接行を除きます。"},
+{d:"manage",q:"DO WHILEとDO UNTILの条件評価について正しい説明はどれですか。",o:["WHILEは先頭で継続条件を判定し、UNTILは末尾で終了条件を判定する","WHILEもUNTILも必ず0回だけ実行する","WHILEは末尾、UNTILは先頭で同じ条件を判定する","UNTILは反復DOでは使用できない"],a:0,e:"DO WHILEは処理前に条件を確認します。DO UNTILは処理後に確認するため、本体が少なくとも1回実行されます。"},
+{d:"manage",q:"条件を満たす行だけ出力するサブセットIFはどれですか。",o:["<code>if amount &gt; 0;</code>","<code>if amount &gt; 0 then;</code>","<code>where new_amount &gt; 0 after;</code>","<code>keep amount &gt; 0;</code>"],a:0,e:"THEN以下を書かないIF文はサブセットIFで、条件が真の行だけを暗黙出力まで進めます。"},
+{d:"manage",q:"互いに排他的な区分を上から順に1つだけ割り当てたいときに適切なものはどれですか。",o:["独立したIFを3つ並べる","IF-THEN / ELSE IF / ELSEを使う","WHEREを3つ並べる","OUTPUTを最初に実行する"],a:1,e:"ELSE IFでつなぐと、最初に真になった枝だけが実行されます。"},
+{d:"manage",q:"同じ条件のときに2つ以上の代入文を実行するために使う組み合わせはどれですか。",o:["START / STOP","BEGIN / FINISH","DO / END","OPEN / CLOSE"],a:2,e:"<code>if 条件 then do;</code>から<code>end;</code>までを1つの条件ブロックにします。"},
+{d:"manage",q:"単価priceと数量quantityから金額amountを作る代入文はどれですか。",o:["<code>amount := price * quantity;</code>","<code>amount = price * quantity;</code>","<code>amount equal price quantity;</code>","<code>compute amount price * quantity;</code>"],a:1,e:"SASの代入文は左辺の変数名、等号、右辺の式で書きます。"},
+{d:"manage",q:"変数start_dateへ2026年4月1日のSAS日付値を代入する正しい文はどれですか。",o:["<code>start_date='01APR2026'd;</code>","<code>start_date=&quot;2026/04/01&quot;;</code>","<code>start_date=date9. 01APR2026;</code>","<code>start_date=input 20260401;</code>"],a:0,e:"日付定数は引用符で囲んだDATE9表現の直後にdを付けます。"},
+{d:"manage",q:"新しい文字変数statusを12文字で作るとき、最も安全な位置はどこですか。",o:["statusへの最初の代入より前","RUN;の後","PROC PRINTの中","最初の代入より後ならどこでも同じ"],a:0,e:"文字変数の長さは最初にコンパイル時定義された内容で決まるため、LENGTHは最初の代入やSETより前に置くのが基本です。"},
+{d:"manage",q:"変数amountに説明用の見出し「売上金額」を設定するステートメントはどれですか。",o:["<code>label amount='売上金額';</code>","<code>rename amount='売上金額';</code>","<code>format amount='売上金額';</code>","<code>length amount='売上金額';</code>"],a:0,e:"LABELは変数名を変えずに説明用ラベルを付けます。"},
+{d:"manage",q:"数値amountを桁区切り・小数2桁で表示する指定はどれですか。",o:["<code>format amount comma12.2;</code>","<code>informat amount comma12.2;</code>","<code>length amount comma12.2;</code>","<code>label amount comma12.2;</code>"],a:0,e:"FORMATステートメントは保存値を変えずに表示形式を設定します。"},
+{d:"manage",q:"SETで読み込むときにold_nameをnew_nameへ変更する正しい指定はどれですか。",o:["<code>set work.source(rename=(old_name=new_name));</code>","<code>set work.source(label=(old_name=new_name));</code>","<code>rename work.source(old_name=new_name);</code>","<code>set work.source(rename old_name as new_name);</code>"],a:0,e:"RENAME=データセットオプションでは、括弧内に旧変数名=新変数名を書きます。"},
+{d:"manage",q:"<code>by customer_id;</code>で処理中、顧客グループの先頭行だけ1になる一時変数はどれですか。",o:["<code>start.customer_id</code>","<code>first.customer_id</code>","<code>customer_id.first</code>","<code>_first_</code>"],a:1,e:"BY処理ではFIRST.変数とLAST.変数が自動作成され、グループ境界で1になります。"},
+{d:"manage",q:"顧客ごとの最終行だけを出力する条件はどれですか。",o:["<code>if first.customer_id;</code>","<code>if last.customer_id;</code>","<code>if end.customer_id;</code>","<code>if _n_=last;</code>"],a:1,e:"LAST.customer_idは各顧客グループの末尾行で1になります。"},
+{d:"manage",q:"DATAステップの反復をまたいで変数balanceの値を保持する明示的な指定はどれですか。",o:["<code>keep balance;</code>","<code>retain balance 0;</code>","<code>format balance 0;</code>","<code>hold balance;</code>"],a:1,e:"RETAINは反復開始時に変数を欠損へ戻さず、直前の値を保持します。初期値も指定できます。"},
+{d:"manage",q:"次のうちSUMステートメントはどれですか。",o:["<code>total = total + amount;</code>","<code>total + amount;</code>","<code>total = sum + amount;</code>","<code>sum(total,amount);</code>"],a:1,e:"<code>total + amount;</code>はSUMステートメントで、totalは暗黙に保持され、amountの欠損は0として扱われます。"},
+{d:"manage",q:"<code>sum(10,.,5)</code>の結果はどれですか。",o:["欠損値","5","10","15"],a:3,e:"SUM関数は欠損引数を無視して15を返します。一方、通常の<code>10 + . + 5</code>は欠損になります。"},
+{d:"manage",q:"コード内へ確認用データを直接入力するとき、データ行の開始と終了に使う組み合わせはどれですか。",o:["<code>datalines;</code>と単独の<code>;</code>","<code>input;</code>と<code>run;</code>","<code>cards begin;</code>と<code>cards end;</code>だけ","<code>datafile;</code>と<code>close;</code>"],a:0,e:"INPUTステートメントで列を定義し、DATALINES;の次からデータを書き、単独のセミコロンでデータ行を終了します。"},
+{d:"manage",q:"<code>scan('Tokyo Osaka Nagoya',2,' ')</code>の結果はどれですか。",o:["Tokyo","Osaka","Nagoya","Tokyo Osaka"],a:1,e:"SCANは区切り文字で分割した第n語を返します。2番目はOsakaです。"},
+{d:"manage",q:"<code>substr('SASPROGRAM',4,7)</code>の結果はどれですか。",o:["SAS","PROGRAM","PROGRA","ASPROGR"],a:1,e:"SUBSTRは4文字目から7文字を取り出すためPROGRAMになります。"},
+{d:"manage",q:"<code>trim(name)</code>の主な働きはどれですか。",o:["先頭の空白だけを除く","末尾の空白を除く","すべての空白を除く","文字を大文字にする"],a:1,e:"TRIMは文字値末尾の空白を取り除きます。先頭と末尾の両方にはSTRIPが使われます。"},
+{d:"manage",q:"地域コードregionを大文字に統一する関数はどれですか。",o:["<code>upcase(region)</code>","<code>uppercase(region)</code>","<code>highcase(region)</code>","<code>capital(region)</code>"],a:0,e:"UPCASEは英字を大文字、LOWCASEは小文字へ変換します。"},
+{d:"manage",q:"score1からscore4までをまとめて平均する式はどれですか。",o:["<code>mean(of score1-score4)</code>","<code>mean(score1 to score4)</code>","<code>average(score1-score4)</code>","<code>mean(of score1--score4)</code>"],a:0,e:"連番の変数名はハイフンの変数リストで表し、関数の引数ではOFを付けて指定できます。MEANは欠損値を除外します。"},
+{d:"manage",q:"<code>round(123.456,0.1)</code>の結果はどれですか。",o:["123","123.4","123.5","124"],a:2,e:"ROUNDの第2引数は丸め単位です。0.1単位なので小数第1位の123.5になります。"},
+{d:"manage",q:"正の数に対する <code>int(8.9)</code>の結果はどれですか。",o:["8","9","8.9","欠損値"],a:0,e:"INT関数は0方向へ小数部分を切り捨てるため8です。"},
+{d:"manage",q:"<code>smallest(2,18,4,9,1)</code>の結果はどれですか。",o:["1","4","9","18"],a:1,e:"SMALLESTの第1引数は順位です。2番目に小さい値は4です。"},
+{d:"manage",q:"0以上1未満の一様乱数を作る関数はどれですか。",o:["<code>rand('uniform')</code>","<code>random(0,1)</code>","<code>uniform()</code>だけが唯一の正解","<code>range(0,1)</code>"],a:0,e:"RAND関数に分布名UNIFORMを指定すると、0以上1未満の一様乱数を返します。"},
+{d:"manage",q:"2026年9月5日のSAS日付値を数値引数から作る関数はどれですか。",o:["<code>mdy(9,5,2026)</code>","<code>mdy(2026,9,5)</code>","<code>date(2026,9,5)</code>","<code>ymd(2026,9,5)</code>"],a:0,e:"MDYは月、日、年の順で引数を指定します。"},
+{d:"manage",q:"現在の日付をSAS日付値として返す関数の組み合わせはどれですか。",o:["TODAY()とDATE()","TIME()とDATETIME()","DAY()とMDY()","NOW()とCURRENT()"],a:0,e:"TODAY()とDATE()はいずれも現在の日付をSAS日付値として返します。"},
+{d:"manage",q:"現在時刻を午前0時からの秒数として返す関数はどれですか。",o:["<code>today()</code>","<code>time()</code>","<code>day()</code>","<code>second()</code>"],a:1,e:"TIME()は現在時刻を午前0時からの秒数で返します。"},
+{d:"manage",q:"SAS日付値sale_dateから四半期を取り出す関数はどれですか。",o:["<code>qtr(sale_date)</code>","<code>quarter= sale_date</code>","<code>intck('qtr',sale_date)</code>","<code>month(sale_date)/4</code>"],a:0,e:"QTR関数は日付が属する四半期を1〜4で返します。YEAR、MONTH、DAYも各要素を返します。"},
+{d:"manage",q:"2つの日付の間で「月の境界を何回越えたか」を数える関数はどれですか。",o:["<code>intck('month',start,end)</code>","<code>intnx('month',start,end)</code>","<code>month(end-start)</code>","<code>datdif(start,end,'month')</code>"],a:0,e:"INTCKは指定区間の境界数を数えます。経過した完全月数と必ず一致するとは限りません。"},
+{d:"manage",q:"開始日から3か月後の日付を求める基本形はどれですか。",o:["<code>intnx('month',start_date,3)</code>","<code>intck('month',start_date,3)</code>","<code>month(start_date)+3</code>","<code>mdy(start_date,3)</code>"],a:0,e:"INTNXは指定した間隔だけ日付・日時を移動します。第4引数でBEGINNINGやSAMEなどの位置合わせも指定できます。"},
+{d:"manage",q:"年齢や実年数を小数で求める用途に適した関数はどれですか。",o:["<code>yrdif</code>","<code>qtr</code>","<code>time</code>","<code>largest</code>"],a:0,e:"YRDIFは2日付間の年数を計算します。DATDIFは日数差の計算に使います。"},
+{d:"manage",q:"文字値 <code>'1,250'</code>を数値1250へ明示変換する式はどれですか。",o:["<code>input(amount_char,comma12.)</code>","<code>put(amount_char,comma12.)</code>","<code>format(amount_char,comma12.)</code>","<code>amount_char*comma12.</code>"],a:0,e:"文字から数値への変換はINPUT関数とinformatを使います。"},
+{d:"manage",q:"数値IDの25を6桁の文字値 <code>000025</code>へ変換する式はどれですか。",o:["<code>put(id,z6.)</code>","<code>input(id,z6.)</code>","<code>format(id,z6.)</code>","<code>char(id,6)</code>"],a:0,e:"数値から文字への変換はPUT関数とformatを使います。Z6.は先頭を0で埋めます。"},
+{d:"manage",q:"次のコードでOUTPUTは何回実行されますか。",c:"do year=2025 to 2026;\n  do month=1 to 3;\n    output;\n  end;\nend;",o:["2回","3回","5回","6回"],a:3,e:"外側が2回、内側が各3回なので、ネストされたループ内のOUTPUTは2×3=6回実行されます。"},
+{d:"manage",q:"PROC TRANSPOSEの指定の対応として正しいものはどれですか。",o:["VARは転置する値、IDは転置後の列名、BYはグループ、OUT=・PREFIX=・NAME=は出力先や列名属性","VARはグループ、IDは入力表、BYは出力列、OUT=は並べ替え","IDは転置する数値、VARは必ず文字の列名、BYはformat","PREFIX=は入力行削除、NAME=はシート名"],a:0,e:"VARは値、IDは横持ちの列名、BYはグループです。OUT=は出力先、PREFIX=は列名接頭辞、NAME=は元変数名を格納する列名を指定します。"},
+{d:"manage",q:"マクロ変数yearを2026として作成する構文はどれですか。",o:["<code>%let year=2026;</code>","<code>let &amp;year=2026;</code>","<code>%macro year 2026;</code>","<code>retain year=2026;</code>"],a:0,e:"%LETでマクロ変数を作成し、参照するときは<code>&amp;year</code>または区切りが必要な場合<code>&amp;year.</code>と書きます。"},
+{d:"error",q:"ログに複数のERRORが続けて表示されたとき、最初に確認するものはどれですか。",o:["最後のERROR","最初に表示されたERRORとその直前のコード","出力データの最終行だけ","WARNINGをすべて無視して再実行"],a:1,e:"1つの構文ミスが後続エラーを連鎖させるため、最初の異常箇所から修正します。"},
+{d:"error",q:"次のコードで最初に直す箇所はどこですか。",c:"data work.checked;\n  set work.orders\n  if amount &gt; 0;\nrun;",o:["DATAの後ろ","SETステートメント末尾のセミコロン","IFの比較演算子","RUNの前"],a:1,e:"<code>set work.orders</code>の末尾にセミコロンがなく、次のIFまで同じ文として解釈されます。"},
+{d:"error",q:"次のうち引用符が正しく対応しているTITLEステートメントはどれですか。",o:["<code>title &quot;Sales Report';</code>","<code>title 'Sales Report&quot;;</code>","<code>title &quot;Sales Report&quot;;</code>","<code>title &quot;Sales Report;</code>"],a:2,e:"開始と終了に同じ種類の引用符を使い、文字列の後ろをセミコロンで終えます。"},
+{d:"error",q:"<code>proc pritn data=work.sales;</code>で疑うべき原因はどれですか。",o:["データ型の自動変換","PROC PRINTのスペルミス","BY変数の未ソート","文字長の不足"],a:1,e:"PRITNはPRINTのスペルミスで、SASはキーワードを自動補正しません。"},
+{d:"error",q:"<code>proc print data=work.sales noob;</code>でERRORになった場合、最も可能性が高い原因はどれですか。",o:["NOOBSのスペルミスによる無効オプション","WORKライブラリはPRINTできない","PROC PRINTではDATA=を使えない","セミコロンが多すぎる"],a:0,e:"オブザベーション番号を消す正しいオプションはNOOBSです。"},
+{d:"error",q:"ログの「文字値が数値に変換されました」というNOTEが示すものはどれですか。",o:["明示的なINPUT関数だけが実行された","SASが式に合わせて自動型変換した","数値変数が削除された","FORMATが永久に解除された"],a:1,e:"文字と数値を混ぜた比較・計算などで自動変換が起きます。INPUTまたはPUTで意図を明示します。"},
+{d:"error",q:"ログに「変数totlは初期化されていません」と出た場合、最初に確認したいものはどれですか。",o:["変数名のスペルと代入経路","ODSの出力先","TITLEの文字色","PROC SORTのOUT=だけ"],a:0,e:"未初期化変数は、変数名のタイプミスや、どの分岐でも値が代入されないことが主な原因です。"},
+{d:"error",q:"PUTLOGで変数名と値をセットでログへ出す書き方はどれですか。",o:["<code>putlog amount;</code>","<code>putlog amount=;</code>","<code>putlog =amount;</code>","<code>putlog value(amount);</code>"],a:1,e:"変数名の後ろに等号を付けると、<code>amount=1250</code>のように名前と値が表示されます。"},
+{d:"error",q:"日付をDATE9.、金額をCOMMA12.2でログ表示する正しい文はどれですか。",o:["<code>putlog order_date= date9. amount= comma12.2;</code>","<code>putlog format order_date date9. amount comma12.2;</code>","<code>format putlog order_date date9.;</code>","<code>putlog order_date input date9.;</code>"],a:0,e:"PUTLOGでは変数の直後に一時的なformatを指定できます。データセットのformat属性は変更しません。"},
+{d:"error",q:"現在のDATAステップ反復でPDVにある全変数をログへ出す指定はどれですか。",o:["<code>putlog _all_;</code>","<code>putlog *;</code>","<code>printlog all;</code>","<code>putlog _pdv_;</code>"],a:0,e:"_ALL_は自動変数を含む現在の変数値をまとめて出します。大量出力を避けるため条件付き利用が基本です。"},
+{d:"error",q:"customer_idがC001の行だけログへ出すコードはどれですか。",o:["<code>if customer_id='C001' then putlog customer_id= amount=;</code>","<code>where customer_id='C001' putlog;</code>","<code>putlog if customer_id='C001';</code>","<code>if customer_id='C001' output log;</code>"],a:0,e:"PUTLOG自体をIF-THENの実行対象にすると、調査対象の行だけへログを絞れます。"},
+{d:"error",q:"自動変数 <code>_N_</code>が表すものはどれですか。",o:["出力データセットの最終行数","現在のDATAステップ反復回数","欠損値の個数","BYグループの個数"],a:1,e:"_N_はDATAステップが何回反復したかを示します。通常は出力データセットに保存されません。"},
+{d:"error",q:"自動変数 <code>_ERROR_</code>が1になるのはどのようなときですか。",o:["現在の反復でデータエラーが起きたとき","DATAステップが1回目のとき","出力行が1件のとき","WARNINGが1個もないとき"],a:0,e:"入力変換の失敗など、現在の反復でデータエラーが起きると_ERROR_が1になります。"},
+{d:"error",q:"構文エラーとロジックエラーの違いとして正しいものはどれですか。",o:["ロジックエラーでは必ずSASが停止する","構文エラーは常に正しい結果を出す","ロジックエラーは実行できても結果が要件と異なる","両者はログでは一切区別できない"],a:2,e:"ロジックエラーはコードが実行できるため、行数、合計、欠損、境界値などの検算が必要です。"},
+{d:"error",q:"次のコードでcategory=Aの1行はWORK.ONEとWORK.TWOへそれぞれ何回出ますか。",c:"data work.one work.two;\n  set work.input;\n  if category='A' then output work.one;\n  output;\nrun;",o:["ONEへ1回、TWOへ0回","ONEへ1回、TWOへ1回","ONEへ2回、TWOへ1回","ONEへ2回、TWOへ2回"],a:2,e:"指定OUTPUTでONEへ1回、出力先を省略したOUTPUTでONEとTWOの両方へ1回ずつ書かれます。"},
+{d:"error",q:"DATAステップ内に明示的なOUTPUTステートメントが1つでもある場合の動作はどれですか。",o:["ステップ末尾の暗黙出力は行われない","すべての行が必ず2回出力される","OUTPUTは無視される","DATAステートメントの最初の出力先だけ削除される"],a:0,e:"明示的なOUTPUTを使うと暗黙出力は止まるため、必要な各経路でOUTPUTが実行されるか確認します。"},
+{d:"error",q:"数値変数amountが欠損の行に対して <code>if amount &lt; 1000;</code>を実行すると通常どうなりますか。",o:["条件は偽になる","欠損値は数値より小さいため条件は真になる","必ず構文エラーになる","欠損値は自動的に1000へ変わる"],a:1,e:"通常の数値欠損値はすべての数値より小さいため、低額判定の前にMISSING関数で分けます。"},
+{d:"reports",q:"10行あるデータの6行目から10行目だけをPROC PRINTで表示する指定はどれですか。",o:["<code>data=work.sales(firstobs=6 obs=10)</code>","<code>data=work.sales(firstobs=6 obs=5)</code>","<code>data=work.sales(start=6 end=10)</code>","<code>data=work.sales(obs=6 firstobs=10)</code>"],a:0,e:"FIRSTOBS=6で開始位置、OBS=10で最後に処理する位置を指定するため、6〜10行目の5行を表示します。"},
+{d:"reports",q:"Obs番号を表示せず、customer_idとamountをこの順で表示する指定はどれですか。",o:["<code>proc print data=work.sales noobs; var customer_id amount; run;</code>","<code>proc print data=work.sales; id obs; order customer_id amount; run;</code>","<code>proc print data=work.sales obs=0; by customer_id amount; run;</code>","<code>proc print data=work.sales; class customer_id amount; run;</code>"],a:0,e:"NOOBSでObs列を非表示にし、VARステートメントで表示する変数と順序を指定します。"},
+{d:"reports",q:"Obs番号の代わりにcustomer_idを表示し、一覧末尾にamountの合計を出す指定はどれですか。",o:["<code>id customer_id; sum amount;</code>","<code>var customer_id; total amount;</code>","<code>by customer_id; mean amount;</code>","<code>class customer_id; add amount;</code>"],a:0,e:"IDは行識別子を置き換え、SUMは指定した数値変数の合計行を追加します。"},
+{d:"reports",q:"PROC PRINTでregionがEastの行だけ表示する正しい指定はどれですか。",o:["<code>where region='East';</code>","<code>keep region='East';</code>","<code>class region='East';</code>","<code>id region='East';</code>"],a:0,e:"WHEREステートメントはPROCが処理する行を条件で絞ります。"},
+{d:"reports",q:"PROC PRINTでregionごとに別のレポートを作る場合の前提はどれですか。",o:["入力データをregionでソートしてBYステートメントを使う","CLASSだけを書けば必ず別ページになる","IDとSUMを同時に使わない","入力データをCSVへ変換する"],a:0,e:"BYグループ処理には、原則としてBY変数でソート済みの入力が必要です。"},
+{d:"reports",q:"ラベル中の <code>#</code>を改行位置として列見出しを分割するPROC PRINT指定はどれですか。",o:["<code>proc print data=x label split='#';</code>","<code>proc print data=x break='#';</code>","<code>proc print data=x label newline='#';</code>","<code>proc print data=x id='#';</code>"],a:0,e:"LABELオプションでラベルを見出しに使用し、SPLIT=でラベル内の分割文字を指定します。"},
+{d:"reports",q:"タイトルと注記を設定し、日付・ページ番号を消して横向きにする正しい組み合わせはどれですか。",o:["<code>title '売上'; footnote '社内用'; options nodate nonumber orientation=landscape;</code>","<code>title='売上' footnote='社内用' nodate landscape;</code>","<code>proc options title='売上' page=off;</code>","<code>format report nodate nonumber horizontal;</code>"],a:0,e:"TITLEとFOOTNOTEはグローバルステートメント、NODATE・NONUMBER・ORIENTATION=はSASシステムオプションです。解除は<code>title; footnote;</code>です。"},
+{d:"reports",q:"変数regionの一元度数表を作るコードはどれですか。",o:["<code>proc freq data=work.sales; tables region; run;</code>","<code>proc means data=work.sales; var region; run;</code>","<code>proc print data=work.sales; freq region; run;</code>","<code>proc sort data=work.sales; tables region; run;</code>"],a:0,e:"PROC FREQのTABLESステートメントに1変数を指定すると一元度数表を作ります。"},
+{d:"reports",q:"regionとstatusの二元度数表を作るTABLES指定はどれですか。",o:["<code>tables region status;</code>","<code>tables region*status;</code>","<code>tables region+status;</code>","<code>tables region by status;</code>"],a:1,e:"PROC FREQではアスタリスクで2変数を結び、クロス集計表を作ります。"},
+{d:"reports",q:"PROC FREQのオプション説明として正しいものはどれですか。",o:["NLEVELSは水準数、ORDER=FREQは度数順、MISSINGは欠損も度数へ含める","NLEVELSは平均、ORDER=FREQは標準偏差、MISSINGは行を削除する","3つともPROC MEANS専用である","MISSINGを指定すると欠損値が0へ変換される"],a:0,e:"NLEVELSは異なる値の数、ORDER=FREQは度数順、MISSINGは欠損値を有効な水準として集計する指定です。"},
+{d:"reports",q:"regionとstatusの各1変数レベルで件数・平均・合計を出し、結果をWORK.SUMMARYへ保存するコードはどれですか。",o:["<code>proc means data=work.sales n mean sum maxdec=1; class region status; ways 1; var amount; output out=work.summary sum=; run;</code>","<code>proc means data=work.sales; by region status; levels 1; print out=work.summary; run;</code>","<code>proc freq data=work.sales mean sum; tables region*status / out=work.summary; run;</code>","<code>proc print data=work.sales; class region status; export=work.summary; run;</code>"],a:0,e:"N・MEAN・SUMで統計量、MAXDEC=で表示桁、WAYS 1で1変数ずつの要約レベル、OUTPUT OUT=で出力データセットを指定します。"},
+{d:"reports",q:"PROC MEANSの指定の説明として正しいものはどれですか。",o:["NWAYは全CLASS変数を組み合わせた最詳細レベルだけ、MISSINGは欠損も分類値、MAXDEC=は表示小数桁","NWAYは全行削除、MISSINGは欠損除外、MAXDEC=は最大値","CLASSは必ず事前ソートが必要で、BYは不要","VARは分類変数、CLASSは分析変数を指定する"],a:0,e:"NWAY、MISSING、MAXDEC=で要約レベル・欠損分類・表示桁数を制御します。BY処理は原則ソートが必要ですが、CLASSは通常不要です。"},
+{d:"reports",q:"分布、極値、欠損値を詳しく調べるのに適したプロシジャはどれですか。",o:["PROC UNIVARIATE","PROC IMPORT","PROC TRANSPOSE","PROC EXPORT"],a:0,e:"PROC UNIVARIATEは分布統計、極値、欠損値などを詳しく確認できます。"},
+{d:"reports",q:"数値statusの1を「有効」、0を「無効」と表示するユーザー定義formatの基本構文はどれですか。",o:["<code>proc format; value statusf 1='有効' 0='無効'; run;</code>","<code>proc print; format statusf 1='有効'; run;</code>","<code>data format; label 1='有効'; run;</code>","<code>proc format; informat statusf 1='有効'; run;</code>"],a:0,e:"PROC FORMATのVALUEステートメントで数値formatを定義し、FORMATステートメントで変数へ割り当てます。"},
+{d:"reports",q:"データセットに保存した開始値・終了値・ラベルなどからformatを一括作成するPROC FORMATオプションはどれですか。",o:["CNTLIN=","OUT=","DATAFILE=","GUESSINGROWS="],a:0,e:"CNTLIN=には、FMTNAME、START、END、LABELなどを持つ制御入力データセットを指定します。"},
+{d:"reports",q:"PDF出力を開き、スタイルを指定してレポートを作成し、最後に閉じるコードはどれですか。",o:["<code>ods pdf file='report.pdf' style=journal; proc print data=work.sales; run; ods pdf close;</code>","<code>proc pdf data=work.sales style=journal; print; close;</code>","<code>ods file='report.pdf'; proc print data=work.sales; run;</code>","<code>export pdf='report.pdf'; proc print; end;</code>"],a:0,e:"ODSは出力先を開き、PROC実行後に同名のCLOSEで閉じます。PDFのほかHTML、RTF、EXCEL、POWERPOINT、CSVなどの出力先があります。"},
+{d:"reports",q:"WORK.SALESをCSVファイルへ書き出すPROC EXPORTの指定として正しいものはどれですか。",o:["<code>proc export data=work.sales outfile='/home/user/sales.csv' dbms=csv replace; run;</code>","<code>proc import data=work.sales outfile='/home/user/sales.csv'; run;</code>","<code>ods csv data=work.sales replace;</code>","<code>proc print data=work.sales dbms=csv;</code>"],a:0,e:"PROC EXPORTではDATA=にSASデータセット、OUTFILE=に外部ファイル、DBMS=CSVを指定します。"},
+{d:"reports",q:"XLSXエンジンを使ってWORK.SALESをExcelブックのSalesシートへ書くコードはどれですか。",o:["<code>libname excel xlsx '/home/user/report.xlsx'; data excel.Sales; set work.sales; run; libname excel clear;</code>","<code>libname xlsx excel '/home/user/report.xlsx'; set excel.Sales=work.sales;</code>","<code>data work.sales; set '/home/user/report.xlsx'.Sales; run;</code>","<code>proc print data=work.sales out=excel format=xlsx;</code>"],a:0,e:"XLSXエンジンでブックをライブラリとして割り当て、DATAステップの出力先にシート名を指定して、最後にCLEARします。"},
+{d:"practical",q:"並べ替え後の2番目のオブザベーションで、productの値はどれですか。",c:"入力データ\nproduct   sales   region\nBoot        120   East\nSandal       80   West\nBoot         90   North\nSlipper     150   East\nSandal      110   South\n\nproc sort data=work.shoes out=work.sorted;\n  by descending product sales;\nrun;",o:["Boot","Sandal","Slipper","West"],a:1,e:"文字の降順ではSlipper、Sandal、Bootの順です。Sandal内はsales昇順なので、2行目はSandal・80・Westです。"},
+{d:"practical",q:"同じ並べ替え後の4番目のオブザベーションで、regionの値はどれですか。",c:"入力データ\nproduct   sales   region\nBoot        120   East\nSandal       80   West\nBoot         90   North\nSlipper     150   East\nSandal      110   South\n\nby descending product sales;",o:["East","West","North","South"],a:2,e:"並びはSlipper150、Sandal80、Sandal110、Boot90、Boot120です。4行目のregionはNorthです。"},
+{d:"practical",q:"作成後のWORK.RANGEで、SalesRangeがMiddleになるオブザベーション数はいくつですか。",c:"入力sales: 80000, 100000, 150000, 200000, 250000, .\n\nlength SalesRange $ 7;\nif missing(sales) then SalesRange='Missing';\nelse if sales &lt; 100000 then SalesRange='Lower';\nelse if sales &lt;= 200000 then SalesRange='Middle';\nelse SalesRange='Upper';",o:["2","3","4","5"],a:1,e:"境界値を含む100000、150000、200000の3行がMiddleです。"},
+{d:"practical",q:"前問のMiddleグループについて、salesの平均はいくつですか。",c:"Middleに入るsales: 100000, 150000, 200000",o:["125000","150000","175000","200000"],a:1,e:"合計450000を3行で割るため、平均は150000です。"},
+{d:"practical",q:"欠損値をLowerへ誤分類しないため、最初に置くべき条件はどれですか。",o:["<code>if missing(sales) then SalesRange='Missing';</code>","<code>if sales &lt; 100000 then SalesRange='Lower';</code>","<code>if sales=. then delete all;</code>","<code>where sales &gt;= 0;</code>"],a:0,e:"数値欠損値は通常の数値より小さいため、金額の大小比較より先にMISSING関数で分けます。"},
+{d:"practical",q:"次のDATAステップでcategoryに保存される値はどれですか。",c:"data work.test;\n  length category $ 4;\n  category='Upper';\nrun;",o:["Upper","Uppe","Upp","欠損値"],a:1,e:"categoryの長さは4文字なので、5文字のUpperは先頭4文字のUppeに切り詰められます。"},
+{d:"practical",q:"flag=0のとき、次のコードでstatusに保存される値はどれですか。",c:"if flag=1 then status='OK';\nelse status='REVIEW';",o:["OK","RE","REVIEW","欠損値"],a:1,e:"コンパイル時に最初に現れる文字定数OKからstatusの長さが2と決まり、REVIEWはREに切り詰められます。"},
+{d:"practical",q:"次のコードでWORK.TOTALSは何オブザベーションになりますか。",c:"入力\ncustomer_id  amount\nC1               10\nC1               20\nC2                5\nC2                .\n\ndata work.totals;\n  set work.sorted_orders;\n  by customer_id;\n  if first.customer_id then total=0;\n  total + amount;\n  if last.customer_id then output;\nrun;",o:["1","2","3","4"],a:1,e:"各customer_idグループの最終行だけ出力するため、C1とC2の2行です。"},
+{d:"practical",q:"前問のWORK.TOTALSで、C2のtotalはいくつですか。",o:["0","5","欠損値","25"],a:1,e:"SUMステートメントは欠損のamountを0として扱うため、C2の累計は5のままです。"},
+{d:"practical",q:"入力が4行でamountが50、100、150、80のとき、HIGH・LOW・ALLの行数の組み合わせはどれですか。",c:"data work.high work.low work.all;\n  set work.input;\n  if amount &gt;= 100 then output work.high;\n  if amount &lt; 100 then output work.low;\n  output;\nrun;",o:["HIGH=2、LOW=2、ALL=4","HIGH=4、LOW=4、ALL=4","HIGH=6、LOW=6、ALL=4","HIGH=6、LOW=6、ALL=12"],a:2,e:"最後のoutput;は3つすべてへ各4行を書きます。HIGHとLOWには条件付き出力が各2行加わるため、それぞれ6行です。"},
+{d:"practical",q:"次のコードでChar2の値はどれですか。",c:"data work.text;\n  Char1='ABCDE12345';\n  Char2=substr(Char1,6,3);\nrun;",o:["E12","123","1234","CDE"],a:1,e:"6文字目から3文字を取り出すため、Char2は123です。"},
+{d:"practical",q:"次のコードでTotalに代入される値はどれですか。",c:"Revenue2024=1.2;\nRevenue2025=1.6;\nRevAdjust=0.2;\nCost2025=1.0;\nTotal=sum(of Rev:);",o:["2.8","3.0","3.8","4.0"],a:1,e:"名前接頭辞リストRev:はRevenue2024、Revenue2025、RevAdjustを選びます。合計は1.2+1.6+0.2=3.0です。"},
+{d:"practical",q:"PROC FORMATで定義した数値format scoreを変数testへ正しく適用する文はどれですか。",c:"proc format;\n  value score 1-50='Fail' 51-100='Pass';\nrun;",o:["<code>format test score;</code>","<code>format test score.;</code>","<code>format score test.;</code>","<code>proc print format=score.;</code>"],a:1,e:"定義名はscoreですが、変数へ適用するときはピリオドを付けて<code>format test score.;</code>と書きます。"},
+{d:"practical",q:"実行後のamountとid_charの組み合わせはどれですか。",c:"amount_char='1,250';\nid=42;\namount=input(amount_char,comma12.);\nid_char=put(id,z5.);",o:["amount='1,250'、id_char=42","amount=1250、id_char=00042","amount=1.25、id_char=42000","amount=.、id_char='42'"],a:1,e:"INPUTとCOMMA12.で数値1250、PUTとZ5.で5桁の文字値00042になります。"},
+{d:"practical",q:"次のコードでnext_dateをDATE9.表示した結果はどれですか。",c:"start_date='31JAN2026'd;\nnext_date=intnx('month',start_date,1,'same');\nformat next_date date9.;",o:["01FEB2026","28FEB2026","03MAR2026","31FEB2026"],a:1,e:"SAME配置は可能な限り同じ日を保ちます。2月に31日はないため月末の28FEB2026になります。"},
+{d:"practical",q:"次のBYマージでWORK.MATCHEDは何オブザベーションになりますか。",c:"MASTER: id=1,2,3 が各1行\nTRANS : id=1が2行、id=3が1行、id=4が1行\n\ndata work.matched;\n  merge work.trans(in=a) work.master(in=b);\n  by id;\n  if a and b;\nrun;",o:["2","3","4","5"],a:1,e:"両方にあるid=1の2行とid=3の1行が残ります。id=2とid=4は片側だけなので除外され、合計3行です。"},
+{d:"practical",q:"次のコードでprofitが正の行を残すための修正はどれですか。",c:"data work.profit;\n  set work.sales;\n  profit=sales-cost;\n  where profit &gt; 0;\nrun;",o:["WHEREを<code>if profit &gt; 0;</code>へ変更する","profitのFORMATを指定する","SETをMERGEへ変更する","profitを文字型にする"],a:0,e:"profitはDATAステップ内で作成されるため、入力前に評価されるWHEREでは参照できません。作成後のサブセットIFを使います。"},
+{d:"practical",q:"次のコードでWORK.LOOPは何オブザベーションになり、iの値はどの順になりますか。",c:"data work.loop;\n  do i=1 to 5 by 2;\n    output;\n  end;\nrun;",o:["2行、1・3","3行、1・3・5","4行、1・2・3・4","5行、1・2・3・4・5"],a:1,e:"iは1から5まで2ずつ増えるため1、3、5の3回OUTPUTされます。"},
+{d:"practical",q:"次の転置後、C1行のmonth_Febの値はどれですか。",c:"入力\ncustomer_id  month  amount\nC1           Jan        10\nC1           Feb        20\n\nproc transpose data=work.long out=work.wide prefix=month_;\n  by customer_id;\n  id month;\n  var amount;\nrun;",o:["10","20","Jan","Feb"],a:1,e:"ID変数monthの値が列名に使われ、PREFIX=によりmonth_Janとmonth_Febができます。month_Febの値は20です。"},
+{d:"practical",q:"欠損・1000未満・1000以上のどれか1つへ正しく振り分ける修正後コードはどれですか。",o:["<code>data miss low high; set input; if missing(amount) then output miss; else if amount&lt;1000 then output low; else output high; run;</code>","<code>data low high; set input; if amount&lt;1000 output low; if amount&gt;=1000 output high; run;</code>","<code>data miss low high; set input; if amount&lt;1000 then output low; if missing(amount) then output miss; output high; run;</code>","<code>data miss low high; set input; where missing(amount); output miss low high; run;</code>"],a:0,e:"3つの出力先をDATA文に宣言し、欠損判定を最初に置き、ELSE IFで1行が1つの出力先だけへ入るようにします。"}
+];
+
+const answerTargets=[2,0,3,1,1,3,0,2,0,2,1,3,3,1,2,0];
+questions.forEach((question,index)=>{
+  const target=answerTargets[index%answerTargets.length];
+  const shift=(target-question.a+4)%4;
+  if(shift)question.o=question.o.slice(-shift).concat(question.o.slice(0,-shift));
+  question.a=target;
+});
+
+const state=new Array(questions.length).fill(null);
+let showingAnswers=false;
+const root=document.getElementById("quiz-root");
+
+function renderQuiz(){
+  Object.entries(domains).forEach(([key,domain])=>{
+    const section=document.createElement("section");
+    section.className=`tile ${domain.tone}`;
+    section.id=key;
+    const items=questions.map((question,index)=>({question,index})).filter(item=>item.question.d===key);
+    section.innerHTML=`<div class="tile-inner section"><div class="quiz-domain-head"><div><p class="section-eyebrow">${domain.range}</p><h2>${domain.title}</h2></div><p>${items.length}問</p></div><div class="quiz-list"></div></div>`;
+    const list=section.querySelector(".quiz-list");
+    items.forEach(({question,index})=>{
+      const fieldset=document.createElement("fieldset");
+      fieldset.className="quiz-question";
+      fieldset.dataset.index=String(index);
+      const code=question.c?`<pre class="question-code">${question.c}</pre>`:"";
+      const options=question.o.map((option,optionIndex)=>`<label class="quiz-option"><input type="radio" name="q${index+1}" value="${optionIndex}"><span><b>${String.fromCharCode(65+optionIndex)}.</b> ${option}</span></label>`).join("");
+      fieldset.innerHTML=`<legend><span class="question-number">Q${index+1}</span>${question.q}</legend>${code}<div class="quiz-options">${options}</div><p class="question-feedback" aria-live="polite"></p>`;
+      list.appendChild(fieldset);
+    });
+    root.appendChild(section);
+  });
+}
+
+function updateQuestion(index){
+  const question=questions[index];
+  const fieldset=document.querySelector(`.quiz-question[data-index="${index}"]`);
+  const labels=[...fieldset.querySelectorAll(".quiz-option")];
+  const feedback=fieldset.querySelector(".question-feedback");
+  labels.forEach(label=>label.classList.remove("is-answer","is-wrong"));
+  fieldset.classList.remove("is-correct","is-incorrect");
+  if(state[index]!==null){
+    const ok=state[index]===question.a;
+    fieldset.classList.add(ok?"is-correct":"is-incorrect");
+    labels[state[index]].classList.add(ok?"is-answer":"is-wrong");
+    if(showingAnswers&&!ok)labels[question.a].classList.add("is-answer");
+    feedback.className=`question-feedback ${ok?"correct":"incorrect"}`;
+    feedback.innerHTML=`${ok?"○ 正解です。":"× 不正解です。"}${question.e}`;
+  }else if(showingAnswers){
+    labels[question.a].classList.add("is-answer");
+    feedback.className="question-feedback";
+    feedback.innerHTML=`正解は${String.fromCharCode(65+question.a)}です。${question.e}`;
+  }else{
+    feedback.className="question-feedback";
+    feedback.textContent="";
+  }
+}
+
+function updateStatus(){
+  const answered=state.filter(value=>value!==null).length;
+  const correct=state.reduce((total,value,index)=>total+(value===questions[index].a?1:0),0);
+  document.getElementById("answered-count").textContent=`${answered} / ${questions.length}`;
+  document.getElementById("correct-count").textContent=String(correct);
+  document.getElementById("remaining-count").textContent=String(questions.length-answered);
+}
+
+renderQuiz();
+if(questions.length!==120){document.getElementById("quiz-root").innerHTML=`<section class="tile tile-light"><div class="tile-inner section"><p>問題データの読み込みに失敗しました（${questions.length}/120問）。</p></div></section>`;}
+
+root.addEventListener("change",event=>{
+  if(!event.target.matches('input[type="radio"]'))return;
+  const fieldset=event.target.closest(".quiz-question");
+  const index=Number(fieldset.dataset.index);
+  state[index]=Number(event.target.value);
+  updateQuestion(index);
+  updateStatus();
+});
+
+document.getElementById("jump-unanswered").addEventListener("click",()=>{
+  const index=state.findIndex(value=>value===null);
+  const target=index===-1?document.getElementById("final-actions"):document.querySelector(`.quiz-question[data-index="${index}"]`);
+  target.scrollIntoView({behavior:"smooth",block:"center"});
+});
+
+document.getElementById("answer-toggle").addEventListener("click",event=>{
+  showingAnswers=!showingAnswers;
+  questions.forEach((_,index)=>updateQuestion(index));
+  event.currentTarget.setAttribute("aria-pressed",String(showingAnswers));
+  event.currentTarget.textContent=showingAnswers?"答えを隠す":"答えを見る";
+});
+
+document.getElementById("grade-button").addEventListener("click",()=>{
+  const answered=state.filter(value=>value!==null).length;
+  const correct=state.reduce((total,value,index)=>total+(value===questions[index].a?1:0),0);
+  const percentage=Math.round((correct/questions.length)*100);
+  const result=document.getElementById("final-result");
+  const details=Object.entries(domains).map(([key,domain])=>{
+    const indexes=questions.map((question,index)=>question.d===key?index:-1).filter(index=>index>=0);
+    const domainAnswered=indexes.filter(index=>state[index]!==null).length;
+    const domainCorrect=indexes.filter(index=>state[index]===questions[index].a).length;
+    return `<div class="domain-result"><b>${domainCorrect} / ${indexes.length}</b><span>${domain.title}<br>回答 ${domainAnswered}問</span></div>`;
+  }).join("");
+  const message=answered===questions.length?(percentage>=80?"全範囲をよく理解できています。間違えた問題だけ復習しましょう。":"分野別結果を確認し、弱い章へ戻って復習しましょう。"):`未回答が${questions.length-answered}問あります。現在の回答だけで集計しています。`;
+  result.innerHTML=`<div class="score-line"><strong>${correct}点</strong><span>正答率 ${percentage}%・回答 ${answered}/${questions.length}問 — ${message}</span></div><div class="domain-results">${details}</div>`;
+  result.classList.add("show");
+  result.focus({preventScroll:true});
+  result.scrollIntoView({behavior:"smooth",block:"center"});
+});
+
+document.getElementById("reset-button").addEventListener("click",()=>{
+  if(!window.confirm("120問すべての回答を消して、最初からやり直しますか？"))return;
+  state.fill(null);
+  showingAnswers=false;
+  document.querySelectorAll('.quiz-question input[type="radio"]').forEach(input=>{input.checked=false;});
+  questions.forEach((_,index)=>updateQuestion(index));
+  updateStatus();
+  const toggle=document.getElementById("answer-toggle");
+  toggle.setAttribute("aria-pressed","false");
+  toggle.textContent="答えを見る";
+  document.getElementById("final-result").classList.remove("show");
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+
+const progress=document.getElementById("progress");
+window.addEventListener("scroll",()=>{const max=document.documentElement.scrollHeight-window.innerHeight;progress.style.width=(max>0?(window.scrollY/max)*100:0)+"%";});
+</script>
+</body>
+</html>

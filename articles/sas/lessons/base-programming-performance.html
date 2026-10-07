@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SAS 9.4 Base Programming 試験対策 — yotalab</title>
 <meta name="description" content="SAS 9.4 Base Programming Performance-Based Exam の試験範囲、重要構文、項目別学習ロードマップ、演習をまとめた学習ページ。">
-<link rel="stylesheet" href="../../article.css?v=20260904">
+<link rel="stylesheet" href="../../article.css?v=20260905">
 <style>
   .exam-map{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:32px 0}
   .exam-map-card{border:1px solid var(--hairline);border-radius:18px;padding:22px;background:var(--bg)}
@@ -76,6 +76,14 @@
 
   .source-list{margin:18px 0 0;padding-left:1.1em}
   .source-list li{font-size:14px;line-height:1.6;color:var(--ink-muted);margin:6px 0}
+
+  .final-test-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:20px;align-items:center;margin:24px 0 0;padding:22px 24px;border:1px solid rgba(0,102,204,.25);border-radius:18px;background:linear-gradient(135deg,rgba(0,102,204,.08),var(--bg));color:var(--ink);text-decoration:none;transition:transform .2s,border-color .2s}
+  .final-test-card:hover{transform:translateY(-2px);border-color:var(--action);text-decoration:none}
+  .final-test-number{font-size:34px;font-weight:800;line-height:1;color:var(--action);letter-spacing:-.04em}
+  .final-test-body h3{margin:0 0 5px;font-size:19px}
+  .final-test-body p{margin:0;font-size:13px;line-height:1.55;color:var(--ink-muted)}
+  .final-test-arrow{font-size:22px;color:var(--action)}
+  @media(max-width:560px){.final-test-card{grid-template-columns:auto minmax(0,1fr);gap:14px}.final-test-arrow{display:none}.final-test-number{font-size:28px}}
 </style>
 </head>
 <body>
@@ -121,6 +129,11 @@
       <p>比重が最も大きいのはデータ管理です。まず DATA ステップでの変数作成、条件分岐、関数、BY グループ処理、DO ループを固め、その後に入出力とレポートへ広げるのが効率的です。</p>
       <cite>参照: ローカル PDF <code>articles/sas/docs/specialist-base-programming.pdf</code> / SAS 公式 Exam Content Guide</cite>
     </div>
+    <a class="final-test-card" href="base-programming-performance/final-100-questions.html">
+      <span class="final-test-number">120</span>
+      <span class="final-test-body"><h3>最終確認 120問4択問題集</h3><p>全範囲100問とサンプル形式の実践20問で、正誤判定・分野別結果を確認します。</p></span>
+      <span class="final-test-arrow" aria-hidden="true">→</span>
+    </a>
   </div>
 </section>
 
