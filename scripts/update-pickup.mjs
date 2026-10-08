@@ -4,6 +4,8 @@ const root = new URL('../', import.meta.url);
 const config = JSON.parse(readFileSync(new URL('content/pickup.json', root), 'utf8'));
 const app = config.apps[config.selected];
 if (!app) throw new Error('Unknown PICK UP selection: ' + config.selected);
+const theme = { timer: 'timer', palettly: 'palette', karuta: 'words', swack: 'swack' }[config.selected];
+if (!theme) throw new Error('Missing app preview theme: ' + config.selected);
 for (const key of ['name', 'headline', 'category', 'platform', 'href', 'image', 'alt']) {
   if (typeof app[key] !== 'string' || !app[key]) throw new Error('Missing field: ' + key);
 }
@@ -18,8 +20,8 @@ const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<'
 const a = Object.fromEntries(Object.entries(app).map(([k,v]) => [k, escape(v)]));
 const block = [
   '<!-- PICKUP:START -->',
-  '<a class="hero-feature' + (app.width > app.height ? ' feature-landscape' : '') + '" href="' + a.href + '">',
-  '<div class="feature-photo"><img src="' + a.image + '" width="' + a.width + '" height="' + a.height + '" alt="' + a.alt + '" fetchpriority="high"></div>',
+  '<a class="hero-feature ' + theme + '" href="' + a.href + '">',
+  '<div class="product-art screen-art"><img src="' + a.image + '" width="' + a.width + '" height="' + a.height + '" alt="' + a.alt + '" fetchpriority="high"></div>',
   '<div class="feature-caption"><div><span class="eyebrow">PICK UP / ' + a.category + '</span><h2>' + a.headline + '</h2><p>' + a.name + ' <span>· ' + a.platform + '</span></p></div></div>',
   '</a>',
   '<!-- PICKUP:END -->'
