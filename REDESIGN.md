@@ -10,6 +10,7 @@ The homepage prioritizes apps. Tools and Games are categories; iOS and Web are p
 - Product previews and visual refinement: assets/refinement.css and assets/previews/
 - Preview JPEGs are resized copies of the app screenshots; keep original assets intact.
 - Existing detail/article identity: assets/content-theme.css
+- App detail layout: assets/app-detail.css (four app pages, including bottom download links)
 - Confirmed X/note profile URLs: socialLinks in assets/site.js. Blank values show a non-clickable pending label, never a guessed account.
 - Profile: #about in index.html
 

@@ -27,5 +27,5 @@ if (!matchMedia("(prefers-reduced-motion: reduce)").matches && "IntersectionObse
       observer.unobserve(entry.target);
     }
   }, { threshold: 0.12 });
-  document.querySelectorAll(".product, .about-section, .note-row").forEach(el => observer.observe(el));
+  document.querySelectorAll(".product, .about-section, .note-row, .showcase-item, .download-section").forEach(el => observer.observe(el));
 }

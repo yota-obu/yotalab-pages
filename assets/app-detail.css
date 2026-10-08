@@ -1,0 +1,32 @@
+/* App-specific colors come from content-theme.css. */
+.app-page .nav-inner{max-width:1180px;height:64px}
+.app-page .hero{padding:125px 24px 80px;background:linear-gradient(160deg,var(--app-tint),var(--bg));border-bottom:1px solid var(--border)}
+.app-page .hero-icon{width:112px;height:112px;border-radius:27px;margin-bottom:26px}
+.app-page .hero h1{font-size:clamp(36px,5.8vw,68px);line-height:1.15;letter-spacing:-.045em;overflow-wrap:anywhere}
+.app-page .hero .en-name{font-size:15px;margin-top:12px}
+.app-page .hero .desc{font-size:17px;line-height:1.9;max-width:640px}
+.app-page .hero .catchcopy{margin-top:28px;font-size:clamp(23px,3.4vw,34px)}
+.app-page .hero-showcase{max-width:920px;box-shadow:0 24px 55px -25px #23271f55;border:8px solid #ffffffb3;border-radius:25px}
+.app-page .showcase-section,.app-page .section-light,.app-page .section-dark{padding:85px 28px}
+.app-page .showcase-section .inner{max-width:1100px}
+.app-page .section-light .inner,.app-page .section-dark .inner{max-width:1020px}
+.app-page .showcase-section h2,.app-page .section-light h2,.app-page .section-dark h2{font-size:clamp(27px,3.6vw,42px);line-height:1.4}
+.app-page .subtitle{line-height:1.8}
+.app-page .showcase-grid{gap:28px}
+.app-page .showcase-item{border-radius:20px;box-shadow:0 12px 26px #00000012}
+.app-page .showcase-item .shot{object-fit:contain}
+.app-page .showcase-item .caption{padding:25px 27px 30px}
+.app-page .showcase-item .caption p{line-height:1.85}
+.app-page .mode-card,.app-page .feat{border-radius:18px}
+.app-page .mode-card{padding:34px}
+.app-page .mode-card p,.app-page .feat p{line-height:1.85}
+.app-page .stat{border:1px solid var(--border);box-shadow:0 10px 25px -20px #23271f40}
+.app-page .recommend-list{max-width:740px;margin-left:auto;margin-right:auto}
+.download-section{padding:70px 28px;background:var(--app-tint);text-align:center;color:var(--dark)}
+.download-section .download-label{font-size:11px;font-weight:600;letter-spacing:2px;color:var(--app-accent)}
+.download-section h2{font-size:clamp(25px,4vw,37px);line-height:1.5;margin:14px 0}
+.download-section p{font-size:14px;line-height:1.9;color:#50554e}
+.download-section .appstore-btn{margin-top:24px}
+.app-return{display:block;width:fit-content;margin:24px auto 0;font-size:13px;color:var(--app-accent);border-bottom:1px solid currentColor;padding-bottom:5px}
+.app-page footer .footer-inner{max-width:1100px}
+@media(max-width:600px){.app-page .hero{padding:120px 22px 50px}.app-page .hero-icon{width:90px;height:90px;border-radius:22px}.app-page .hero .desc{font-size:15px}.app-page .hero .en-name{font-size:13px}.app-page .showcase-section,.app-page .section-light,.app-page .section-dark{padding:55px 22px}.app-page .subtitle{font-size:15px;margin-bottom:30px}.app-page .hero-showcase{border-width:4px;border-radius:15px;margin-top:36px}.app-page .showcase-grid{grid-template-columns:1fr;gap:22px}.app-page .showcase-item .caption{padding:22px}.app-page .mode-card{padding:25px}.download-section{padding:50px 22px}}
