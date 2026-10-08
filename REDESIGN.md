@@ -4,6 +4,11 @@ The homepage prioritizes apps. Tools and Games are categories; iOS and Web are p
 
 ## Editing
 
+### Change PICK UP
+
+Edit only `selected` in `content/pickup.json` to `timer`, `palettly`, `karuta`, or `swack`, then run `node scripts/update-pickup.mjs`.
+Commit the config and generated `index.html` together. The generated static HTML works without JavaScript. Add future apps to the same config. Run `node scripts/update-pickup.mjs --check` to verify synchronization.
+
 - Home: index.html
 - App catalogue: apps/index.html
 - Shared layout and motion: assets/site.css and assets/site.js
