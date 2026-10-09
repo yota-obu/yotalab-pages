@@ -3,7 +3,7 @@
   "apps": {
     "timer": {
       "name": "Progress Bar Timer",
-      "headline": "時間の流れを、ひと目で。",
+      "headline": "画面全体のプログレスバーで時間を管理。",
       "category": "TOOL",
       "platform": "iOS",
       "href": "apps/progress-bar-timer/",
@@ -14,7 +14,7 @@
     },
     "palettly": {
       "name": "Palettly",
-      "headline": "写真から、次の配色へ。",
+      "headline": "写真の色を、パレットに",
       "category": "TOOL",
       "platform": "iOS",
       "href": "apps/palettly/",
@@ -25,7 +25,7 @@
     },
     "karuta": {
       "name": "英単語かるた",
-      "headline": "遊ぶうちに、ことばが増える。",
+      "headline": "タップで覚える英単語",
       "category": "GAME",
       "platform": "iOS",
       "href": "apps/english-karuta/",
@@ -36,7 +36,7 @@
     },
     "swack": {
       "name": "Swack",
-      "headline": "狙って、投げて、もう一回。",
+      "headline": "スワイプで、モルック対戦を。",
       "category": "GAME",
       "platform": "iOS",
       "href": "apps/molkky-3d/",
