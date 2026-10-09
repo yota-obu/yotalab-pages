@@ -30,9 +30,9 @@
       "platform": "iOS",
       "href": "apps/english-karuta/",
       "image": "assets/previews/karuta.jpg",
-      "alt": "英単語かるたのゲーム画面",
-      "width": 1000,
-      "height": 462
+      "alt": "英単語かるたを操作するイメージ",
+      "width": 1200,
+      "height": 1200
     },
     "swack": {
       "name": "Swack",
@@ -41,9 +41,9 @@
       "platform": "iOS",
       "href": "apps/molkky-3d/",
       "image": "assets/previews/swack.jpg",
-      "alt": "芝生に並ぶピンとSwackのタイトル",
-      "width": 1400,
-      "height": 788
+      "alt": "芝生のピンとSwackのゲームイメージ",
+      "width": 1200,
+      "height": 1200
     }
   }
 }
