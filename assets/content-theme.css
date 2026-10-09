@@ -9,7 +9,7 @@ a:focus-visible,button:focus-visible{outline:3px solid #718f35;outline-offset:5p
 .article-hero{background:#eeeee6}
 .app-page{--dark:#23271f;--app-tint:#eef0e8;--app-accent:#456026;--app-night:#222c20;--app-on-night:#c6dfaa;color:var(--dark)}
 .app-english-karuta{--app-tint:#ececf6;--app-accent:#4d4f91;--app-night:#27283d;--app-on-night:#d1d2ff}
-.app-molkky-3d{--app-tint:#e9efdf;--app-accent:#3e612e;--app-night:#233221;--app-on-night:#cce5b3}
+.app-molkky-3d{--app-tint:#e8f8fd;--app-accent:#147fa8;--app-night:#123e52;--app-on-night:#91e1f7}
 .app-palettly{--app-tint:#f3e8df;--app-accent:#87503c;--app-night:#362c28;--app-on-night:#f0c5ab}
 .app-progress-bar-timer{--app-tint:#e9edeb;--app-accent:#3c5b50;--app-night:#232c28;--app-on-night:#c9e6d7}
 .app-page{--accent:var(--app-accent);--accent2:var(--app-accent)}
