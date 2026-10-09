@@ -1,0 +1,10 @@
+.global-header{position:sticky;top:0;z-index:1000;width:100%;background:rgba(246,245,240,.94);border-bottom:1px solid rgba(35,39,31,.1);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.global-header-inner{max-width:1248px;height:72px;margin:auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between;gap:28px}
+.global-brand{color:#23271f!important;font-size:24px;font-weight:800;letter-spacing:-1.2px;text-decoration:none}
+.global-brand:after{content:"";display:inline-block;width:7px;height:7px;margin-left:5px;border-radius:50%;background:#b8df55}
+.global-nav{display:flex;align-items:center;gap:28px}
+.global-nav a{position:relative;color:#555b51!important;font-size:12px;font-weight:600;letter-spacing:.02em;text-decoration:none;white-space:nowrap}
+.global-nav a:hover,.global-nav a[aria-current="page"]{color:#23271f!important}
+.global-nav a[aria-current="page"]:after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:2px;border-radius:2px;background:#6f8f31}
+@media(max-width:680px){.global-header-inner{height:62px;padding:0 18px;gap:14px}.global-brand{font-size:20px}.global-nav{gap:13px}.global-nav a{font-size:10.5px;letter-spacing:0}.global-brand:after{width:6px;height:6px}}
+@media(prefers-reduced-motion:reduce){.global-header *{scroll-behavior:auto!important}}
