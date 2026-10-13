@@ -4,7 +4,7 @@
 .sketch.product:hover .screen-art>img{transform:scale(1.025)}
 body{background:radial-gradient(ellipse at 0 0,#f0eedf 0,transparent 600px),var(--paper)}
 .site-header{position:relative;padding-top:25px;padding-bottom:25px}
-.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:65px;align-items:center;padding:65px 0 70px}
+.hero{display:block;padding:65px 0 70px}.hero-copy{max-width:840px}
 .hero h1{font-size:clamp(44px,4.9vw,70px);line-height:1.4}
 .hero .eyebrow{letter-spacing:1.4px}
 .hero-feature{display:block;background:#fff;border:1px solid #deded3;border-radius:25px;overflow:hidden;box-shadow:0 25px 60px -35px #39382860;transition:transform .4s,box-shadow .4s}
@@ -32,6 +32,7 @@ body{background:radial-gradient(ellipse at 0 0,#f0eedf 0,transparent 600px),var(
 .product:hover .screen-art>img,.hero-feature:hover .screen-art>img{transform:scale(1.025)}
 .screen-label{position:absolute;left:20px;top:18px;background:#ffffffed;color:#293027;padding:7px 11px;border-radius:20px;font-size:8px;letter-spacing:1.4px;border:1px solid #00000010}
 .product-info{padding:28px 32px 32px}.product-top{margin-bottom:23px}.product-top>b{border:1px solid var(--line);border-radius:50%;width:36px;height:36px;display:grid;place-items:center;font-size:18px}
+.sketch.product .product-top img{border:1px solid #d9ddd4}
 .product h3{font-size:27px}.product-link{border:0;display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:18px;margin-top:25px}
 .next-app{background:linear-gradient(115deg,#e8edde,#f6f5f0);border-style:solid;padding:32px}.next-app .plus{background:#fff;border-radius:50%;width:48px;height:48px;display:grid;place-items:center;flex-shrink:0}
 .about-section{position:relative;overflow:hidden;border:1px solid #d4dcc8;background:linear-gradient(120deg,#e8edde,#f0f2e9)}
@@ -41,6 +42,7 @@ body{background:radial-gradient(ellipse at 0 0,#f0eedf 0,transparent 600px),var(
 .developer-heading{display:flex;align-items:baseline;gap:14px;margin-top:10px}
 .developer-heading h3{font-size:20px;letter-spacing:-.03em}
 .developer-heading>span{font-size:11px;color:#687061}
+.career-label{display:block;margin-top:18px;font-size:10px;font-weight:700;letter-spacing:.12em;color:#687061}
 .about-section .developer-profile p{max-width:42em;margin-top:12px;line-height:1.9}
 .notes-section .note-row{border-radius:0;transition:background .25s,padding .25s}
 .note-row:hover{background:#ebede3;padding-left:15px;padding-right:15px}
