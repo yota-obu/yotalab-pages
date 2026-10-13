@@ -1,0 +1,69 @@
+.sketch-page{background:#fff8e7;color:#17202a;overflow-x:hidden}
+.sketch-page main{max-width:1180px}
+.sketch-page h1,.sketch-page h2,.sketch-page h3,.sketch-page .catch{font-family:ui-rounded,"Hiragino Maru Gothic ProN","Arial Rounded MT Bold",sans-serif}
+.release-banner{display:flex;justify-content:center;align-items:center;gap:14px;margin:26px 0 0;padding:13px 20px;border:1px solid #ff6b5e45;border-radius:16px;background:#fff;color:#17202a;text-align:center}
+.release-banner span{font-size:9px;font-weight:800;letter-spacing:1.8px;color:#d94c43}.release-banner strong{font-size:14px;letter-spacing:.02em}
+.sketch-hero{display:grid;grid-template-columns:1.1fr 1fr;align-items:center;gap:40px;padding:72px 0 82px}
+.app-identity{display:flex;align-items:center;gap:18px}
+.app-identity img{border-radius:20px;box-shadow:0 8px 24px #17202a0d}
+.app-identity h1{font-size:clamp(23px,3vw,34px);margin:6px 0 0;line-height:1.4;letter-spacing:-.04em}
+.sketch-page .eyebrow{font-size:10px;font-weight:700;letter-spacing:1.5px;color:#52616b}
+.catch{font-weight:800;font-size:clamp(38px,4.8vw,62px);line-height:1.38;letter-spacing:-.055em;margin:30px 0 22px}
+.lead{font-size:17px;line-height:1.95;color:#46525b}
+.hero-actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:28px 0 16px}
+.release-status{display:inline-flex;padding:13px 20px;border-radius:100px;background:#ffd166;color:#17202a;font-size:13px;font-weight:700}
+.outline-link{border:1px solid #17202a35;border-radius:100px;padding:12px 19px;font-size:13px}
+.outline-link:hover{background:#fff}
+.small-note{font-size:12px!important;line-height:1.8!important;color:#5a666e!important}
+.sketch-art{position:relative;min-height:470px}
+.art-note{position:absolute;right:4%;top:0;display:flex;align-items:center;gap:12px;background:#ffd166;padding:13px 23px;border-radius:24px;transform:rotate(5deg)}
+.art-note strong{font-size:49px;line-height:1.15}.art-note span{font-size:9px;line-height:1.5;letter-spacing:1.5px}
+.art-card{position:absolute;background:#fff;border:1px solid #17202a15;box-shadow:0 14px 34px #17202a12;border-radius:22px;padding:14px;margin:0}
+.art-card img{width:100%;height:auto;aspect-ratio:3/2;object-fit:contain;display:block}
+.art-card figcaption{font-size:12px;color:#46525b;margin:7px 4px 1px}
+.art-car{width:88%;top:95px;left:0;transform:rotate(-5deg)}
+.art-apple{width:53%;top:250px;right:0;transform:rotate(7deg)}
+.art-caption{position:absolute;bottom:0;left:8px;font-size:11px;color:#5a666e}
+.sketch-section{padding:68px 0;border-top:1px solid #17202a18}
+.section-intro h2{font-size:clamp(27px,3.5vw,40px);line-height:1.5;margin:14px 0;letter-spacing:-.035em}
+.section-intro>p{font-size:15px;line-height:1.85;color:#46525b}
+.steps{list-style:none;padding:0;margin:35px 0 0;display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.steps li{background:#fff;border:1px solid #17202a12;padding:28px;border-radius:22px}
+.step-number{display:inline-grid;place-items:center;width:42px;height:42px;background:#ffd166;border-radius:50%;font-weight:700}
+.steps h3{font-size:20px;margin:20px 0 10px}.steps p{font-size:14px;line-height:1.85;margin:0;color:#46525b}
+.screens-section{overflow:visible}
+.screen-heading{display:flex;align-items:end;justify-content:space-between;gap:30px}.screen-heading>p{max-width:350px;margin-bottom:14px}
+.screen-rail{display:flex;gap:22px;overflow-x:auto;margin:32px calc(50% - 50vw) 0;padding:4px max(24px,calc((100vw - 1180px)/2)) 26px;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:#ff6b5e #17202a12}
+.screen-rail:focus-visible{outline:3px solid #1fa7a0;outline-offset:6px}
+.screen-rail figure{flex:0 0 clamp(220px,23vw,294px);margin:0;scroll-snap-align:start}
+.screen-rail img{display:block;width:100%;height:auto;border-radius:28px;border:1px solid #17202a18;box-shadow:0 16px 38px #17202a14;background:#fff}
+.screen-rail figcaption{display:flex;align-items:center;gap:9px;margin:13px 6px 0;font-size:13px;font-weight:700}.screen-rail figcaption span{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#ffd166;font-size:9px}
+.topic-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:32px}
+.topic-grid figure{margin:0;background:#fff;border-radius:18px;padding:16px 12px;border:1px solid #17202a12}
+.topic-grid img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:contain}
+.topic-grid figcaption{text-align:center;font-size:13px;margin-top:15px;font-weight:600}
+.topic-update{font-size:13px;color:#52616b;line-height:1.85;margin-top:24px}
+.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:32px}
+.feature-grid article{background:#fff;border:1px solid #17202a12;border-radius:22px;padding:30px}
+.feature-tag{display:inline-block;padding:7px 12px;border-radius:100px;font-size:9px;letter-spacing:1.5px;font-weight:700;color:#17202a}
+.tag-coral{background:#ffe3dd}.tag-teal{background:#d9efec}.tag-yellow{background:#fff0c3}.tag-gray{background:#eceeef}
+.feature-grid h3{font-size:23px;line-height:1.55;margin:20px 0 12px}.feature-grid p{font-size:14px;line-height:1.9;color:#46525b}
+.faq-section details{border-bottom:1px solid #17202a20;padding:22px 0}
+.faq-section summary{font-size:16px;font-weight:600;cursor:pointer;line-height:1.7}
+.faq-section summary:focus-visible{outline:3px solid #1b766f;outline-offset:6px}
+.faq-section details p{font-size:14px;line-height:1.95;color:#46525b;max-width:780px}
+.sketch-cta{text-align:center;background:#ffedbf;border-radius:28px;padding:52px 24px;margin:12px 0 65px}
+.sketch-cta h2{font-size:clamp(27px,3vw,38px);line-height:1.5;margin:18px 0}
+.sketch-cta>p{font-size:14px;line-height:1.9;color:#46525b}
+.sketch-cta .release-status{background:#fff;margin:12px 0}
+.contact-line{margin-top:30px!important}.contact-line a{border-bottom:1px solid #17202a40;padding-bottom:4px;overflow-wrap:anywhere}
+.legal-links{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:24px 0 4px}.legal-links a{padding:10px 15px;border:1px solid #17202a25;border-radius:100px;font-size:12px;background:#fff8e7}
+.app-return{display:inline-block;font-size:12px;border-bottom:1px solid #17202a40;margin-top:20px;padding-bottom:5px}
+@media(max-width:900px){.sketch-hero{grid-template-columns:1fr;gap:30px;padding-top:45px}.sketch-art{width:min(550px,100%);justify-self:center;min-height:490px}.desktop-break{display:none}.topic-grid{grid-template-columns:repeat(3,1fr)}.screen-heading{align-items:start;flex-direction:column;gap:0}}
+@media(max-width:600px){.release-banner{align-items:flex-start;flex-direction:column;gap:4px;margin-top:16px}.sketch-hero{padding-bottom:45px}.app-identity img{width:60px;height:60px;border-radius:16px}.catch{font-size:clamp(34px,9vw,49px);margin-top:25px}.lead{font-size:15px}.sketch-art{min-height:400px}.art-note{right:1%;padding:10px 18px}.art-car{top:90px}.art-apple{top:220px;width:52%}.steps,.feature-grid{grid-template-columns:1fr;gap:16px}.steps li,.feature-grid article{padding:24px}.sketch-section{padding:45px 0}.topic-grid{grid-template-columns:1fr 1fr;gap:12px}.topic-grid figure{padding:14px 8px}.feature-grid h3{font-size:21px}.screen-rail{gap:15px;margin:24px -22px 0;padding-left:24px;padding-right:24px}.screen-rail figure{flex-basis:min(72vw,270px)}.faq-section summary{font-size:15px}.sketch-cta{margin-bottom:40px;padding:38px 18px}.sketch-page .site-footer{gap:18px}.sketch-page .site-footer>a:not(.brand){margin-left:0}}
+@media(max-width:360px){.sketch-art{min-height:350px}.art-apple{top:190px}.catch{font-size:33px}.hero-actions{gap:10px}.release-status,.outline-link{font-size:12px;padding:11px 15px}}
+@media(prefers-reduced-motion:reduce){.sketch-page{scroll-behavior:auto}}
+
+/* Legal documents */
+.legal-page{background:#fff8e7;color:#17202a}.legal-page main{max-width:940px}.legal-hero{padding:64px 0 38px;border-bottom:1px solid #17202a18}.legal-hero h1{font-size:clamp(34px,6vw,58px);margin:14px 0 18px;letter-spacing:-.05em}.legal-hero p{color:#52616b;line-height:1.8}.legal-meta{display:flex;gap:9px;flex-wrap:wrap;margin-top:22px}.legal-meta span{padding:8px 12px;border-radius:100px;background:#fff;border:1px solid #17202a12;font-size:11px}
+.legal-document{padding:34px 0 70px}.legal-document section{padding:28px 0;border-bottom:1px solid #17202a18}.legal-document h2{font-size:clamp(19px,2.4vw,25px);line-height:1.5;margin:0 0 12px}.legal-document p{font-size:14px;line-height:2;color:#35414a;white-space:pre-line;margin:0}.legal-document a{text-decoration:underline;text-underline-offset:4px}.legal-back{display:inline-block;margin-top:34px;font-size:13px;border-bottom:1px solid #17202a50;padding-bottom:4px}

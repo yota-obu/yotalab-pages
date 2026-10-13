@@ -1,4 +1,7 @@
 /* Product photography, editorial hierarchy and restrained motion. */
+.sketch.product .screen-art{background:#fff8e7;padding:30px}
+.sketch.product .screen-art>img{object-fit:contain;background:#fff;border-radius:18px;transform:none}
+.sketch.product:hover .screen-art>img{transform:scale(1.025)}
 body{background:radial-gradient(ellipse at 0 0,#f0eedf 0,transparent 600px),var(--paper)}
 .site-header{position:relative;padding-top:25px;padding-bottom:25px}
 .hero{display:grid;grid-template-columns:1.05fr 1fr;gap:65px;align-items:center;padding:65px 0 70px}
