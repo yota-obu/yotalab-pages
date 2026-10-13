@@ -48,6 +48,7 @@
 .sketch-cta h2{font-size:clamp(27px,3vw,38px);line-height:1.5;margin:18px 0}
 .sketch-cta>p{font-size:14px;line-height:1.9;color:#46525b}
 .sketch-cta .release-status{background:#fff;margin:12px 0}
+.store-release{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0}.store-release .release-status{margin:0}.store-release .outline-link{background:#fff8e7}
 .contact-line{margin-top:30px!important}.contact-line a{border-bottom:1px solid #17202a40;padding-bottom:4px;overflow-wrap:anywhere}
 .legal-links{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:24px 0 4px}.legal-links a{padding:10px 15px;border:1px solid #17202a25;border-radius:100px;font-size:12px;background:#fff8e7}
 .app-return{display:inline-block;font-size:12px;border-bottom:1px solid #17202a40;margin-top:20px;padding-bottom:5px}
